@@ -52,7 +52,7 @@ jobs:
         run: npm run cypress
 
       - name: Run Lighthouse
-        run: lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
+        run: lighthouse http://localhost:4200 --output json --output html --output-path ./ --chrome-flags="--headless --no-sandbox --disable-gpu"
 
       - name: Build Project
         run: npm run build -- --configuration production
@@ -62,17 +62,3 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-
-      - name: Upload Lighthouse Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-report
-          path: ./lighthouse-report.html
-
-      - name: Upload Cypress Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-results
-          path: |
-            cypress/screenshots/
-            cypress/videos/
