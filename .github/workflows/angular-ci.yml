@@ -1,0 +1,53 @@
+name: Angular CI
+
+# Déclencheurs de la CI
+on:
+  push: # Déclenche sur un push vers ces branches
+    branches:
+      - main
+      - dev
+      - charles
+  pull_request: # Déclenche lors de l'ouverture ou mise à jour d'une PR
+
+# Définition des jobs
+jobs:
+  build:
+    # Le job s'exécute sur une machine Ubuntu
+    runs-on: ubuntu-latest
+
+    # Étapes du workflow
+    steps:
+      # Étape 1 : Récupérer le code source
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Étape 2 : Configurer Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 23 # Spécifie la version de Node.js
+          cache: 'npm' # Active le cache pour npm
+
+      # Étape 3 : Installer les dépendances
+      - name: Install Dependencies
+        run: npm ci
+
+      # Étape 4 : Lancer le linting
+      - name: Lint Code
+        run: npm run lint
+
+      # Étape 5 : Exécuter les tests unitaires
+      - name: Run Unit Tests
+        run: npm test -- --watch=false --code-coverage
+
+      # Étape 6 : Construire le projet pour vérifier que le build fonctionne
+      - name: Build Project
+        run: npm run build -- --configuration production
+
+      # Étape 7 : Sauvegarder le rapport de couverture (optionnel)
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
