@@ -17,7 +17,7 @@ on:
 jobs:
   build:
     # Le job s'exécute sur une machine Ubuntu
-    runs-on: weboaks/node-karma-protractor-chrome
+    runs-on: ubuntu-22.04
 
     # Étapes du workflow
     steps:
