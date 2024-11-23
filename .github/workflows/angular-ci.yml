@@ -54,10 +54,6 @@ jobs:
             wait-on http://localhost:4200
             npm run cypress
 
-      # Étape 9 : Analyse avec SonarQube
-      - name: SonarQube Analysis
-        run: npm run sonar
-
       # Étape 10 : Analyse des performances avec Lighthouse
       - name: Run Lighthouse
         run: lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html
