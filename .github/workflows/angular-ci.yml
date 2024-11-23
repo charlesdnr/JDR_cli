@@ -66,15 +66,5 @@ jobs:
       - name: Upload Lighthouse Report
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-report
-          path: |
-           ./JDR_cli.report.html
-           ./JDR_cli.report.json
-
-      - name: Upload Cypress Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-results
-          path: |
-            ./screenshots/
-            ./videos/
+          name: JDR_cli.report.html
+          path: ./
