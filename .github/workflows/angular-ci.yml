@@ -30,7 +30,7 @@ jobs:
 
       # Étape 3 : Installer les dépendances
       - name: Install Dependencies
-        run: npm ci
+        run: npm i
 
       # Étape 4 : Lancer le linting
       - name: Lint Code
