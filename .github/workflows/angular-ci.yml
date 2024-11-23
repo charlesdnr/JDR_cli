@@ -58,8 +58,6 @@ jobs:
       - name: Run Lighthouse
         run: |
             npm install -g lighthouse
-            npm start &
-            wait-on http://localhost:4200
             lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html
 
       # Étape 11 : Construire le projet
