@@ -49,7 +49,9 @@ jobs:
       # Étape 8 : Tests E2E
       - name: Run E2E Tests
         run: |
-            npm start
+            npm install -g wait-on
+            npm start &
+            wait-on http://localhost:4200
             npm run cypress
 
       # Étape 9 : Analyse avec SonarQube
