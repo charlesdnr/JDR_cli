@@ -36,18 +36,9 @@ jobs:
       - name: Install Dependencies
         run: npm i
 
-      - name: Install Chrome
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y google-chrome-stable
-            google-chrome --version
-
-      - name: Set DISPLAY
-        run: export DISPLAY=:99
-        
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
-        run: npm test --browsers=ChromeHeadlessCI --watch=false --code-coverage
+        run: npm test --browsers=Chrome_no_sandbox --watch=false --code-coverage
 
       # Étape 6 : Construire le projet pour vérifier que le build fonctionne
       - name: Build Project
