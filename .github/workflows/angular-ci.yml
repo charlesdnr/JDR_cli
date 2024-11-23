@@ -17,7 +17,7 @@ on:
 jobs:
   build:
     # Le job s'exécute sur une machine Ubuntu
-    runs-on: ubuntu-24.04
+    runs-on: weboaks/node-karma-protractor-chrome
 
     # Étapes du workflow
     steps:
@@ -36,9 +36,14 @@ jobs:
       - name: Install Dependencies
         run: npm i
 
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
-        run: npm test --browsers=Chrome_no_sandbox --watch=false --code-coverage
+        run: npm test:ci
 
       # Étape 6 : Construire le projet pour vérifier que le build fonctionne
       - name: Build Project

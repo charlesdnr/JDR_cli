@@ -1,5 +1,3 @@
-process.env.CHROME_BIN = require('puppeteer').executablePath()
-
 module.exports = function (config) {
     config.set({
       frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -8,32 +6,33 @@ module.exports = function (config) {
         require('karma-chrome-launcher'),
         require('karma-jasmine-html-reporter'),
         require('karma-coverage'),
-        require('@angular-devkit/build-angular/plugins/karma')
+        require('@angular-devkit/build-angular/plugins/karma'),
       ],
       client: {
-        clearContext: false // Laisse Jasmine afficher les résultats des tests
+        clearContext: false, // Laisser Jasmine afficher les résultats
       },
-      reporters: ['progress', 'coverage'], // Affiche la progression et la couverture
+      reporters: ['progress', 'coverage'], // Progression et rapport de couverture
       coverageReporter: {
         dir: require('path').join(__dirname, './coverage'),
         subdir: '.',
         reporters: [
-          { type: 'html' },
-          { type: 'text-summary' }
-        ]
+          { type: 'html' }, // Générer des rapports HTML
+          { type: 'lcovonly' }, // Rapport LCOV pour les outils comme SonarQube
+          { type: 'text-summary' }, // Résumé texte
+        ],
       },
       port: 9876,
       colors: true,
       logLevel: config.LOG_INFO,
-      autoWatch: false, // Désactive le watch mode pour la CI
-      browsers: ['Chrome_no_sandbox'],
+      autoWatch: false,
+      browsers: ['ChromeHeadlessCI'],
       customLaunchers: {
-      Chrome_no_sandbox: {
-          base: 'Chrome',
-          flags: ['--no-sandbox', '--headless', '--disable-gpu', '--remote-debugging-port=9222', '--single-run']
-      }
+        ChromeHeadlessCI: {
+          base: 'ChromeHeadless',
+          flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+        },
       },
-      singleRun: true // Assure que Karma quitte après exécution
+      singleRun: true, // Assurer que Karma quitte après l'exécution
     });
   };
   
