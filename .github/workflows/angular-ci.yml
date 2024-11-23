@@ -45,7 +45,7 @@ jobs:
 
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
-        run: npm test --code-coverage
+        run: npm test-headless --code-coverage
 
       # Étape 6 : Construire le projet pour vérifier que le build fonctionne
       - name: Build Project

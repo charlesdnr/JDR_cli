@@ -1,3 +1,5 @@
+process.env.CHROME_BIN = require('puppeteer').executablePath()
+
 module.exports = function (config) {
     config.set({
       frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -5,6 +7,7 @@ module.exports = function (config) {
         require('karma-jasmine'),
         require('karma-chrome-launcher'),
         require('karma-jasmine-html-reporter'),
+        require('karma-firefox-launcher'),
         require('karma-coverage'),
         require('@angular-devkit/build-angular/plugins/karma')
       ],
@@ -24,12 +27,12 @@ module.exports = function (config) {
       colors: true,
       logLevel: config.LOG_INFO,
       autoWatch: false, // Désactive le watch mode pour la CI
-      browsers: ['ChromeHeadlessCI'], // Utilise uniquement ChromeHeadlessCI
+      browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI', 'Firefox'],
       customLaunchers: {
-        ChromeHeadlessCI: {
+      ChromeHeadlessCI: {
           base: 'ChromeHeadless',
-          flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
-        }
+          flags: ['--no-sandbox']
+      }
       },
       singleRun: true // Assure que Karma quitte après exécution
     });
