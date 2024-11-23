@@ -56,7 +56,11 @@ jobs:
 
       # Étape 10 : Analyse des performances avec Lighthouse
       - name: Run Lighthouse
-        run: lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html
+        run: |
+            npm install -g lighthouse
+            npm start &
+            wait-on http://localhost:4200
+            lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html
 
       # Étape 11 : Construire le projet
       - name: Build Project
