@@ -49,7 +49,7 @@ jobs:
             wait-on http://localhost:4200 --timeout 30000
 
       - name: Run E2E Tests
-        run: npm run cypress --config-file=./cypress.config.js
+        run: npm run cypress
 
       - name: Run Lighthouse
         run: lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
