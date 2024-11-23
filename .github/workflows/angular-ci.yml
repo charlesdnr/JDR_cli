@@ -1,6 +1,5 @@
 name: Angular CI
 
-# Déclencheurs de la CI
 on:
   push:
     branches:
@@ -12,61 +11,64 @@ on:
       - dev
       - main
 
-# Définition des jobs
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-      # Étape 1 : Récupérer le code source
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Étape 2 : Configurer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'npm'
 
-      # Étape 3 : Installer les dépendances
       - name: Install Dependencies
         run: npm ci
 
-      # Étape 5 : Vérifications rapides (Linting et TypeScript)
       - name: Run Linting
         run: npm run lint
 
       - name: Check Types
         run: npm run type-check
 
-      # Étape 6 : Exécuter les tests unitaires
+      - name: Start Angular App and Wait
+        run: |
+          npm start &
+          npx wait-on http://localhost:4200 --timeout 30000
+
       - name: Run Unit Tests
         run: |
-          npm install --save-dev karma-chrome-launcher
-          npm test
+          mkdir -p reports/coverage
+          npm test -- --coverage --output-path reports/coverage
 
-      # Étape 8 : Tests E2E
       - name: Run E2E Tests
-        run: |
-            npm install -g wait-on
-            npm start &
-            wait-on http://localhost:4200
-            npm run cypress
+        run: npx cypress run --config-file=cypress.config.js
 
-      # Étape 10 : Analyse des performances avec Lighthouse
       - name: Run Lighthouse
         run: |
-            npm install -g lighthouse
-            lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
+          mkdir -p reports/lighthouse
+          lighthouse http://localhost:4200 --output json --output html --output-path reports/lighthouse/lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
 
-      # Étape 11 : Construire le projet
       - name: Build Project
         run: npm run build -- --configuration production
 
-      # Étape 12 : Sauvegarder le rapport de couverture
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/
+          path: reports/coverage/
+
+      - name: Upload Lighthouse Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: reports/lighthouse/
+
+      - name: Upload Cypress Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-results
+          path: cypress/results/
