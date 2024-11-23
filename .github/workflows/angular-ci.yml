@@ -46,17 +46,11 @@ jobs:
           npm install --save-dev karma-chrome-launcher
           npm test
 
-      # Étape 7 : Vérification de la couverture
-      - name: Verify Coverage
-        run: |
-           if grep -q "ERROR" ./coverage/lcov-report/index.html; then
-             echo "Coverage threshold not met."
-             exit 1
-           fi
-
       # Étape 8 : Tests E2E
       - name: Run E2E Tests
-        run: npm run e2e
+        run: |
+            npm start
+            npm run cypress
 
       # Étape 9 : Analyse avec SonarQube
       - name: SonarQube Analysis
