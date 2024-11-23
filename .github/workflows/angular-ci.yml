@@ -42,7 +42,9 @@ jobs:
             sudo apt-get install -y google-chrome-stable
             google-chrome --version
 
-
+      - name: Set DISPLAY
+        run: export DISPLAY=:99
+        
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
         run: npm test --browsers=ChromeHeadlessCI --watch=false --code-coverage
