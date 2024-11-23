@@ -27,11 +27,11 @@ module.exports = function (config) {
       colors: true,
       logLevel: config.LOG_INFO,
       autoWatch: false, // Désactive le watch mode pour la CI
-      browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI', 'Firefox'],
+      browsers: ['Chrome_no_sandbox', 'ChromeHeadless', 'ChromeHeadlessCI', 'Firefox'],
       customLaunchers: {
       ChromeHeadlessCI: {
-          base: 'ChromeHeadless',
-          flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+          base: 'Chrome',
+          flags: ['--no-sandbox', '--headless', '--disable-gpu', '--remote-debugging-port=9222', '--single-run']
       }
       },
       singleRun: true // Assure que Karma quitte après exécution

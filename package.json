@@ -6,8 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --browsers=Chrome",
-    "test-headless": "ng test --browsers=ChromeHeadlessCI --watch=false"
+    "test": "./node_modules/.bin/karma start karma.conf.js"
   },
   "private": true,
   "dependencies": {
