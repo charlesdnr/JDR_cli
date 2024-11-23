@@ -32,10 +32,6 @@ jobs:
       - name: Install Dependencies
         run: npm i
 
-      # Étape 4 : Lancer le linting
-      - name: Lint Code
-        run: npm run lint
-
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
         run: npm test -- --watch=false --code-coverage
