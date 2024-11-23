@@ -2,24 +2,21 @@ name: Angular CI
 
 # Déclencheurs de la CI
 on:
-  push: # Déclenche sur un push vers ces branches
+  push:
     branches:
       - main
       - dev
       - charles
-  pull_request: 
+  pull_request:
     branches:
-        - dev
-        - main
-    
+      - dev
+      - main
 
 # Définition des jobs
 jobs:
   build:
-    # Le job s'exécute sur une machine Ubuntu
     runs-on: ubuntu-22.04
 
-    # Étapes du workflow
     steps:
       # Étape 1 : Récupérer le code source
       - name: Checkout Code
@@ -29,33 +26,57 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20 # Spécifie la version de Node.js
-          cache: 'npm' # Active le cache pour npm
+          node-version: 20
+          cache: 'npm'
 
       # Étape 3 : Installer les dépendances
       - name: Install Dependencies
-        run: npm i
+        run: npm ci
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+      # Étape 4 : Vérifier les dépendances
+      - name: Check Dependencies
+        run: ncu -u
 
-      # Étape 5 : Exécuter les tests unitaires
+      # Étape 5 : Vérifications rapides (Linting et TypeScript)
+      - name: Run Linting
+        run: npm run lint
+
+      - name: Check Types
+        run: npm run type-check
+
+      # Étape 6 : Exécuter les tests unitaires
       - name: Run Unit Tests
         run: |
-         npm install --save-dev karma-chrome-launcher
-         npm test
-         
+          npm install --save-dev karma-chrome-launcher
+          npm test
 
-      # Étape 6 : Construire le projet pour vérifier que le build fonctionne
+      # Étape 7 : Vérification de la couverture
+      - name: Verify Coverage
+        run: |
+           if grep -q "ERROR" ./coverage/lcov-report/index.html; then
+             echo "Coverage threshold not met."
+             exit 1
+           fi
+
+      # Étape 8 : Tests E2E
+      - name: Run E2E Tests
+        run: npm run e2e
+
+      # Étape 9 : Analyse avec SonarQube
+      - name: SonarQube Analysis
+        run: npm run sonar
+
+      # Étape 10 : Analyse des performances avec Lighthouse
+      - name: Run Lighthouse
+        run: lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html
+
+      # Étape 11 : Construire le projet
       - name: Build Project
         run: npm run build -- --configuration production
 
-      # Étape 7 : Sauvegarder le rapport de couverture
+      # Étape 12 : Sauvegarder le rapport de couverture
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
-

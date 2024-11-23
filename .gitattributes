@@ -1,0 +1,6 @@
+# Normaliser tous les fichiers texte en LF
+* text=auto
+
+# Garder les fichiers binaires intacts
+*.png binary
+*.jpg binary

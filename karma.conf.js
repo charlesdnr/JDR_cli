@@ -32,6 +32,14 @@ module.exports = function (config) {
           flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
         },
       },
+      check: {
+        global: {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80
+        }
+      },
       singleRun: true, // Assurer que Karma quitte après l'exécution
     });
   };
