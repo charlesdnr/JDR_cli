@@ -10,8 +10,7 @@
     "test:ci": "ng test",
     "lint": "ng lint",
     "type-check": "tsc --noEmit",
-    "sonar": "sonar-scanner",
-    "cypress": "npx cypress run --config-file=./cypress.config.js"
+    "sonar": "sonar-scanner"
   },
   "private": true,
   "dependencies": {
