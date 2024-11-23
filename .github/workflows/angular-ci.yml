@@ -43,7 +43,10 @@ jobs:
 
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
-        run: npm test
+        run: |
+         npm install --save-dev karma-chrome-launcher
+         npm test
+         
 
       # Étape 6 : Construire le projet pour vérifier que le build fonctionne
       - name: Build Project
