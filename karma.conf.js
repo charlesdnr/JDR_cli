@@ -7,7 +7,6 @@ module.exports = function (config) {
         require('karma-jasmine'),
         require('karma-chrome-launcher'),
         require('karma-jasmine-html-reporter'),
-        require('karma-firefox-launcher'),
         require('karma-coverage'),
         require('@angular-devkit/build-angular/plugins/karma')
       ],
@@ -27,7 +26,7 @@ module.exports = function (config) {
       colors: true,
       logLevel: config.LOG_INFO,
       autoWatch: false, // Désactive le watch mode pour la CI
-      browsers: ['Chrome_no_sandbox', 'ChromeHeadless', 'ChromeHeadlessCI', 'Firefox'],
+      browsers: ['Chrome_no_sandbox', 'ChromeHeadless', 'ChromeHeadlessCI'],
       customLaunchers: {
       ChromeHeadlessCI: {
           base: 'Chrome',
