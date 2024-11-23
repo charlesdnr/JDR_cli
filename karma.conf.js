@@ -21,11 +21,11 @@ module.exports = function (config) {
       colors: true,
       logLevel: config.LOG_INFO,
       autoWatch: false,
-      browsers: ['ChromeHeadless'],
+      browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI'],
       customLaunchers: {
-        ChromeHeadless: {
+        ChromeHeadlessCI: {
           base: 'ChromeHeadless',
-          flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+          flags: ['--no-sandbox']
         }
       },
       singleRun: true // s'assure que Karma quitte après les tests
