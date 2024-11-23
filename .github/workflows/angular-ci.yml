@@ -1,5 +1,6 @@
 name: Angular CI
 
+# Déclencheurs de la CI
 on:
   push:
     branches:
@@ -11,6 +12,7 @@ on:
       - dev
       - main
 
+# Définition des jobs
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -26,7 +28,11 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: |
+           npm ci
+           npm install -g lighthouse
+           npm install --save-dev karma-chrome-launcher
+           npm install -g wait-on
 
       - name: Run Linting
         run: npm run lint
@@ -34,23 +40,21 @@ jobs:
       - name: Check Types
         run: npm run type-check
 
-      - name: Start Angular App and Wait
-        run: |
-          npm start &
-          npx wait-on http://localhost:4200 --timeout 30000
-
       - name: Run Unit Tests
+        run: npm test
+
+      - name: Starting application for E2E Tests and Lighthouse Tests
         run: |
-          mkdir -p reports/coverage
-          npm test -- --coverage --output-path reports/coverage
+            npm start &
+            wait-on http://localhost:4200 --timeout 30000
 
       - name: Run E2E Tests
-        run: npx cypress run --config-file=cypress.config.js
+        run: npm run cypress --config-file=cypress.config.js
 
       - name: Run Lighthouse
         run: |
-          mkdir -p reports/lighthouse
-          lighthouse http://localhost:4200 --output json --output html --output-path reports/lighthouse/lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
+            mkdir -p reports/lighthouse
+            lighthouse http://localhost:4200 --output json --output html --output-path ./lighthouse-report.html --chrome-flags="--headless --no-sandbox --disable-gpu"
 
       - name: Build Project
         run: npm run build -- --configuration production
@@ -59,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: reports/coverage/
+          path: coverage/
 
       - name: Upload Lighthouse Report
         uses: actions/upload-artifact@v4
