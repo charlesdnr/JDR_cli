@@ -45,13 +45,13 @@ jobs:
 
       # Étape 5 : Exécuter les tests unitaires
       - name: Run Unit Tests
-        run: npm test -- --watch=false --code-coverage
+        run: npm test --code-coverage
 
       # Étape 6 : Construire le projet pour vérifier que le build fonctionne
       - name: Build Project
         run: npm run build -- --configuration production
 
-      # Étape 7 : Sauvegarder le rapport de couverture (optionnel)
+      # Étape 7 : Sauvegarder le rapport de couverture
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v3
         with:

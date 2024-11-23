@@ -9,26 +9,29 @@ module.exports = function (config) {
         require('@angular-devkit/build-angular/plugins/karma')
       ],
       client: {
-        clearContext: false // laisse Jasmine afficher le rapport complet
+        clearContext: false // Laisse Jasmine afficher les résultats des tests
       },
-      reporters: ['progress', 'coverage'],
+      reporters: ['progress', 'coverage'], // Affiche la progression et la couverture
       coverageReporter: {
         dir: require('path').join(__dirname, './coverage'),
         subdir: '.',
-        reporters: [{ type: 'html' }, { type: 'text-summary' }]
+        reporters: [
+          { type: 'html' },
+          { type: 'text-summary' }
+        ]
       },
       port: 9876,
       colors: true,
       logLevel: config.LOG_INFO,
-      autoWatch: false,
-      browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI'],
+      autoWatch: false, // Désactive le watch mode pour la CI
+      browsers: ['ChromeHeadlessCI'], // Utilise uniquement ChromeHeadlessCI
       customLaunchers: {
         ChromeHeadlessCI: {
           base: 'ChromeHeadless',
-          flags: ['--no-sandbox']
+          flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
         }
       },
-      singleRun: true // s'assure que Karma quitte après les tests
+      singleRun: true // Assure que Karma quitte après exécution
     });
   };
   
