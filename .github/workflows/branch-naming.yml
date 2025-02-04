@@ -1,0 +1,25 @@
+name: Branch Naming Convention
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+      - develop
+  create:
+    branches-ignore:
+      - main
+      - master
+      - develop
+
+jobs:
+  branch-naming-rules:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check branch name
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          if ! [[ $BRANCH_NAME =~ ^(feat|fix|docs|style|refactor|test|chore)/.+ ]]; then
+            echo "Branch name '$BRANCH_NAME' does not follow the convention"
+            echo "Branch names must start with: feat/, fix/, docs/, style/, refactor/, test/, or chore/"
+            exit 1
+          fi
