@@ -1,0 +1,42 @@
+// dark.scss
+@use "sass:color";
+@use "./primeng-components.scss";
+@use "../variables" as var;
+
+:root {
+  --primary-color: #{var.$primary-color};
+  --secondary-color: #{var.$secondary-color};
+  --third-color: #{var.$third-color};
+  --background-color: #{var.$background-color};
+  --background-transparent: #{var.$background-color-transparent};
+
+  --surface-0: #{var.$background-color};
+  --surface-50: #{color.adjust(var.$background-color, $lightness: 5%)};
+  --surface-100: #{color.adjust(var.$background-color, $lightness: 10%)};
+  --surface-200: #{color.adjust(var.$background-color, $lightness: 15%)};
+  --surface-300: #{color.adjust(var.$background-color, $lightness: 20%)};
+  --surface-400: #{color.adjust(var.$background-color, $lightness: 25%)};
+  --surface-500: #{color.adjust(var.$background-color, $lightness: 30%)};
+
+  --text-color: #{var.$text-color};
+  --text-color-secondary: #{color.adjust(var.$text-color, $lightness: -20%)};
+  --button-text-color: #{var.$button-text-color};
+
+  --error-color: #{var.$error-color};
+  --warning-color: #{var.$warning-color};
+  --success-color: #{var.$success-color};
+  --info-color: #{var.$info-color};
+
+  // Ombres
+  --shadow-1: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-2: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+  // Bordures
+  --border-radius: #{var.$border-radius};
+  --border-color: var(--surface-300);
+}
+
+body {
+  background-color: var(--surface-0);
+  color: var(--text-color);
+}

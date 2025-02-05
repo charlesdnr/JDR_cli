@@ -1,0 +1,106 @@
+@use "sass:color";
+@use "../variables" as var;
+
+:root {
+  // Variables de base pour les boutons
+  --p-button-primary-color: #{var.$button-text-color};
+  --p-button-primary-background: #{var.$primary-color};
+  --p-button-primary-border-color: #{var.$primary-color};
+  --p-button-padding-y: #{var.$button-padding-y};
+  --p-button-padding-x: #{var.$button-padding-x};
+  --p-button-transition-duration: #{var.$transition-duration};
+  --p-button-border-radius: #{var.$border-radius};
+  --p-button-gap: #{var.$button-gap};
+
+  // États des boutons
+  --p-button-primary-hover-background: #{color.adjust(
+      var.$primary-color,
+      $lightness: -10%
+    )};
+  --p-button-primary-hover-border-color: #{color.adjust(
+      var.$primary-color,
+      $lightness: -10%
+    )};
+  --p-button-primary-hover-color: #{var.$text-color};
+  --p-button-primary-active-background: #{color.adjust(
+      var.$primary-color,
+      $lightness: -20%
+    )};
+  --p-button-primary-active-border-color: #{color.adjust(
+      var.$primary-color,
+      $lightness: -20%
+    )};
+  --p-button-primary-active-color: #{var.$text-color};
+  --p-button-primary-focus-background: #{var.$primary-color};
+  --p-button-primary-focus-border-color: #{var.$primary-color};
+  --p-button-primary-focus-color: #{var.$text-color};
+
+  // Variables boutons secondaires
+  --p-button-secondary-background: #{var.$secondary-color};
+  --p-button-secondary-border-color: #{var.$secondary-color};
+  --p-button-secondary-color: #{var.$text-color};
+  --p-button-secondary-hover-background: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -10%
+    )};
+  --p-button-secondary-hover-border-color: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -10%
+    )};
+  --p-button-secondary-hover-color: #{var.$text-color};
+  --p-button-secondary-active-background: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -20%
+    )};
+  --p-button-secondary-active-border-color: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -20%
+    )};
+  --p-button-secondary-active-color: #{var.$text-color};
+
+  // Variables pour les inputs
+  --p-input-border-color: #{var.$surface-300};
+  --p-input-hover-border-color: #{var.$primary-color};
+  --p-input-focus-border-color: #{var.$primary-color};
+  --p-input-background: #{var.$surface-0};
+  --p-input-text-color: #{var.$text-color};
+
+  // Input texte
+  --p-inputtext-color: #{var.$text-color};
+  --p-inputtext-background: #{var.$background-color};
+  --p-inputtext-padding-y: #{var.$input-padding};
+  --p-inputtext-padding-x: #{var.$input-padding};
+  --p-inputtext-border-color: #{var.$text-color};
+  --p-inputtext-transition-duration: #{var.$transition-duration};
+  --p-inputtext-border-radius: #{var.$border-radius};
+  --p-inputtext-shadow: #{var.$shadow-1};
+  --p-inputtext-hover-border-color: #{var.$input-hover-border-color};
+  --p-inputtext-focus-border-color: #{var.$primary-color};
+  --p-inputtext-focus-ring-shadow: #{var.$input-focus-shadow-size} #{var.$input-focus-shadow-color};
+  --p-inputtext-focus-ring-width: 2px;
+  --p-inputtext-focus-ring-style: solid;
+  --p-inputtext-focus-ring-color: #{rgba(var.$primary-color, 0.2)};
+  --p-inputtext-focus-ring-offset: 0px;
+  --p-inputtext-disabled-background: #{var.$surface-200};
+  --p-inputtext-disabled-color: #{var.$surface-600};
+  --p-inputtext-transition-duration: #{var.$transition-duration};
+  --p-inputtext-border-radius: #{var.$border-radius};
+  --p-inputtext-shadow: #{var.$shadow-1};
+
+  // Variables pour les dropdowns
+  --p-dropdown-background: #{var.$surface-0};
+  --p-dropdown-border: #{var.$surface-300};
+  --p-dropdown-item-hover-bg: #{var.$surface-100};
+  --p-dropdown-item-selected-bg: #{var.$primary-color};
+  --p-dropdown-item-selected-color: #{var.$button-text-color};
+
+  // float label
+  --p-floatlabel-font-weight: #{var.$font-weight-medium};
+  --p-floatlabel-position-x: 10%;
+  --p-floatlabel-color: #{var.$text-color};
+  --p-floatlabel-transition-duration: 0.3s;
+  --p-floatlabel-on-border-radius: #{var.$border-radius};
+  --p-floatlabel-on-active-background: #{var.$background-color};
+  --p-floatlabel-on-active-padding: 0.5px;
+  --p-floatlabel-focus-color: #{var.$text-color};
+}

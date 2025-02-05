@@ -1,0 +1,42 @@
+<div class="container-login">
+  <div class="container-left">
+    <div class="container-head">
+      <img src="/assets/images/logo.png" alt="" />
+      <h1>{{ "Lore Tavern" | translate }}</h1>
+    </div>
+    <h1 class="h1">{{ labelh2 | translate }}</h1>
+    <div class="container-form" [formGroup]="formgroup">
+      <p-float-label variant="on">
+        <input
+          class="input"
+          id="login"
+          required="true"
+          type="text"
+          pInputText
+          formControlName="login"
+        />
+        <label for="login">{{ "Nom d'utilisateur" | translate }}</label>
+      </p-float-label>
+      <p-float-label class="last-label" variant="on">
+        <p-password
+          label="Password"
+          id="password"
+          required="true"
+          class="input"
+          formControlName="password"
+          [feedback]="false"
+        />
+        <label for="password">{{ "Mot de passe" | translate }}</label>
+      </p-float-label>
+      <p-button
+        class="input button"
+        [label]="labelButton | translate"
+        type="submit"
+      />
+    </div>
+    <div class="no-account">
+      <p>{{ noAccountLabel | translate }}</p>
+      <p-button class="button" [label]="labelButton | translate" />
+    </div>
+  </div>
+</div>
