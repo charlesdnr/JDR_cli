@@ -4,8 +4,8 @@
       <img src="/assets/images/logo.png" alt="" />
       <h1>{{ "Lore Tavern" | translate }}</h1>
     </div>
-    <h1 class="h1">{{ labelh2 | translate }}</h1>
-    <div class="container-form" [formGroup]="formgroup">
+    <h1 class="h1">{{ labelh2() | translate }}</h1>
+    <form class="container-form" [formGroup]="formgroup()" (ngSubmit)="formSubmit()">
       <p-float-label variant="on">
         <input
           class="input"
@@ -17,7 +17,15 @@
         />
         <label for="login">{{ "Nom d'utilisateur" | translate }}</label>
       </p-float-label>
-      <p-float-label class="last-label" variant="on">
+
+      @if(!isLogin()){
+        <p-float-label variant="on">
+          <input type="text" id="email" pInputText formControlName="email" >
+          <label for="email">{{ "Adresse Mail" | translate }}</label>
+        </p-float-label>
+      }
+
+      <p-float-label [ngClass]="{ 'last-label': isLogin() }" variant="on">
         <p-password
           label="Password"
           id="password"
@@ -28,15 +36,28 @@
         />
         <label for="password">{{ "Mot de passe" | translate }}</label>
       </p-float-label>
+      @if(!isLogin()){
+        <p-float-label [ngClass]="{ 'last-label': !isLogin() }"  variant="on">
+          <p-password
+            id="confirm"
+            required="true"
+            class="input"
+            formControlName="confirm"
+            [feedback]="false"
+          />
+          <label for="confirm">{{ "Confirmez le mot de passe" | translate }}</label>
+        </p-float-label>
+      }
       <p-button
         class="input button"
-        [label]="labelButton | translate"
+        [label]="labelButton() | translate"
+        [disabled]="!formgroup().valid"
         type="submit"
       />
-    </div>
+    </form>
     <div class="no-account">
-      <p>{{ noAccountLabel | translate }}</p>
-      <p-button class="button" [label]="labelButton | translate" />
+      <p>{{ noAccountLabel() | translate }}</p>
+      <p-button [routerLink]="isLogin() ? ['/auth', 'register'] : ['/auth', 'login']"  class="button" [label]="labelButton() | translate" />
     </div>
   </div>
 </div>

@@ -1,7 +1,9 @@
 @use "../../../styles.scss";
+
 :host {
   --p-inputtext-background: var(--background-transparent);
 }
+
 .container-login {
   width: 100%;
   height: 100%;
@@ -14,30 +16,54 @@
 
   .container-left {
     display: flex;
-    background-color: var(--background-transparent);
+    position: relative; // Ajouté pour le positionnement
     width: 40%;
     height: 100%;
     flex-direction: column;
     text-align: center;
 
-    .container-head{
+    // Création d'un pseudo-élément pour l'effet de flou
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: inherit;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px); // Support pour Safari
+      background-color: var(--background-transparent);
+      z-index: 0;
+    }
+
+    // Assurer que le contenu reste au-dessus du flou
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .container-head {
       display: flex;
       justify-content: center;
       align-items: center;
-      img{
+      flex: 2;
+
+      img {
         object-fit: cover;
         width: 12rem;
         height: 12rem;
       }
-      flex: 2;
     }
-    .h1{
+
+    .h1 {
       flex: 1;
       display: flex;
       align-items: flex-end;
       justify-content: center;
     }
-    .no-account{
+
+    .no-account {
       flex: 2;
       width: 100%;
       height: 100%;
@@ -45,7 +71,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      p-button{
+
+      p-button {
         width: 20rem;
         height: 3.5rem;
       }
@@ -62,20 +89,20 @@
       width: 100%;
       flex: 3;
 
-      .last-label{
+      .last-label {
         margin-bottom: 15px;
       }
+
       .button {
         width: 20rem;
         height: 3.5rem;
       }
-      
     }
   }
 }
 
 ::ng-deep {
-  .p-button{
+  .p-button {
     width: 100%;
     height: 100%;
   }
