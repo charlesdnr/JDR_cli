@@ -1,151 +1,211 @@
-  @use "sass:color";
-  @use "../variables" as var;
+@use "sass:color";
+@use "../variables" as var;
 
-  :root {
-    // Variables de base pour les boutons
-    --p-button-primary-color: #{var.$button-text-color};
-    --p-button-primary-background: #{var.$primary-color};
-    --p-button-primary-border-color: #{var.$primary-color};
-    --p-button-padding-y: #{var.$button-padding-y};
-    --p-button-padding-x: #{var.$button-padding-x};
-    --p-button-transition-duration: #{var.$transition-duration};
-    --p-button-border-radius: #{var.$border-radius};
-    --p-button-gap: #{var.$button-gap};
+:root {
+  // Variables de base pour les boutons
+  --p-button-primary-color: #{var.$button-text-color};
+  --p-button-primary-background: #{var.$primary-color};
+  --p-button-primary-border-color: #{var.$primary-color};
+  --p-button-padding-y: #{var.$button-padding-y};
+  --p-button-padding-x: #{var.$button-padding-x};
+  --p-button-transition-duration: #{var.$transition-duration};
+  --p-button-border-radius: #{var.$border-radius};
+  --p-button-gap: #{var.$button-gap};
 
-    // États des boutons
-    --p-button-primary-hover-background: #{color.adjust(
-        var.$primary-color,
-        $lightness: -10%
-      )};
-    --p-button-primary-hover-border-color: #{color.adjust(
-        var.$primary-color,
-        $lightness: -10%
-      )};
-    --p-button-primary-hover-color: #{var.$button-text-color};
-    --p-button-primary-active-background: #{color.adjust(
-        var.$primary-color,
-        $lightness: -20%
-      )};
-    --p-button-primary-active-border-color: #{color.adjust(
-        var.$primary-color,
-        $lightness: -20%
-      )};
-    --p-button-primary-active-color: #{var.$text-color};
-    --p-button-primary-focus-background: #{var.$primary-color};
-    --p-button-primary-focus-border-color: #{var.$primary-color};
-    --p-button-primary-focus-color: #{var.$text-color};
+  // États des boutons
+  --p-button-primary-hover-background: #{color.adjust(
+      var.$primary-color,
+      $lightness: -10%
+    )};
+  --p-button-primary-hover-border-color: #{color.adjust(
+      var.$primary-color,
+      $lightness: -10%
+    )};
+  --p-button-primary-hover-color: #{var.$button-text-color};
+  --p-button-primary-active-background: #{color.adjust(
+      var.$primary-color,
+      $lightness: -20%
+    )};
+  --p-button-primary-active-border-color: #{color.adjust(
+      var.$primary-color,
+      $lightness: -20%
+    )};
+  --p-button-primary-active-color: #{var.$text-color};
+  --p-button-primary-focus-background: #{var.$primary-color};
+  --p-button-primary-focus-border-color: #{var.$primary-color};
+  --p-button-primary-focus-color: #{var.$text-color};
 
-    --p-disabled-opacity: 0.5;
+  --p-disabled-opacity: 0.5;
 
-    // Variables boutons secondaires
-    --p-button-secondary-background: #{var.$secondary-color};
-    --p-button-secondary-border-color: #{var.$secondary-color};
-    --p-button-secondary-color: #{var.$text-color};
-    --p-button-secondary-hover-background: #{color.adjust(
-        var.$secondary-color,
-        $lightness: -10%
-      )};
-    --p-button-secondary-hover-border-color: #{color.adjust(
-        var.$secondary-color,
-        $lightness: -10%
-      )};
-    --p-button-secondary-hover-color: #{var.$text-color};
-    --p-button-secondary-active-background: #{color.adjust(
-        var.$secondary-color,
-        $lightness: -20%
-      )};
-    --p-button-secondary-active-border-color: #{color.adjust(
-        var.$secondary-color,
-        $lightness: -20%
-      )};
-    --p-button-secondary-active-color: #{var.$text-color};
+  --p-button-text-secondary-color: #{var.$text-color};
 
-    // Variables pour les inputs
-    --p-input-border-color: #{var.$surface-300};
-    --p-input-hover-border-color: #{var.$primary-color};
-    --p-input-focus-border-color: #{var.$primary-color};
-    --p-input-background: #{var.$surface-0};
-    --p-input-text-color: #{var.$text-color};
+  // Variables boutons secondaires
+  --p-button-secondary-background: #{var.$secondary-color};
+  --p-button-secondary-border-color: #{var.$secondary-color};
+  --p-button-secondary-color: #{var.$text-color};
+  --p-button-secondary-hover-background: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -10%
+    )};
+  --p-button-secondary-hover-border-color: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -10%
+    )};
+  --p-button-secondary-hover-color: #{var.$text-color};
+  --p-button-secondary-active-background: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -20%
+    )};
+  --p-button-secondary-active-border-color: #{color.adjust(
+      var.$secondary-color,
+      $lightness: -20%
+    )};
+  --p-button-secondary-active-color: #{var.$text-color};
 
-    // Input texte
-    --p-inputtext-color: #{var.$text-color};
-    --p-inputtext-background: #{var.$background-color};
-    --p-inputtext-padding-y: #{var.$input-padding};
-    --p-inputtext-padding-x: #{var.$input-padding};
-    --p-inputtext-border-color: #{var.$text-color};
-    --p-inputtext-transition-duration: #{var.$transition-duration};
-    --p-inputtext-border-radius: #{var.$border-radius};
-    --p-inputtext-shadow: #{var.$shadow-1};
-    --p-inputtext-hover-border-color: #{var.$input-hover-border-color};
-    --p-inputtext-focus-border-color: #{var.$primary-color};
-    --p-inputtext-focus-ring-shadow: #{var.$input-focus-shadow-size} #{var.$input-focus-shadow-color};
-    --p-inputtext-focus-ring-width: 2px;
-    --p-inputtext-focus-ring-style: solid;
-    --p-inputtext-focus-ring-color: #{rgba(var.$primary-color, 0.2)};
-    --p-inputtext-focus-ring-offset: 0px;
-    --p-inputtext-disabled-background: #{var.$surface-200};
-    --p-inputtext-disabled-color: #{var.$surface-600};
-    --p-inputtext-transition-duration: #{var.$transition-duration};
-    --p-inputtext-border-radius: #{var.$border-radius};
-    --p-inputtext-shadow: #{var.$shadow-1};
+  // Variables pour les inputs
+  --p-input-border-color: #{var.$surface-300};
+  --p-input-hover-border-color: #{var.$primary-color};
+  --p-input-focus-border-color: #{var.$primary-color};
+  --p-input-background: #{var.$surface-0};
+  --p-input-text-color: #{var.$text-color};
 
-    // Variables pour les dropdowns
-    --p-dropdown-background: #{var.$surface-0};
-    --p-dropdown-border: #{var.$surface-300};
-    --p-dropdown-item-hover-bg: #{var.$surface-100};
-    --p-dropdown-item-selected-bg: #{var.$primary-color};
-    --p-dropdown-item-selected-color: #{var.$button-text-color};
+  // Input texte
+  --p-inputtext-color: #{var.$text-color};
+  --p-inputtext-background: #{var.$background-color};
+  --p-inputtext-padding-y: #{var.$input-padding};
+  --p-inputtext-padding-x: #{var.$input-padding};
+  --p-inputtext-border-color: #{var.$text-color};
+  --p-inputtext-transition-duration: #{var.$transition-duration};
+  --p-inputtext-border-radius: #{var.$border-radius};
+  --p-inputtext-shadow: #{var.$shadow-1};
+  --p-inputtext-hover-border-color: #{var.$input-hover-border-color};
+  --p-inputtext-focus-border-color: #{var.$primary-color};
+  --p-inputtext-focus-ring-shadow: #{var.$input-focus-shadow-size} #{var.$input-focus-shadow-color};
+  --p-inputtext-focus-ring-width: 2px;
+  --p-inputtext-focus-ring-style: solid;
+  --p-inputtext-focus-ring-color: #{rgba(var.$primary-color, 0.2)};
+  --p-inputtext-focus-ring-offset: 0px;
+  --p-inputtext-disabled-background: #{var.$surface-200};
+  --p-inputtext-disabled-color: #{var.$surface-600};
+  --p-inputtext-transition-duration: #{var.$transition-duration};
+  --p-inputtext-border-radius: #{var.$border-radius};
+  --p-inputtext-shadow: #{var.$shadow-1};
 
-    // float label
-    --p-floatlabel-font-weight: #{var.$font-weight-medium};
-    --p-floatlabel-position-x: 10%;
-    --p-floatlabel-color: #{var.$text-color};
-    --p-floatlabel-transition-duration: 0.3s;
-    --p-floatlabel-on-border-radius: #{var.$border-radius};
-    --p-floatlabel-on-active-background: #{var.$background-color};
-    --p-floatlabel-on-active-padding: 0.5px;
-    --p-floatlabel-focus-color: #{var.$text-color};
+  // Variables pour les dropdowns
+  --p-dropdown-background: #{var.$surface-0};
+  --p-dropdown-border: #{var.$surface-300};
+  --p-dropdown-item-hover-bg: #{var.$surface-100};
+  --p-dropdown-item-selected-bg: #{var.$primary-color};
+  --p-dropdown-item-selected-color: #{var.$button-text-color};
 
-    // Toast - Base
+  // float label
+  --p-floatlabel-font-weight: #{var.$font-weight-medium};
+  --p-floatlabel-position-x: 10%;
+  --p-floatlabel-color: #{var.$text-color};
+  --p-floatlabel-transition-duration: 0.3s;
+  --p-floatlabel-on-border-radius: #{var.$border-radius};
+  --p-floatlabel-on-active-background: #{var.$background-color};
+  --p-floatlabel-on-active-padding: 0.5px;
+  --p-floatlabel-focus-color: #{var.$text-color};
+
+  // Toast - Base
   --p-toast-border-width: 1px;
   --p-toast-border-radius: #{var.$border-radius};
   --p-toast-padding: #{var.$spacing-md};
   --p-toast-icon-size: 1rem;
   --p-toast-message-margin: #{var.$spacing-sm};
   --p-toast-backdrop-filter: blur(8px);
-  --p-toast-content-padding : #{var.$spacing-sm};
+  --p-toast-content-padding: #{var.$spacing-sm};
   --p-toast-content-gap: #{var.$spacing-md};
   --p-toast-detail-font-weight: #{var.$font-weight-normal};
   --p-toast-detail-font-size: #{var.$font-size-small};
 
   // Toast - Success
-  --p-toast-success-background: #{color.adjust(var.$success-color, $lightness: 30%, $alpha: -0.35)};
-  --p-toast-success-border-color: #{color.adjust(var.$success-color, $lightness: -10%, $alpha: -0.3)};
+  --p-toast-success-background: #{color.adjust(
+      var.$success-color,
+      $lightness: 30%,
+      $alpha: -0.35
+    )};
+  --p-toast-success-border-color: #{color.adjust(
+      var.$success-color,
+      $lightness: -10%,
+      $alpha: -0.3
+    )};
   --p-toast-success-color: #{var.$button-text-color};
   --p-toast-summary-font-weight: 600;
   --p-toast-summary-font-size: #{var.$font-size-small};
-  --p-toast-success-icon-color: #{color.adjust(var.$success-color, $lightness: -15%)};
-  --p-toast-success-shadow: 0 2px 8px #{color.adjust(var.$success-color, $alpha: -0.9)};
+  --p-toast-success-icon-color: #{color.adjust(
+      var.$success-color,
+      $lightness: -15%
+    )};
+  --p-toast-success-shadow: 0 2px 8px #{color.adjust(
+      var.$success-color,
+      $alpha: -0.9
+    )};
 
   // Toast - Error
-  --p-toast-error-background: #{color.adjust(var.$error-color, $lightness: 35%, $alpha: -0.35)};
-  --p-toast-error-border-color: #{color.adjust(var.$error-color, $lightness: -10%, $alpha: -0.3)};
-  --p-toast-error-color: #{color.adjust(var.$error-color, $lightness: -25%, $saturation: 15%)};
+  --p-toast-error-background: #{color.adjust(
+      var.$error-color,
+      $lightness: 35%,
+      $alpha: -0.35
+    )};
+  --p-toast-error-border-color: #{color.adjust(
+      var.$error-color,
+      $lightness: -10%,
+      $alpha: -0.3
+    )};
+  --p-toast-error-color: #{color.adjust(
+      var.$error-color,
+      $lightness: -25%,
+      $saturation: 15%
+    )};
   --p-toast-error-icon-color: #{color.adjust(var.$error-color, $lightness: -15%)};
-  --p-toast-error-shadow: 0 2px 8px #{color.adjust(var.$error-color, $alpha: -0.9)};
-  
+  --p-toast-error-shadow: 0 2px 8px #{color.adjust(
+      var.$error-color,
+      $alpha: -0.9
+    )};
 
   // Toast - Warning
-  --p-toast-warning-background: #{color.adjust(var.$warning-color, $lightness: 45%, $alpha: -0.85)};
-  --p-toast-warning-border-color: #{color.adjust(var.$warning-color, $lightness: -10%, $alpha: -0.3)};
-  --p-toast-warning-color: #{color.adjust(var.$warning-color, $lightness: -25%, $saturation: 15%)};
-  --p-toast-warning-icon-color: #{color.adjust(var.$warning-color, $lightness: -15%)};
-  --p-toast-warning-shadow: 0 2px 8px #{color.adjust(var.$warning-color, $alpha: -0.9)};
+  --p-toast-warning-background: #{color.adjust(
+      var.$warning-color,
+      $lightness: 45%,
+      $alpha: -0.85
+    )};
+  --p-toast-warning-border-color: #{color.adjust(
+      var.$warning-color,
+      $lightness: -10%,
+      $alpha: -0.3
+    )};
+  --p-toast-warning-color: #{color.adjust(
+      var.$warning-color,
+      $lightness: -25%,
+      $saturation: 15%
+    )};
+  --p-toast-warning-icon-color: #{color.adjust(
+      var.$warning-color,
+      $lightness: -15%
+    )};
+  --p-toast-warning-shadow: 0 2px 8px #{color.adjust(
+      var.$warning-color,
+      $alpha: -0.9
+    )};
 
   // Toast - Info
-  --p-toast-info-background: #{color.adjust(var.$info-color, $lightness: 45%, $alpha: -0.85)};
-  --p-toast-info-border-color: #{color.adjust(var.$info-color, $lightness: -10%, $alpha: -0.3)};
-  --p-toast-info-color: #{color.adjust(var.$info-color, $lightness: -25%, $saturation: 15%)};
+  --p-toast-info-background: #{color.adjust(
+      var.$info-color,
+      $lightness: 45%,
+      $alpha: -0.85
+    )};
+  --p-toast-info-border-color: #{color.adjust(
+      var.$info-color,
+      $lightness: -10%,
+      $alpha: -0.3
+    )};
+  --p-toast-info-color: #{color.adjust(
+      var.$info-color,
+      $lightness: -25%,
+      $saturation: 15%
+    )};
   --p-toast-info-icon-color: #{color.adjust(var.$info-color, $lightness: -15%)};
   --p-toast-info-shadow: 0 2px 8px #{color.adjust(var.$info-color, $alpha: -0.9)};
 
@@ -153,5 +213,14 @@
   --p-toast-transition-duration: #{var.$transition-duration};
   --p-toast-transform-scale: 0.9;
   --p-toast-width: auto;
-  }
-  
+
+  // input group
+  --p-inputgroup-addon-border-radius: #{var.$border-radius};
+  --p-inputgroup-addon-border-radius: #{var.$border-radius};
+  --p-inputgroup-addon-border-color: #{var.$text-color};
+  --p-inputgroup-addon-padding: #{var.$input-padding};
+  --p-inputgroup-addon-background: #{var.$background-color}; //changer pour changer couleur
+  --p-inputgroup-addon-color: #{var.$text-color};
+
+  --p-icon-size: 15px;
+}

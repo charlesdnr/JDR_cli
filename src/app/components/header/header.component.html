@@ -1,0 +1,26 @@
+<header>
+  <div class="title"  >
+    <img routerLink="/home" style="cursor: pointer;" src="/assets/images/logo.png" alt="" />
+    <h1 routerLink="/home" style="cursor: pointer;" >Lore Taverne</h1>
+  </div>
+ <!--  <div class="recherche">
+    <p-inputgroup>
+      <input pInputText placeholder="Search..." />
+      <p-inputgroup-addon>
+        <p-button
+          ><span class="material-symbols-outlined"> search </span></p-button
+        >
+      </p-inputgroup-addon>
+    </p-inputgroup>
+  </div>-->
+  <div class="container-liste">
+    @for(button of mapButton; track button){
+    <div class="container-button">
+      <p-button [routerLink]="button.link" >
+        <span class="material-symbols-outlined">{{ button.icon }}</span>
+        {{ button.name }}
+      </p-button>
+    </div>
+    }
+  </div>
+</header>

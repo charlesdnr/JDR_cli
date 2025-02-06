@@ -1,2 +1,6 @@
-<router-outlet></router-outlet>
-<p-toast />
+<router-outlet>
+    @if(!onAuth()){
+        <app-header />
+    }
+</router-outlet>
+<p-toast position="bottom-right" />
