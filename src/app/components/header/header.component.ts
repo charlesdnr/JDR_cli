@@ -5,6 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface buttonHeader {
   name: string;
@@ -20,7 +21,8 @@ export interface buttonHeader {
     InputTextModule,
     InputGroupModule,
     InputGroupAddonModule,
-    RouterLink
+    RouterLink,
+    TranslateModule
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -31,4 +33,8 @@ export class HeaderComponent {
     { name: 'Projets', icon: 'assignment', link: '/projects' },
     { name: 'Compte', icon: 'account_circle', link: '/account' },
   ];
+
+  public get token(): string | null {
+    return localStorage.getItem('token');
+  }
 }

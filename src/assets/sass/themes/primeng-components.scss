@@ -40,18 +40,15 @@
   --p-button-text-secondary-color: #{var.$text-color};
 
   // Variables boutons secondaires
-  --p-button-secondary-background: #{var.$secondary-color};
+  --p-button-secondary-background: transparent;
   --p-button-secondary-border-color: #{var.$secondary-color};
   --p-button-secondary-color: #{var.$text-color};
-  --p-button-secondary-hover-background: #{color.adjust(
-      var.$secondary-color,
-      $lightness: -10%
-    )};
+  --p-button-secondary-hover-background: #{var.$primary-color};
   --p-button-secondary-hover-border-color: #{color.adjust(
       var.$secondary-color,
       $lightness: -10%
     )};
-  --p-button-secondary-hover-color: #{var.$text-color};
+  --p-button-secondary-hover-color: #{var.$button-text-color};
   --p-button-secondary-active-background: #{color.adjust(
       var.$secondary-color,
       $lightness: -20%

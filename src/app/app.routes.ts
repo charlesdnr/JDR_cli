@@ -9,7 +9,7 @@ import { NewProjectComponent } from './pages/new-project/new-project.component';
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'auth/login' },
     { path: 'auth/:config', component: AuthComponent },
-    { path: 'home', component: HomeComponent, canActivate: [authGuard] },
+    { path: 'home', component: HomeComponent },
     { path: 'account', component: AccountComponent, canActivate: [authGuard] },
     { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
     { path: 'new-project', component: NewProjectComponent, canActivate: [authGuard] },

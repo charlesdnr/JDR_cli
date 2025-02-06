@@ -22,8 +22,8 @@ export class AppComponent {
 
   constructor(private translate: TranslateService, private router: Router) {
     translate.addLangs(['fr-FR', 'en-EN']);
-    translate.setDefaultLang('en-EN');
-    translate.use('en-EN')
+    translate.setDefaultLang('fr-FR');
+    translate.use('fr-FR')
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
