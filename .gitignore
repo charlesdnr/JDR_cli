@@ -404,3 +404,7 @@ FodyWeavers.xsd
 .firebase
 *-debug.log
 .runtimeconfig.json
+
+
+firebase.json
+./firebase.json
