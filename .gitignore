@@ -10,6 +10,9 @@
 *.userosscache
 *.sln.docstates
 
+
+firebase.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -404,7 +407,3 @@ FodyWeavers.xsd
 .firebase
 *-debug.log
 .runtimeconfig.json
-
-
-firebase.json
-./firebase.json
