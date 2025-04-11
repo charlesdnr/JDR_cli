@@ -18,7 +18,7 @@ import { AuthHttpService } from '../../services/https/auth-http.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { User } from '../../classes/User';
 import { KeyFilterModule } from 'primeng/keyfilter';

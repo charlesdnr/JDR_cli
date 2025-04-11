@@ -401,9 +401,11 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-#angular 
+#angular
 .angular/
 # Firebase
 .firebase
 *-debug.log
 .runtimeconfig.json
+
+src/environments/environment.secret.ts

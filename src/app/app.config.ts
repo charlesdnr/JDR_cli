@@ -1,6 +1,5 @@
 import {
   ApplicationConfig,
-  EnvironmentProviders,
   importProvidersFrom,
   provideZoneChangeDetection,
 } from '@angular/core';
@@ -17,11 +16,11 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { environment } from '../environments/environment';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import Aura from '@primeng/themes/aura';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
+import { firebaseConfig } from '../environments/environment.secret';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
@@ -54,7 +53,7 @@ export const appConfig: ApplicationConfig = {
         },
       }),
     ]),
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
   ],
 };
