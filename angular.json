@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "JDR_cli": {
+    "jdr-cli": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -83,10 +83,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "JDR_cli:build:production"
+              "buildTarget": "jdr-cli:build:production"
             },
             "development": {
-              "buildTarget": "JDR_cli:build:development"
+              "buildTarget": "jdr-cli:build:development"
             }
           },
           "defaultConfiguration": "development"

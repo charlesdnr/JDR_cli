@@ -13,10 +13,7 @@
   --p-button-gap: #{var.$button-gap};
 
   // États des boutons
-  --p-button-primary-hover-background: #{color.adjust(
-      var.$primary-color,
-      $lightness: -10%
-    )};
+  --p-button-primary-hover-background: #{var.$background-color};
   --p-button-primary-hover-border-color: #{color.adjust(
       var.$primary-color,
       $lightness: -10%

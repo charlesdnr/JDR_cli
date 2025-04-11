@@ -1,3 +1,11 @@
-@use './assets/sass/themes/dark.scss';
+@use "./assets/sass/themes/dark.scss";
 //@use './assets/sass/themes/light.scss';
-@use './assets/sass/common.scss';
+@use "./assets/sass/common.scss";
+@import "primeicons/primeicons.css";
+
+:root {
+  --p-button-secondary-background: var(--background-color);
+  --p-button-primary-hover-color: var(--text-color);
+
+  //   --p-button-padding-y: 10px;
+}

@@ -2,11 +2,12 @@ import { IUser } from "../interfaces/IUser";
 
 export class User implements IUser {
     id: number;
-    username: string;
+    username: string = '';
     password: string;
+    email: string;
 
-    constructor(username: string, password: string) {
-        this.username = username;
+    constructor(email: string, password: string) {
+        this.email = email;
         this.password = password;
         this.id = 0;
     }

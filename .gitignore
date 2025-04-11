@@ -400,3 +400,7 @@ FodyWeavers.xsd
 
 #angular 
 .angular/
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json

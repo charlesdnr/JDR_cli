@@ -1,5 +1,6 @@
 header {
   display: flex;
+  border-bottom: 1px solid var(--text-color);
   .title {
     display: flex;
     flex: 2;
@@ -9,14 +10,20 @@ header {
 
     img {
       object-fit: contain;
-      margin-left: 10px;
+      margin: 10px;
     }
   }
 
   .container-liste {
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 10px;
     padding-right: 25px;
+
+    i {
+      font-size: 1.5rem;
+    }
   }
 
   ::ng-deep {
@@ -24,6 +31,7 @@ header {
       width: 183px;
       height: 37px;
       font-size: 0.9rem !important;
+      // border: 1px solid transparent;
     }
   }
 

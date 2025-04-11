@@ -1,25 +1,28 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
-import { User } from '../../classes/User';
-import { UserResponse } from '../../interfaces/UserResponse';
-import { firstValueFrom } from 'rxjs';
+import { defer, firstValueFrom, Observable } from 'rxjs';
+import { Auth } from '@angular/fire/auth';
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from '@firebase/auth';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthHttpService {
-  endpoint: string = ""
+  constructor(private auth: Auth) {}
 
-  constructor(private http: HttpClient) {
-    this.endpoint = environment.apiUrl + 'api/auth'
+  login(email: string, password: string) {
+    return signInWithEmailAndPassword(this.auth, email, password);
   }
-
-  login(user: User): Promise<UserResponse> {
-    return firstValueFrom<UserResponse>(this.http.post<UserResponse>(`${this.endpoint}/login`, user))
+  // the sign up uses createUserWithEmailAndPassword
+  signup(email: string, password: string, custom: any) {
+    return createUserWithEmailAndPassword(this.auth, email, password);
   }
-
-  register(user: User): Promise<any>{
-    return firstValueFrom(this.http.post(`${this.endpoint}/register`, user))
+  loginGoogle() {
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(this.auth, provider);
   }
 }

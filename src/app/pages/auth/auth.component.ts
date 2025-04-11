@@ -26,6 +26,7 @@ import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../validators/equalPattern';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
+// import { GooglSsoDirective } from '../../directives/googl-sso.directive';
 
 @Component({
   selector: 'app-auth',
@@ -39,6 +40,7 @@ import { HttpErrorResponse } from '@angular/common/http';
     TranslateModule,
     KeyFilterModule,
     RouterLink,
+    // GooglSsoDirective,
   ],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss',
@@ -51,22 +53,25 @@ export class AuthComponent implements OnInit, OnDestroy {
   formgroup = computed(() => {
     if (this.isLogin()) {
       return new FormGroup({
-        login: new FormControl(''),
+        email: new FormControl(''),
         password: new FormControl(''),
       });
-    } 
-      return new FormGroup(
-        {
-          login: new FormControl('', Validators.required),
-          password: new FormControl('', Validators.required),
-          confirm: new FormControl('', Validators.required),
-          email: new FormControl('', [Validators.email, Validators.required]),
-        },
-        { validators: passwordMatchValidator }
-      );
+    }
+    return new FormGroup(
+      {
+        login: new FormControl('', Validators.required),
+        password: new FormControl('', Validators.required),
+        confirm: new FormControl('', Validators.required),
+        email: new FormControl('', [Validators.email, Validators.required]),
+      },
+      { validators: passwordMatchValidator }
+    );
   });
   labelButton = computed(() =>
-    this.isLogin() ? 'Se Connecter' : "S'enregistrer"
+    this.isLogin() ? 'Connexion' : "S'enregistrer"
+  );
+  labelButton2 = computed(() =>
+    !this.isLogin() ? 'Se Connecter' : "S'enregistrer"
   );
   labelh2 = computed(() => (this.isLogin() ? 'Connexion' : "S'enregistrer"));
   noAccountLabel = computed(() =>
@@ -75,7 +80,10 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   private routeSubscription!: Subscription;
 
-  constructor(private httpAuth: AuthHttpService, private messageService: MessageService) {}
+  constructor(
+    private httpAuth: AuthHttpService,
+    private messageService: MessageService
+  ) {}
 
   ngOnDestroy(): void {
     this.routeSubscription?.unsubscribe();
@@ -90,16 +98,14 @@ export class AuthComponent implements OnInit, OnDestroy {
   formSubmit() {
     if (this.formgroup().valid) {
       const user: User = new User(
-        this.formgroup().value.login!,
+        this.formgroup().value.email!,
         this.formgroup().value.password!
       );
-      console.log(this.formgroup().value);
-      console.log(user);
       if (this.isLogin()) {
         this.loginUser(user);
       } else {
         this.httpAuth
-          .register(user)
+          .signup(user.email, user.password, {})
           .then(() => {
             this.loginUser(user);
           })
@@ -109,10 +115,36 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   loginUser(user: User) {
-    this.httpAuth.login(user).then((value) => {
-      this.router.navigateByUrl('/home');
-      localStorage.setItem('token', value.token);
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Succesfully login' });
-    }).catch((err: HttpErrorResponse) => this.messageService.add({ severity: 'error', summary: 'Error', detail: `Error : ${err.message}` }));
+    this.httpAuth
+      .login(user.email, user.password)
+      .then((value) => {
+        this.router.navigateByUrl('/home');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Connecté en tant que ' + value.user.email,
+        });
+      })
+      .catch((err: HttpErrorResponse) =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Error : ${err.message}`,
+        })
+      );
+  }
+
+  loginGoogle() {
+    this.httpAuth
+      .loginGoogle()
+      .then((value) => {
+        this.router.navigateByUrl('/home');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Connecté en tant que ' + value.user.email,
+        });
+      })
+      .catch((err) => console.log(err));
   }
 }

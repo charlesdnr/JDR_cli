@@ -1,1 +1,1 @@
-# JDR_cli
+# jdr-cli

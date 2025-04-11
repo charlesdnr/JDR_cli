@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { HeaderComponent } from './components/header/header.component';
 import { filter } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -12,23 +13,22 @@ import { filter } from 'rxjs';
   imports: [RouterOutlet, TranslateModule, ToastModule, HeaderComponent],
   providers: [MessageService],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  onAuth = computed(() => {
-    return this.url().startsWith('/auth/');
-  });
-  url = signal('')
+  onAuth = false;
+  url = '';
 
   constructor(private translate: TranslateService, private router: Router) {
     translate.addLangs(['fr-FR', 'en-EN']);
     translate.setDefaultLang('fr-FR');
-    translate.use('fr-FR')
+    translate.use('fr-FR');
 
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      this.url.set(event.url)
-    });
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.url = event.url;
+        this.onAuth = this.url.startsWith('/auth/');
+      });
   }
 }
