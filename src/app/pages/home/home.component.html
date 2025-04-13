@@ -1,1 +1,27 @@
-coucu
+<div class="left">
+  <div class="first">
+    <h1>
+      {{ "Bienvenue" }}
+    </h1>
+    @if(userService.currentJdrUser?.username){
+    <h1 style="color: var(--secondary-color)">
+      {{ userService.currentJdrUser?.username }}
+    </h1>
+    } @else {
+    <h1>,</h1>
+    }
+  </div>
+  <h1>{{ "Libère ton imagination," }}</h1>
+  <h1>{{ "construis ton monde \n avec l'IA" }}</h1>
+  <div class="container-button">
+    <p-button
+      label="Créer un projet"
+      icon="pi pi-arrow-right"
+      iconPos="right"
+    />
+    <button>{{ "Explorer les projets" | translate }}</button>
+  </div>
+</div>
+<div class="right">
+  <img src="assets/images/home.png" alt="image de page home" />
+</div>

@@ -53,6 +53,8 @@
       flex: 1;
 
       img {
+        width: 10rem;
+        height: 10rem;
         object-fit: contain;
       }
     }
@@ -81,7 +83,7 @@
       padding: 20px;
       border-radius: 10px;
       width: 100%;
-      flex: 3;
+      flex: 1;
 
       .last-label {
         margin-bottom: 15px;
@@ -125,4 +127,17 @@ button {
   p {
     flex: 9;
   }
+}
+
+
+.separator {
+  width: 50%;
+  height: 1px;
+  background-color: var(--text-color);
+  margin-bottom: 20px;
+}
+.providers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }

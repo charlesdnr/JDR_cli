@@ -7,7 +7,7 @@ import { ProjectComponent } from './pages/project/project.component';
 import { NewProjectComponent } from './pages/new-project/new-project.component';
 
 export const routes: Routes = [
-    { path: '', pathMatch: 'full', redirectTo: 'auth/login' },
+    { path: '', pathMatch: 'full', redirectTo: 'home' },
     { path: 'auth/:config', component: AuthComponent },
     { path: 'home', component: HomeComponent },
     { path: 'account', component: AccountComponent, canActivate: [authGuard] },

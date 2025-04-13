@@ -1,17 +1,21 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { defer, firstValueFrom, Observable } from 'rxjs';
 import { Auth } from '@angular/fire/auth';
 import {
   createUserWithEmailAndPassword,
+  GithubAuthProvider,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
 } from '@firebase/auth';
+import { UserHttpService } from './user-http.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthHttpService {
+  private userService = inject(UserHttpService);
+
   constructor(private auth: Auth) {}
 
   login(email: string, password: string) {
@@ -24,5 +28,12 @@ export class AuthHttpService {
   loginGoogle() {
     const provider = new GoogleAuthProvider();
     return signInWithPopup(this.auth, provider);
+  }
+  loginGithub() {
+    const provider = new GithubAuthProvider();
+    return signInWithPopup(this.auth, provider);
+  }
+  async logout(){
+    await this.auth.signOut()
   }
 }

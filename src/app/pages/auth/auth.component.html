@@ -64,15 +64,23 @@
         type="submit"
       />
     </form>
-    <button (click)="loginGoogle()">
-      <img src="assets/images/google.png" alt="logo google" />
-      <p>
-        {{
-          labelButton() == "Connexion" ? "Se Connecter" : "S'enregistrer"
-        }}
-        avec Google
-      </p>
-    </button>
+    <div class="separator"></div>
+    <div class="providers">
+      <button (click)="loginGoogle()">
+        <img src="assets/images/google.png" alt="logo google" />
+        <p>
+          {{ labelButton() == "Connexion" ? "Se Connecter" : "S'enregistrer" }}
+          avec Google
+        </p>
+      </button>
+      <button (click)="loginGithub()">
+        <img src="assets/images/github.png" alt="logo google" />
+        <p>
+          {{ labelButton() == "Connexion" ? "Se Connecter" : "S'enregistrer" }}
+          avec Github
+        </p>
+      </button>
+    </div>
     <div class="no-account">
       <p>{{ noAccountLabel() | translate }}</p>
       <p-button

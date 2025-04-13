@@ -1,10 +1,15 @@
 <header>
-  <div class="title"  >
-    <img routerLink="/home" style="cursor: pointer;" src="/assets/images/logo.png" alt="" />
+  <div class="title">
+    <img
+      routerLink="/home"
+      style="cursor: pointer"
+      src="/assets/images/logo.png"
+      alt=""
+    />
   </div>
   <div class="recherche">
     <p-inputgroup>
-      <input pInputText [placeholder]="'Rechercher...' | translate " />
+      <input pInputText [placeholder]="'Rechercher...' | translate" />
       <p-inputgroup-addon>
         <p-button
           ><span class="material-symbols-outlined"> search </span></p-button
@@ -13,23 +18,33 @@
     </p-inputgroup>
   </div>
   @if(user$ | async; as user){
-    <div class="container-liste">
-      @for(button of mapButton; track button){
-      <div class="container-button">
-        <p-button severity="secondary" [routerLink]="button.link" >
-          <span class="material-symbols-outlined">{{ button.icon }}</span>
-          {{ button.name }}
-        </p-button>
-      </div>
-      }
-      <i (click)="logout()" class="pi pi-sign-out" style="color: red;" ></i>
-    </div>
-  }
-  @else {
+  <div class="container-liste">
+    @for(button of mapButton; track button){
     <div class="container-button">
-      <p-button severity="secondary" routerLink="/auth/login">{{ 'Se connecter' | translate }}</p-button>
-      <p-button severity="secondary" routerLink="/auth/register">{{ "S'enregistrer" | translate }}</p-button>
+      <span
+        [routerLink]="button.link"
+        [pTooltip]="button.name"
+        tooltipPosition="bottom"
+        appendTo="body"
+        class="material-symbols-outlined"
+        >{{ button.icon }}</span
+      >
     </div>
+    }
+    <i
+      (click)="logout($event)"
+      class="pi pi-sign-out"
+      style="color: red; cursor: pointer"
+    ></i>
+  </div>
+  } @else {
+  <div class="container-button">
+    <p-button routerLink="/auth/login">{{
+      "Se connecter" | translate
+    }}</p-button>
+    <p-button severity="secondary" routerLink="/auth/register">{{
+      "S'enregistrer" | translate
+    }}</p-button>
+  </div>
   }
-  
 </header>

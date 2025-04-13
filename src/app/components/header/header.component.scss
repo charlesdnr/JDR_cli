@@ -3,14 +3,16 @@ header {
   border-bottom: 1px solid var(--text-color);
   .title {
     display: flex;
-    flex: 2;
+    flex: 1;
     justify-content: flex-start;
     align-items: center;
-    gap: 25px;
+    // gap: 25px;
 
     img {
       object-fit: contain;
-      margin: 10px;
+      // margin: 15px;
+      width: 5rem;
+      height: 5rem;
     }
   }
 
@@ -23,6 +25,10 @@ header {
 
     i {
       font-size: 1.5rem;
+    }
+    span {
+      font-size: 2rem;
+      cursor: pointer;
     }
   }
 
@@ -39,21 +45,22 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 10px;
+    padding-right: 10px;
   }
 
-  .container-button, .container-liste {
+  .container-button,
+  .container-liste {
     flex: 2;
   }
-  
-  
+
   .recherche {
     display: flex;
-    flex: 6;
-    padding-left: 10%;
-    padding-right: 10%;
-    justify-content: center;
+    flex: 7;
+    padding-right: 10px;
+    padding-left: 10px;
     align-items: center;
-  
+
     ::ng-deep {
       .p-button {
         width: 50px;
@@ -68,10 +75,9 @@ header {
       }
 
       .p-inputgroup {
-        width: 70%;
+        width: 90%;
+        max-width: 500px;
       }
     }
   }
-  
 }
-

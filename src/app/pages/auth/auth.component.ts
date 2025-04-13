@@ -26,7 +26,8 @@ import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../validators/equalPattern';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
-// import { GooglSsoDirective } from '../../directives/googl-sso.directive';
+import { UserHttpService } from '../../services/https/user-http.service';
+import { UserCredential } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-auth',
@@ -40,7 +41,6 @@ import { HttpErrorResponse } from '@angular/common/http';
     TranslateModule,
     KeyFilterModule,
     RouterLink,
-    // GooglSsoDirective,
   ],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss',
@@ -48,6 +48,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class AuthComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private httpAuth = inject(AuthHttpService);
+  private httpUser = inject(UserHttpService);
+  private messageService = inject(MessageService);
+
   config = signal('');
   isLogin = computed(() => this.config() == 'login');
   formgroup = computed(() => {
@@ -71,7 +75,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.isLogin() ? 'Connexion' : "S'enregistrer"
   );
   labelButton2 = computed(() =>
-    !this.isLogin() ? 'Se Connecter' : "S'enregistrer"
+    !this.isLogin() ? 'Se connecter' : "S'enregistrer"
   );
   labelh2 = computed(() => (this.isLogin() ? 'Connexion' : "S'enregistrer"));
   noAccountLabel = computed(() =>
@@ -79,11 +83,6 @@ export class AuthComponent implements OnInit, OnDestroy {
   );
 
   private routeSubscription!: Subscription;
-
-  constructor(
-    private httpAuth: AuthHttpService,
-    private messageService: MessageService
-  ) {}
 
   ngOnDestroy(): void {
     this.routeSubscription?.unsubscribe();
@@ -117,13 +116,8 @@ export class AuthComponent implements OnInit, OnDestroy {
   loginUser(user: User) {
     this.httpAuth
       .login(user.email, user.password)
-      .then((value) => {
-        this.router.navigateByUrl('/home');
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Connecté en tant que ' + value.user.email,
-        });
+      .then(async (value) => {
+        await this.checkOurLogin(value)
       })
       .catch((err: HttpErrorResponse) =>
         this.messageService.add({
@@ -137,14 +131,53 @@ export class AuthComponent implements OnInit, OnDestroy {
   loginGoogle() {
     this.httpAuth
       .loginGoogle()
-      .then((value) => {
+      .then(async (value) => {
+        await this.checkOurLogin(value)
+      })
+      .catch((err) => console.log(err));
+  }
+
+  loginGithub() {
+    this.httpAuth
+      .loginGithub()
+      .then(async (value) => {
+        await this.checkOurLogin(value)
+      })
+      .catch((err) => console.log(err));
+  }
+
+  async checkOurLogin(value: UserCredential){
+    if (this.isLogin() && value.user.email) {
+      try {
+        const email = value.user.email;
+        const resp = await this.httpUser.getUserByEmail(email);
+        console.log(resp)
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Connecté en tant que ' + value.user.email,
         });
-      })
-      .catch((err) => console.log(err));
+      } catch (err) {
+        console.log('erreur : ', err)
+      }
+    } else if (!this.isLogin()){
+      try {
+        const email = value.user.email;
+        const username = (this.formgroup().value as any).login;
+        console.log(email, username);
+
+        const resp = await this.httpUser.post({ email: email, username: username });
+        console.log(resp)
+        this.router.navigateByUrl('/home');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Connecté en tant que ' + value.user.email,
+        });
+      } catch (err) {
+        console.log('erreur : ', err)
+      }
+    }
   }
 }
