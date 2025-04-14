@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -36,8 +36,9 @@ export abstract class BaseHttpService {
    * Effectue une requête PUT.
    * @param body Corps de la requête.
    */
-  put<T>(body: any): Promise<T> {
-    return firstValueFrom(this.httpClient.put<T>(this.apiUrl, body));
+  put<T>(body: any, id: any): Promise<T> {
+    const formatid = id ? `/${id}` : ''
+    return firstValueFrom(this.httpClient.put<T>(this.apiUrl + formatid, body));
   }
 
   /**
@@ -53,6 +54,7 @@ export abstract class BaseHttpService {
    * @param params Paramètres de requête.
    */
   delete<T>(id: any): Promise<T> {
-    return firstValueFrom(this.httpClient.delete<T>(this.apiUrl + id ? `/${id}` : ''));
+    const formatid = id ? `/${id}` : ''
+    return firstValueFrom(this.httpClient.delete<T>(this.apiUrl + formatid));
   }
 }

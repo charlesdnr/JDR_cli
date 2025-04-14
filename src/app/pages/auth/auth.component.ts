@@ -151,7 +151,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       try {
         const email = value.user.email;
         const resp = await this.httpUser.getUserByEmail(email);
-        console.log(resp)
+        this.httpUser.currentJdrUser.set(resp);
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
@@ -165,9 +165,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       try {
         const email = value.user.email;
         const username = (this.formgroup().value as any).login;
-        console.log(email, username);
-
-        const resp = await this.httpUser.post({ email: email, username: username });
+        const resp: User = await this.httpUser.post({ email: email, username: username });
+        this.httpUser.currentJdrUser.set(resp);
         console.log(resp)
         this.router.navigateByUrl('/home');
         this.messageService.add({

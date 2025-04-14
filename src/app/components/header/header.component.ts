@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { Auth, User, authState } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
 import { AuthHttpService } from '../../services/https/auth-http.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
+import { UserHttpService } from '../../services/https/user-http.service';
 
 export interface buttonHeader {
   name: string;
@@ -34,12 +33,11 @@ export interface buttonHeader {
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  private auth = inject(Auth);
   private httpAuth = inject(AuthHttpService);
+  private userService = inject(UserHttpService);
+  private router = inject(Router);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
-
-  user$: Observable<User | null>;
 
   mapButton: buttonHeader[] = [
     { name: 'Nouveau Projet', icon: 'assignment_add', link: '/new-project' },
@@ -47,9 +45,7 @@ export class HeaderComponent {
     { name: 'Compte', icon: 'account_circle', link: '/account' },
   ];
 
-  constructor() {
-    this.user$ = authState(this.auth);
-  }
+  currentUser = computed(() => this.userService.currentJdrUser())
 
   logout(event: Event) {
     this.confirmationService.confirm({
@@ -71,6 +67,8 @@ export class HeaderComponent {
       accept: async () => {
         try {
           await this.httpAuth.logout();
+          this.userService.currentJdrUser.set(null);
+          this.router.navigateByUrl('/home')
         } catch (err) {
           this.messageService.add({
             severity: 'warn',

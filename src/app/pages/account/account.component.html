@@ -1,1 +1,81 @@
-<p>account works!</p>
+@let $currentUser = currentUser();
+
+@if($currentUser){
+<div class="container-account">
+  <div class="container-square">
+    <div class="left">
+      <div class="upsquare"></div>
+      <div class="picture-container">
+        <img
+          class="profile-picture"
+          [src]="'assets/images/default-avatar.png'"
+          alt="Photo de profil"
+        />
+      </div>
+      <div class="downsquare">
+        <h2>{{ "Photo" | translate }}</h2>
+        <p class="subtitle">{{ "Upload Photo up to 2mb" | translate }}</p>
+        <div class="button-group">
+          <p-button
+            (onClick)="uploadPhoto()"
+            label="{{ 'Upload Photo' | translate }}"
+            icon="pi pi-upload"
+            severity="secondary"
+          />
+          <p-button
+            (onClick)="deletePhoto()"
+            label="{{ 'Delete Photo' | translate }}"
+            icon="pi pi-trash"
+            severity="danger"
+            styleClass="p-button-danger"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="right card">
+      <!-- <div class="personal">
+        <h2>{{ "Personal Information" | translate }}</h2>
+      </div> -->
+      <div class="info-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="username">{{ "Username" | translate }}</label>
+            <input
+              id="username"
+              type="text"
+              pInputText
+              [(ngModel)]="$currentUser.username"
+            />
+          </div>
+          <div class="form-field"></div>
+          <div class="form-field email-field">
+            <label for="email">{{ "Email" | translate }}</label>
+            <input id="email" type="email" pInputText [(ngModel)]="$currentUser.email" />
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <div class="first">
+            <p-button
+            (onClick)="saveUser()"
+            label="{{ 'Sauvegarder les changements' | translate }}"
+            severity="secondary"
+          />
+            <p-button
+            (onClick)="changePassword()"
+            label="{{ 'Change Password' | translate }}"
+            severity="secondary"
+          />
+          </div>
+          <p-button
+            (onClick)="deleteAccount()"
+            label="{{ 'Delete account' | translate }}"
+            severity="danger"
+            styleClass="p-button-danger"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

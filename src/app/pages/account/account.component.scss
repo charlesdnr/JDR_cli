@@ -1,0 +1,158 @@
+// src/app/pages/account/account.component.scss
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+
+  ::ng-deep {
+    .p-inputtext {
+      // background-color: var(--text-color);
+      // color: var(--background-color);
+      // box-shadow: var(--background-color);
+      height: 40px;
+    }
+}
+}
+
+.container-account {
+  width: 100%;
+}
+
+.container-square {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+
+.card {
+  background-color: var(--secondary-color);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  position: relative;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  flex: 3;
+  padding: 0;
+  align-items: center;
+  background-color: var(--secondary-color);
+  border-radius: 15px;
+
+  .upsquare {
+    height: 100px;
+    width: 100%;
+    background-color: var(--text-color);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+  }
+
+  .picture-container {
+      margin-top: -75px;
+      position: relative;
+      z-index: 2;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%; // Rond
+      border: 4px solid var(--secondary-color);
+      background-color: var(--surface-200);
+      overflow: hidden;
+
+      .profile-picture {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+      }
+  }
+
+  .downsquare {
+    flex-grow: 1;
+    width: 100%;
+    background-color: var(--secondary-color);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    padding-top: 85px;
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+        color: var(--text-color-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column; // Boutons l'un sous l'autre
+        gap: 0.75rem; // Espace entre les boutons
+        width: 100%;
+        max-width: 200px; // Limite la largeur des boutons
+
+        ::ng-deep .p-button {
+           width: 100%; // Boutons pleine largeur
+        }
+    }
+  }
+}
+
+.right {
+  flex: 7; // Prend 7 parts de l'espace
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // Espace entre titre et formulaire
+
+  .info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.5rem;
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+}
+
+
+@media (max-width: 992px) {
+    .container-square {
+        flex-direction: column;
+    }
+    .left, .right {
+        flex: 1;
+    }
+}
+
+.first {
+  display: flex;
+  gap: 10px;
+}

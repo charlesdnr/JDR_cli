@@ -17,7 +17,7 @@
       </p-inputgroup-addon>
     </p-inputgroup>
   </div>
-  @if(user$ | async; as user){
+  @if(currentUser()){
   <div class="container-liste">
     @for(button of mapButton; track button){
     <div class="container-button">
