@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -39,13 +39,19 @@ export class HeaderComponent {
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
 
+  isMobileMenuOpen = signal(false);
+
   mapButton: buttonHeader[] = [
     { name: 'Nouveau Projet', icon: 'assignment_add', link: '/new-project' },
     { name: 'Projets', icon: 'assignment', link: '/projects' },
     { name: 'Compte', icon: 'account_circle', link: '/account' },
   ];
 
-  currentUser = computed(() => this.userService.currentJdrUser())
+  currentUser = computed(() => this.userService.currentJdrUser());
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(value => !value);
+  }
 
   logout(event: Event) {
     this.confirmationService.confirm({

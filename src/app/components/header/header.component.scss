@@ -1,17 +1,32 @@
 header {
   display: flex;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  height: 80px;
+  position: relative;
+
   .title {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     justify-content: flex-start;
     align-items: center;
-    // gap: 25px;
 
     img {
       object-fit: contain;
-      // margin: 15px;
       width: 5rem;
       height: 5rem;
+
+      @media (max-width: 768px) {
+        width: 4rem;
+        height: 4rem;
+      }
+
+      @media (max-width: 480px) {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
     }
   }
 
@@ -22,12 +37,30 @@ header {
     gap: 10px;
     padding-right: 25px;
 
+    @media (max-width: 768px) {
+      padding-right: 10px;
+      gap: 5px;
+    }
+
     i {
       font-size: 1.5rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.3rem;
+      }
     }
+
     span {
       font-size: 2rem;
       cursor: pointer;
+
+      @media (max-width: 768px) {
+        font-size: 1.8rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+      }
     }
   }
 
@@ -36,7 +69,15 @@ header {
       width: 183px;
       height: 37px;
       font-size: 0.9rem !important;
-      // border: 1px solid transparent;
+
+      @media (max-width: 768px) {
+        width: 150px;
+      }
+
+      @media (max-width: 480px) {
+        width: 120px;
+        font-size: 0.8rem !important;
+      }
     }
   }
 
@@ -46,19 +87,42 @@ header {
     align-items: center;
     gap: 10px;
     padding-right: 10px;
+
+    @media (max-width: 480px) {
+      gap: 5px;
+      padding-right: 5px;
+    }
   }
 
-  .container-button,
-  .container-liste {
-    flex: 2;
+  .desktop-menu {
+    display: flex;
+
+    @media (max-width: 600px) {
+      display: none;
+    }
+
+    .container-button,
+    .container-liste {
+      flex: 2;
+      background-color: var(--surface-0);
+
+      @media (max-width: 768px) {
+        flex: 3;
+      }
+    }
   }
 
   .recherche {
     display: flex;
-    flex: 7;
-    padding-right: 10px;
-    padding-left: 10px;
+    flex: 1;
+    padding: 0 10px;
     align-items: center;
+
+    @media (max-width: 600px) {
+      flex: 1;
+      margin: 0;
+      padding: 0 5px;
+    }
 
     ::ng-deep {
       .p-button {
@@ -67,15 +131,80 @@ header {
         padding: 2px !important;
         background-color: transparent !important;
         color: var(--text-color);
+
+        @media (max-width: 480px) {
+          width: 40px;
+          height: 35px;
+        }
       }
+
       .p-inputtext,
       .p-inputgroupaddon {
         height: 40px;
+
+        @media (max-width: 480px) {
+          height: 35px;
+        }
       }
 
       .p-inputgroup {
         width: 90%;
         max-width: 500px;
+
+        @media (max-width: 600px) {
+          width: 100%;
+          max-width: none;
+        }
+      }
+    }
+  }
+
+  /* Menu burger pour mobile */
+  .mobile-menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    margin-left: 5px;
+    align-items: center;
+
+    @media (max-width: 600px) {
+      display: flex;
+      flex: 0 0 auto; /* Ne pas rétrécir ou agrandir */
+    }
+  }
+
+  /* Menu mobile */
+  .mobile-nav {
+    display: none;
+    width: 100%;
+    position: fixed; /* Position fixe par rapport à la fenêtre */
+    top: 64px; /* Position juste en dessous du header */
+    left: 0;
+    right: 0;
+    background-color: var(--surface-card, #fff); /* Couleur de fond ou blanc par défaut */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+
+    &.open {
+      display: block;
+    }
+
+    .container-liste,
+    .container-button {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      padding: 15px 0;
+
+      span, i {
+        margin: 0 15px;
+      }
+    }
+
+    /* Applique des styles spécifiques pour les boutons dans le menu mobile */
+    ::ng-deep {
+      .p-button {
+        margin: 8px;
       }
     }
   }
