@@ -1,1 +1,54 @@
-<p>project works!</p>
+<div class="header-project">
+  <div class="searchbar">
+    <p-iconfield>
+      <p-inputicon styleClass="pi pi-search" />
+      <input type="text" pInputText placeholder="Search" />
+    </p-iconfield>
+  </div>
+  <div class="filtres"></div>
+</div>
+<div class="container">
+  <div class="modules-list">
+    @for(module of displayedModules(); track module){
+    <app-module-viewer [moduleId]="module.moduleId" />
+    }
+  </div>
+  <div class="folders">
+    <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+    <p-tree
+      #treeElement
+      [value]="treeNode()"
+      selectionMode="single"
+      [(selection)]="selectedFolder"
+      (onNodeSelect)="onNodeSelect($event)"
+      (onNodeContextMenuSelect)="onNodeRightClick($event)"
+      [contextMenu]="cm"
+    />
+    <p-button
+      label="Créer un nouveau dossier"
+      (onClick)="showNewFolderDialog(null)"
+    />
+  </div>
+</div>
+
+<p-dialog
+  [header]="dialogTitle"
+  [modal]="true"
+  [(visible)]="dialogVisible"
+  [style]="{ width: '25rem' }"
+>
+  <div class="container-dialog">
+    <p-floatlabel variant="on">
+      <input id="username" pInputText [(ngModel)]="folderName" />
+      <label for="username">Nom du dossier</label>
+    </p-floatlabel>
+    <div class="container-button">
+      <p-button
+        label="Annuler"
+        severity="secondary"
+        (click)="dialogVisible = false"
+      />
+      <p-button label="Confirmer" (click)="handleDialogAction()" />
+    </div>
+  </div>
+</p-dialog>

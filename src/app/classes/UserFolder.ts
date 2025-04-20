@@ -8,9 +8,7 @@ export class UserFolder {
       userId: number,
       name?: string,
       parentFolder?: number,
-      folderId?: number
   ) {
-      this.folderId = folderId;
       this.userId = userId;
       this.name = name;
       this.parentFolder = parentFolder;

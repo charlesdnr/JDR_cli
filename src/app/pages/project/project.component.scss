@@ -1,0 +1,70 @@
+:host{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 100%;
+  width: 100%;
+  padding: 2rem;
+}
+
+.header-project{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  max-height: 50px;
+
+  .searchbar{
+    flex: 3;
+  }
+  .filtres{
+    flex: 7;
+  }
+}
+
+.container{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  .modules-list{
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    align-items: start;
+    justify-content: flex-start;
+  }
+
+  .folders{
+    flex-shrink: 0;
+    padding: 10px;
+    max-width: 261px;
+    border-left: 1px solid var(--primary-color);
+  }
+}
+
+.container-button {
+  display: flex;
+  gap: 10px;
+}
+
+.container-dialog {
+  padding: 10px;
+  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+::ng-deep .p-tree-node-toggle-button{
+  visibility: visible;
+}
+::ng-deep .p-tree-node-icon {
+  margin-right: 3px;
+}
+::ng-deep .p-inputtext{
+  width: 100%;
+  padding-block: 5px;
+}

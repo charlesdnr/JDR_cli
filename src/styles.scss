@@ -8,6 +8,21 @@
   --p-button-primary-hover-color: var(--text-color);
 
   //   --p-button-padding-y: 10px;
+
+  // p-tree
+  --p-tree-background: var(--background-color);
+  --p-surface-900: var(--background-color);
+  --p-tree-node-toggle-button-color: white;
+  --p-tree-node-toggle-button-hover-background: var(--background-color);
+  --p-tree-node-toggle-button-selected-hover-background: var(--secondary-color);
+  --p-tree-node-selected-background: var(--primary-color);
+  --p-tree-node-selected-color: var(--background-color);
+  --p-tree-node-icon-selected-color: var(--background-color);
+  --p-tree-node-hover-background: var(--secondary-color);
+  --p-tree-node-toggle-button-selected-hover-color: white;
+
+  //contextmenu
+  --p-contextmenu-item-focus-background: var(--secondary-color);
 }
 h1 {
   margin-block-start: 0;
