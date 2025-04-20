@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
-import { Picture } from '../../classes/Picture'; // Vérifiez l'import
-import { PictureUsage } from '../../enum/PictureUsage'; // Vérifiez l'import
+import { Picture } from '../../classes/Picture';
+import { PictureUsage } from '../../enum/PictureUsage';
+import { firstValueFrom } from 'rxjs'; // Import nécessaire
 
 @Injectable({
   providedIn: 'root'
@@ -9,54 +10,39 @@ import { PictureUsage } from '../../enum/PictureUsage'; // Vérifiez l'import
 export class PictureHttpService extends BaseHttpService {
 
   constructor() {
-    // Correspond à @RequestMapping("/api/pictures")
     super('api/pictures');
   }
 
-  /**
-   * Crée une image associée à un module.
-   * POST /api/pictures/module/{moduleId}
-   * @param moduleId L'ID du module auquel associer l'image.
-   * @param picture Les données de l'image à créer.
-   */
+  /** POST /api/pictures/module/{moduleId} */
   createPictureForModule(moduleId: number, picture: Picture): Promise<Picture> {
-    // Note: Le contrôleur attend PictureDTO, on envoie Picture et reçoit PictureDTO
-    return this.post<Picture>(picture, `module/${moduleId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/module/${moduleId}`;
+    // T=Picture, B=Picture
+    return firstValueFrom(this.httpClient.post<Picture>(specificUrl, picture));
   }
 
-  // TODO: Ajouter des méthodes similaires pour d'autres usages si nécessaire
-  // Exemple: createPictureForUser(userId: number, picture: Picture): Promise<Picture>
-  // POST /api/pictures/user/{userId}
-  // return this.post<Picture>(picture, `user/${userId}`);
+  // TODO: Ajouter méthodes pour autres usages si nécessaire (ex: user)
+  // createPictureForUser(userId: number, picture: Picture): Promise<Picture> {
+  //   const specificUrl = `${this.baseApiUrl}/user/${userId}`;
+  //   return firstValueFrom(this.httpClient.post<Picture>(specificUrl, picture));
+  // }
 
-
-  /**
-   * Récupère les images basées sur leur type d'usage et l'ID de l'entité associée.
-   * GET /api/pictures/usage-type/{usageType}/usage-id/{usageId}
-   * @param usageType Le type d'usage (BLOCK, USER_PROFILE, MODULE).
-   * @param usageId L'ID de l'entité (Block, User, Module).
-   */
+  /** GET /api/pictures/usage-type/{usageType}/usage-id/{usageId} */
   getPicturesByUsage(usageType: PictureUsage, usageId: number): Promise<Picture[]> {
-    return this.get<Picture[]>(undefined, `usage-type/${usageType}/usage-id/${usageId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/usage-type/${usageType}/usage-id/${usageId}`;
+    return firstValueFrom(this.httpClient.get<Picture[]>(specificUrl));
   }
 
-  /**
-   * Met à jour une image existante.
-   * PUT /api/pictures/{id}
-   * @param id L'ID de l'image à mettre à jour.
-   * @param picture Les nouvelles données de l'image.
-   */
+  /** PUT /api/pictures/{id} */
   updatePicture(id: number, picture: Picture): Promise<Picture> {
-    return this.put<Picture>(picture, id);
+    // Appel standard, T=Picture, B=Picture
+    return this.put<Picture, Picture>(picture, id);
   }
 
-  /**
-   * Supprime une image.
-   * DELETE /api/pictures/{id}
-   * @param id L'ID de l'image à supprimer.
-   */
+  /** DELETE /api/pictures/{id} */
   deletePicture(id: number): Promise<Picture> {
-    // Le contrôleur renvoie le DTO avant NO_CONTENT
+    // Appel standard (le backend renvoie le DTO avant 204)
     return this.delete<Picture>(id);
   }
 }

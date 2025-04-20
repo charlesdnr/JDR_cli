@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
-import { ModuleAccess } from '../../classes/ModuleAccess'; // Vérifiez l'import
-import { AccessRight } from '../../enum/AccessRight'; // Vérifiez l'import
+import { ModuleAccess } from '../../classes/ModuleAccess';
+import { AccessRight } from '../../enum/AccessRight';
+import { firstValueFrom } from 'rxjs'; // Import nécessaire
 
 @Injectable({
   providedIn: 'root'
@@ -9,69 +10,48 @@ import { AccessRight } from '../../enum/AccessRight'; // Vérifiez l'import
 export class ModuleAccessHttpService extends BaseHttpService {
 
   constructor() {
-    // Correspond à @RequestMapping("api/module-access")
     super('api/module-access');
   }
 
-  /**
-   * Récupère un accès module par son ID.
-   * GET /api/module-access/{id}
-   * @param id L'ID de l'accès module.
-   */
+  /** GET /api/module-access/{id} */
   getModuleAccessById(id: number): Promise<ModuleAccess> {
+    // Appel standard
     return this.get<ModuleAccess>(id);
   }
 
-  /**
-   * Récupère tous les accès pour un module donné.
-   * GET /api/module-access/module/{moduleId}
-   * @param moduleId L'ID du module.
-   */
+  /** GET /api/module-access/module/{moduleId} */
   getModuleAccessByModuleId(moduleId: number): Promise<ModuleAccess[]> {
-    // Utilisation de get avec un pathSuffix personnalisé
-    return this.get<ModuleAccess[]> (undefined, `module/${moduleId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/module/${moduleId}`;
+    return firstValueFrom(this.httpClient.get<ModuleAccess[]>(specificUrl));
   }
 
-  /**
-   * Récupère l'accès spécifique d'un utilisateur à un module.
-   * GET /api/module-access/user/{userId}/module/{moduleId}
-   * @param userId L'ID de l'utilisateur.
-   * @param moduleId L'ID du module.
-   */
+  /** GET /api/module-access/user/{userId}/module/{moduleId} */
   getModuleAccessByUserAndModule(userId: number, moduleId: number): Promise<ModuleAccess> {
-     // Utilisation de get avec un pathSuffix personnalisé
-    return this.get<ModuleAccess>(undefined, `user/${userId}/module/${moduleId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/user/${userId}/module/${moduleId}`;
+    return firstValueFrom(this.httpClient.get<ModuleAccess>(specificUrl));
   }
 
-  /**
-   * Crée un nouvel accès pour un utilisateur à un module.
-   * POST /api/module-access/module/{moduleId}/user/{userId}
-   * @param moduleId L'ID du module.
-   * @param userId L'ID de l'utilisateur.
-   */
+  /** POST /api/module-access/module/{moduleId}/user/{userId} */
   createModuleAccess(moduleId: number, userId: number): Promise<ModuleAccess> {
-     // Le corps est vide car les IDs sont dans l'URL
-    return this.post<ModuleAccess>({}, `module/${moduleId}/user/${userId}`);
+    // Chemin spécifique, corps vide {}
+    const specificUrl = `${this.baseApiUrl}/module/${moduleId}/user/${userId}`;
+    // <ModuleAccess, {}> car le corps envoyé est un objet vide
+    return firstValueFrom(this.httpClient.post<ModuleAccess>(specificUrl, {}));
   }
 
-  /**
-   * Supprime un accès module.
-   * DELETE /api/module-access/{id}
-   * @param id L'ID de l'accès à supprimer.
-   */
+  /** DELETE /api/module-access/{id} */
   deleteModuleAccess(id: number): Promise<ModuleAccess> {
-    // Le contrôleur Java renvoie le DTO avant NO_CONTENT
+    // Appel standard (le backend renvoie le DTO avant 204)
     return this.delete<ModuleAccess>(id);
   }
 
-  /**
-   * Active/désactive un droit d'accès spécifique.
-   * PATCH /api/module-access/{id}/rights/{accessRight}
-   * @param id L'ID de l'accès module.
-   * @param accessRight Le droit à activer/désactiver (VIEW, EDIT, PUBLISH, INVITE).
-   */
+  /** PATCH /api/module-access/{id}/rights/{accessRight} */
   toggleAccessRight(id: number, accessRight: AccessRight): Promise<ModuleAccess> {
-    // Le corps de la requête PATCH est vide car tout est dans l'URL
-    return this.patch<ModuleAccess>({}, id, `rights/${accessRight}`);
+    // Chemin spécifique, corps vide {}
+    const specificUrl = `${this.baseApiUrl}/${id}/rights/${accessRight}`;
+    // <ModuleAccess, {}> car le corps envoyé est un objet vide
+    return firstValueFrom(this.httpClient.patch<ModuleAccess>(specificUrl, {}));
   }
 }

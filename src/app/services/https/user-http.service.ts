@@ -1,10 +1,10 @@
 // src/app/services/https/user-http.service.ts
-import { Injectable, signal, WritableSignal, effect } from '@angular/core'; // Importer signal, WritableSignal, effect
+import { Injectable, signal, WritableSignal, effect } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
 import { User } from '../../classes/User';
 import { firstValueFrom } from 'rxjs';
 
-const USER_STORAGE_KEY = 'currentJdrUser'; // Clé pour le sessionStorage
+const USER_STORAGE_KEY = 'currentJdrUser';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class UserHttpService extends BaseHttpService {
   readonly currentJdrUser: WritableSignal<User | null> = signal(this.loadUserFromSession());
 
   constructor() {
-    super('api/user');
+    super('api/user'); // Chemin de base pour les utilisateurs
     effect(() => {
       const currentUser = this.currentJdrUser();
       if (currentUser) {
@@ -24,28 +24,60 @@ export class UserHttpService extends BaseHttpService {
     });
   }
 
-  updateCurrentUser(user: User | null): void {
+  // --- Méthodes CRUD Standard ---
+
+  /** POST /api/user */
+  createUser(user: Partial<User>): Promise<User> {
+    // T=User, B=Partial<User> (ou un DTO spécifique si défini)
+    return this.post<User, Partial<User>>(user);
+  }
+
+  /** GET /api/user */
+  getAllUsers(): Promise<User[]> {
+    return this.get<User[]>();
+  }
+
+  /** GET /api/user/{id} */
+  getUserById(id: number): Promise<User> {
+    return this.get<User>(id);
+  }
+
+  /** PUT /api/user/{id} */
+  updateUser(id: number, user: User): Promise<User> {
+    // T=User, B=User
+    return this.put<User, User>(user, id);
+  }
+
+  /** DELETE /api/user/{id} */
+  deleteUser(id: number): Promise<void> {
+    // Backend renvoie 204 No Content
+    return this.delete<void>(id);
+  }
+
+  // --- Méthodes Spécifiques ---
+
+  /** GET /api/user/email/{email} */
+  getUserByEmail(email: string): Promise<User> {
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/email/${email}`;
+    return firstValueFrom(this.httpClient.get<User>(specificUrl));
+  }
+
+
+  // --- Gestion Signal et SessionStorage ---
+
+  updateCurrentUserSignal(user: User | null): void {
     this.currentJdrUser.set(user);
   }
 
-  getUserByEmail(email: string): Promise<User> {
-    return firstValueFrom(
-      this.httpClient.get<User>(this.apiUrl + '/email/' + email)
-    );
-  }
-
   private loadUserFromSession(): User | null {
-    if (typeof sessionStorage === 'undefined') {
-      console.warn("SessionStorage n'est pas disponible.");
-      return null;
-    }
-
+    if (typeof sessionStorage === 'undefined') return null;
     const userJson = sessionStorage.getItem(USER_STORAGE_KEY);
     if (userJson) {
       try {
         return JSON.parse(userJson) as User;
       } catch (e) {
-        console.error("Erreur lors du parsing de l'utilisateur depuis la session", e);
+        console.error("Erreur parsing utilisateur session", e);
         sessionStorage.removeItem(USER_STORAGE_KEY);
         return null;
       }
@@ -58,7 +90,7 @@ export class UserHttpService extends BaseHttpService {
     try {
       sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } catch (e) {
-      console.error("Erreur lors de la sauvegarde de l'utilisateur en session", e);
+      console.error("Erreur sauvegarde utilisateur session", e);
     }
   }
 

@@ -14,10 +14,11 @@ export class GameSystemHttpService extends BaseHttpService {
   /**
    * Crée un nouveau système de jeu.
    * POST /api/game-system
-   * @param gameSystem Les données du système de jeu à créer.
+   * @param gameSystem Les données du système de jeu à créer (Type B).
    */
   createGameSystem(gameSystem: GameSystem): Promise<GameSystem> {
-    return this.post<GameSystem>(gameSystem);
+    // T = GameSystem (type de retour), B = GameSystem (type du body)
+    return this.post<GameSystem, GameSystem>(gameSystem);
   }
 
   /**
@@ -26,6 +27,7 @@ export class GameSystemHttpService extends BaseHttpService {
    * @param id L'ID du système de jeu.
    */
   getGameSystem(id: number): Promise<GameSystem> {
+    // Pas de body, donc pas besoin du type B
     return this.get<GameSystem>(id);
   }
 
@@ -34,6 +36,7 @@ export class GameSystemHttpService extends BaseHttpService {
    * GET /api/game-system
    */
   getAllGameSystems(): Promise<GameSystem[]> {
+     // Pas de body
     return this.get<GameSystem[]>();
   }
 
@@ -41,10 +44,11 @@ export class GameSystemHttpService extends BaseHttpService {
    * Met à jour un système de jeu existant.
    * PUT /api/game-system/{id}
    * @param id L'ID du système de jeu à mettre à jour.
-   * @param gameSystem Les nouvelles données du système de jeu.
+   * @param gameSystem Les nouvelles données du système de jeu (Type B).
    */
   updateGameSystem(id: number, gameSystem: GameSystem): Promise<GameSystem> {
-    return this.put<GameSystem>(gameSystem, id);
+    // T = GameSystem (type de retour), B = GameSystem (type du body)
+    return this.put<GameSystem, GameSystem>(gameSystem, id);
   }
 
   /**
@@ -53,7 +57,7 @@ export class GameSystemHttpService extends BaseHttpService {
    * @param id L'ID du système de jeu à supprimer.
    */
   deleteGameSystem(id: number): Promise<GameSystem> {
-    // Le contrôleur Java renvoie le DTO avant le statut NO_CONTENT
+    // Pas de body. Le contrôleur Java renvoie le DTO avant le statut NO_CONTENT.
     return this.delete<GameSystem>(id);
   }
 }

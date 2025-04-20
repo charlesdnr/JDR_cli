@@ -3,7 +3,7 @@ import { BaseHttpService } from './base-http.service';
 import { Block } from '../../classes/Block';
 import { firstValueFrom, map } from 'rxjs';
 import { createBlock } from '../../utils/createBlock';
-import { IBlockData } from '../../interfaces/IBlockData'; // Assurez-vous que l'import est correct
+import { IBlockData } from '../../interfaces/IBlockData';
 
 @Injectable({
   providedIn: 'root'
@@ -11,19 +11,17 @@ import { IBlockData } from '../../interfaces/IBlockData'; // Assurez-vous que l'
 export class BlockHttpService extends BaseHttpService {
 
   constructor() {
-    super('api/block');
+    super('api/block'); // Chemin de base de la ressource
   }
 
   /**
    * Récupère tous les blocs pour une version de module spécifique.
    * GET /api/block/module-version/{moduleVersionId}
-   * @param moduleVersionId L'ID de la version du module.
    */
   getBlocksByModuleVersionId(moduleVersionId: number): Promise<Block[]> {
-    // Note: L'utilisation de map et createBlock est conservée car elle apporte
-    // une transformation utile côté client (instanciation des classes).
+    const specificUrl = `${this.baseApiUrl}/module-version/${moduleVersionId}`;
     return firstValueFrom(
-      this.httpClient.get<IBlockData[]>(this.buildUrl(`module-version/${moduleVersionId}`))
+      this.httpClient.get<IBlockData[]>(specificUrl)
         .pipe(
           map(blocksData => blocksData.map(blockData => createBlock(blockData)))
         )
@@ -33,14 +31,13 @@ export class BlockHttpService extends BaseHttpService {
   /**
    * Crée un nouveau bloc.
    * POST /api/block
-   * @param block L'objet Block à créer.
    */
   createBlock(block: Block): Promise<Block> {
-    // Utilise IBlockData pour le retour car le backend renvoie potentiellement un DTO simple
+    // Utilise httpClient directement pour mapper la réponse IBlockData vers Block
     return firstValueFrom(
-      this.httpClient.post<IBlockData>(this.buildUrl(), block)
+      this.httpClient.post<IBlockData>(this.baseApiUrl, block)
         .pipe(
-          map(responseData => createBlock(responseData)) // Transforme la réponse en instance de Block
+          map(responseData => createBlock(responseData))
         )
     );
   }
@@ -48,14 +45,13 @@ export class BlockHttpService extends BaseHttpService {
   /**
    * Met à jour un bloc existant.
    * PUT /api/block/{id}
-   * @param blockId L'ID du bloc à mettre à jour.
-   * @param block Les données mises à jour du bloc.
    */
   updateBlock(blockId: number, block: Block): Promise<Block> {
+    // Utilise httpClient directement pour mapper la réponse IBlockData vers Block
     return firstValueFrom(
-      this.httpClient.put<IBlockData>(this.buildUrl('', blockId), block)
+      this.httpClient.put<IBlockData>(this.buildUrlWithId(blockId), block)
         .pipe(
-          map(responseData => createBlock(responseData)) // Transforme la réponse
+          map(responseData => createBlock(responseData))
         )
     );
   }
@@ -63,17 +59,15 @@ export class BlockHttpService extends BaseHttpService {
   /**
    * Supprime un bloc.
    * DELETE /api/block/{id}
-   * @param blockId L'ID du bloc à supprimer.
    */
   deleteBlock(blockId: number): Promise<Block> {
-    // Le contrôleur Java renvoie BlockDTO, donc on s'attend à IBlockData ici.
-    // Map pour transformer si nécessaire, même si la réponse HTTP est 204 No Content.
-    // Le contrôleur Java retourne le DTO supprimé avant de renvoyer NO_CONTENT,
-    // donc on peut potentiellement recevoir le DTO dans le corps malgré le statut.
+    // Utilise httpClient directement pour mapper la réponse IBlockData vers Block
+    // même si la réponse est souvent vide avec un statut 204, le contrôleur
+    // renvoie le DTO avant, donc on essaie de mapper au cas où.
     return firstValueFrom(
-      this.httpClient.delete<IBlockData>(this.buildUrl('', blockId))
+      this.httpClient.delete<IBlockData>(this.buildUrlWithId(blockId))
         .pipe(
-          map(responseData => createBlock(responseData)) // Transforme si des données sont retournées
+          map(responseData => responseData ? createBlock(responseData) : null as unknown as Block) // Gère la réponse potentiellement vide
         )
     );
   }

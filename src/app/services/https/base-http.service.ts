@@ -6,81 +6,75 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export abstract class BaseHttpService {
   protected httpClient = inject(HttpClient);
-  protected apiUrl = environment.apiUrl;
-  protected baseResourcePath: string; // Gardons une trace du chemin de base
+  protected baseApiUrl: string;
 
-  /**
-   * Le constructeur est protégé. Les classes filles doivent l'appeler via super().
-   * @param resourceBasePath Le chemin relatif vers la ressource API (ex: 'api/block').
-   */
   constructor(resourceBasePath: string) {
-    this.baseResourcePath = resourceBasePath; // Chemin sans le slash initial
-    this.apiUrl = `${environment.apiUrl}${this.baseResourcePath}`; // URL complète de base
+    // Assure que le chemin commence par / s'il n'est pas vide
+    const normalizedPath = resourceBasePath && !resourceBasePath.startsWith('/')
+      ? `/${resourceBasePath}`
+      : resourceBasePath;
+    // Supprime un éventuel / à la fin pour éviter les doubles //
+    const cleanPath = normalizedPath.endsWith('/') ? normalizedPath.slice(0, -1) : normalizedPath;
+    this.baseApiUrl = `${environment.apiUrl.replace(/\/$/, '')}${cleanPath}`; // Construit l'URL de base complète
   }
 
   /**
-   * Construit l'URL complète pour une requête.
-   * @param pathSuffix - Suffixe de chemin optionnel (ex: '/{id}' ou '/sub-resource'). Commence par '/' si nécessaire.
-   * @param id - ID optionnel à ajouter directement après le chemin de base.
+   * Construit l'URL pour une ressource spécifique par ID.
+   * @param id - ID (chaîne ou nombre) à ajouter après l'URL de base.
    */
-  protected buildUrl(pathSuffix: string = '', id?: any): string {
-    const idPath = id ? `/${id}` : '';
-    // Assure que pathSuffix commence par / s'il n'est pas vide et qu'il n'y a pas d'id
-    // Ou s'il y a un id, le suffixe doit commencer par /
-    const formattedSuffix = pathSuffix && (id || !pathSuffix.startsWith('/')) && !pathSuffix.startsWith('/') ? `/${pathSuffix}` : pathSuffix;
-
-    // Combine l'URL de base, l'ID (si présent) et le suffixe formaté
-    return `${this.apiUrl}${idPath}${formattedSuffix}`;
+  protected buildUrlWithId(id: string | number): string {
+    return `${this.baseApiUrl}/${id}`;
   }
 
-
   /**
-   * Effectue une requête GET.
-   * @param id ID optionnel pour récupérer une ressource spécifique.
-   * @param pathSuffix Suffixe de chemin optionnel pour des routes spécifiques (ex: '/search').
+   * Effectue une requête GET (soit sur la base, soit sur un ID).
+   * @template T Le type de la réponse attendue.
+   * @param id ID optionnel (chaîne ou nombre) pour récupérer une ressource spécifique.
    */
-  get<T>(id?: any, pathSuffix: string = ''): Promise<T> {
-    return firstValueFrom(this.httpClient.get<T>(this.buildUrl(pathSuffix, id)));
+  get<T>(id?: string | number): Promise<T> {
+    const url = id !== undefined ? this.buildUrlWithId(id) : this.baseApiUrl;
+    return firstValueFrom(this.httpClient.get<T>(url));
   }
 
   /**
-   * Effectue une requête POST.
+   * Effectue une requête POST sur l'URL de base.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé.
    * @param body Corps de la requête.
-   * @param pathSuffix Suffixe de chemin optionnel pour des routes POST spécifiques.
    */
-  post<T>(body: any, pathSuffix: string = ''): Promise<T> {
-    return firstValueFrom(this.httpClient.post<T>(this.buildUrl(pathSuffix), body));
+  post<T, B>(body: B): Promise<T> {
+    // POST se fait généralement sur l'URL de base de la collection
+    return firstValueFrom(this.httpClient.post<T>(this.baseApiUrl, body));
   }
 
   /**
-   * Effectue une requête PUT sur une ressource spécifique (base + ID).
+   * Effectue une requête PUT sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé.
    * @param body Corps de la requête.
-   * @param id ID de la ressource à mettre à jour.
-   * @param pathSuffix Suffixe de chemin optionnel.
+   * @param id ID (chaîne ou nombre) de la ressource à mettre à jour.
    */
-  put<T>(body: any, id: any, pathSuffix: string = ''): Promise<T> {
-    // PUT cible généralement une ressource spécifique par ID
-    return firstValueFrom(this.httpClient.put<T>(this.buildUrl(pathSuffix, id), body));
+  put<T, B>(body: B, id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.put<T>(this.buildUrlWithId(id), body));
   }
 
   /**
-   * Effectue une requête PATCH sur une ressource spécifique (base + ID).
+   * Effectue une requête PATCH sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé (peut être Partial<...>).
    * @param body Corps de la requête (partiel).
-   * @param id ID de la ressource à mettre à jour partiellement.
-   * @param pathSuffix Suffixe de chemin optionnel.
+   * @param id ID (chaîne ou nombre) de la ressource à mettre à jour partiellement.
    */
-  patch<T>(body: any, id: any, pathSuffix: string = ''): Promise<T> {
-     // PATCH cible généralement une ressource spécifique par ID
-    return firstValueFrom(this.httpClient.patch<T>(this.buildUrl(pathSuffix, id), body));
+  patch<T, B>(body: B, id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.patch<T>(this.buildUrlWithId(id), body));
   }
 
   /**
-   * Effectue une requête DELETE sur une ressource spécifique (base + ID).
-   * @param id ID de la ressource à supprimer.
-   * @param pathSuffix Suffixe de chemin optionnel.
+   * Effectue une requête DELETE sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue (souvent void ou l'objet supprimé).
+   * @param id ID (chaîne ou nombre) de la ressource à supprimer.
    */
-  delete<T>(id: any, pathSuffix: string = ''): Promise<T> {
-     // DELETE cible généralement une ressource spécifique par ID
-    return firstValueFrom(this.httpClient.delete<T>(this.buildUrl(pathSuffix, id)));
+  delete<T>(id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.delete<T>(this.buildUrlWithId(id)));
   }
 }

@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
-import { ModuleVersion } from '../../classes/ModuleVersion'; // Vérifiez l'import
+import { ModuleVersion } from '../../classes/ModuleVersion';
 import { firstValueFrom, map } from 'rxjs';
 import { createBlock } from '../../utils/createBlock';
-import { IBlockData } from '../../interfaces/IBlockData'; // Vérifiez l'import
-import { IModuleVersionResponse } from '../../interfaces/IModuleVersionResponse'; // Vérifiez l'import
+import { IBlockData } from '../../interfaces/IBlockData';
+import { IModuleVersionResponse } from '../../interfaces/IModuleVersionResponse';
 import { Block } from '../../classes/Block';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,82 +14,51 @@ import { Block } from '../../classes/Block';
 export class ModuleVersionHttpService extends BaseHttpService {
 
   constructor() {
-    // Correspond à @RequestMapping("/api/versions")
     super('api/versions');
   }
 
-  /**
-   * Récupère une version de module par son ID.
-   * GET /api/versions/{id}
-   * @param versionId L'ID de la version du module.
-   */
+  /** GET /api/versions/{id} */
   getModuleVersionById(versionId: number): Promise<ModuleVersion> {
     return this.get<ModuleVersion>(versionId);
   }
 
-  /**
-   * Récupère toutes les versions pour un module spécifique.
-   * GET /api/versions/module/{moduleId}
-   * @param moduleId L'ID du module parent.
-   */
+  /** GET /api/versions/module/{moduleId} */
   getModuleVersionsByModuleId(moduleId: number): Promise<ModuleVersion[]> {
-    return this.get<ModuleVersion[]>(undefined, `module/${moduleId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/module/${moduleId}`;
+    return firstValueFrom(this.httpClient.get<ModuleVersion[]>(specificUrl));
   }
 
-  /**
-   * Crée une nouvelle version pour un module.
-   * POST /api/versions/module/{moduleId}
-   * @param moduleId L'ID du module parent.
-   * @param moduleVersion Les données de la version à créer.
-   */
+  /** POST /api/versions/module/{moduleId} */
   createModuleVersion(moduleId: number, moduleVersion: ModuleVersion): Promise<ModuleVersion> {
-    return this.post<ModuleVersion>(moduleVersion, `module/${moduleId}`);
+    // Chemin spécifique
+    const specificUrl = `${this.baseApiUrl}/module/${moduleId}`;
+    // T=ModuleVersion, B=ModuleVersion
+    return firstValueFrom(this.httpClient.post<ModuleVersion>(specificUrl, moduleVersion));
   }
 
-  /**
-   * Met à jour une version de module existante.
-   * PUT /api/versions/{id}
-   * @param versionId L'ID de la version à mettre à jour.
-   * @param moduleVersion Les nouvelles données de la version.
-   */
+  /** PUT /api/versions/{id} */
   updateModuleVersion(versionId: number, moduleVersion: ModuleVersion): Promise<ModuleVersion> {
-    return this.put<ModuleVersion>(moduleVersion, versionId);
+    // Appel standard, T=ModuleVersion, B=ModuleVersion
+    return this.put<ModuleVersion, ModuleVersion>(moduleVersion, versionId);
   }
 
-  /**
-   * Supprime une version de module.
-   * DELETE /api/versions/{id}
-   * @param versionId L'ID de la version à supprimer.
-   */
+  /** DELETE /api/versions/{id} */
   deleteModuleVersion(versionId: number): Promise<void> {
-    // Le contrôleur Java renvoie ResponseEntity<Void> avec HttpStatus.NO_CONTENT
+    // Appel standard, le backend renvoie 204 No Content
     return this.delete<void>(versionId);
   }
 
-  /**
-   * Récupère une version de module avec ses blocs associés (Endpoint spécifique).
-   * GET /api/module-versions/{versionId}/with-blocks (supposé, non dans le contrôleur fourni)
-   * @param versionId L'ID de la version du module.
-   */
+  /** GET /api/module-versions/{versionId}/with-blocks (Chemin spécifique) */
   getModuleVersionWithBlocks(versionId: number): Promise<ModuleVersion & { blocks: Block[] }> {
-    // Ce chemin est spécifique et différent du chemin de base du service.
-    // On utilise donc directement httpClient.get avec l'URL complète.
-    const specificUrl = `${this.apiUrl.replace('/versions', '/module-versions')}/${versionId}/with-blocks`;
+    // Chemin spécifique, différent de baseApiUrl
+    const specificUrl = `${environment.apiUrl}api/module-versions/${versionId}/with-blocks`; // Utilise l'URL de base de l'environnement
     return firstValueFrom(this.httpClient.get<IModuleVersionResponse>(specificUrl)
       .pipe(
         map(data => ({
-          // Reconstruit un objet ModuleVersion avec les propriétés de base
-          // et ajoute la propriété 'blocks' transformée.
           ...new ModuleVersion(
-            data.moduleId,
-            data.version,
-            data.published,
-            data.createdBy,
-            data.createdAt,
-            data.updatedAt,
-            data.gameSystemId,
-            data.language,
-            data.id
+            data.moduleId, data.version, data.published, data.createdBy, data.createdAt,
+            data.updatedAt, data.gameSystemId, data.language, data.id
           ),
           blocks: data.blocks.map((blockData: IBlockData) => createBlock(blockData))
         }))
