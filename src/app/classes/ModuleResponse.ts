@@ -1,5 +1,6 @@
 import { ModuleVersion } from "./ModuleVersion";
 import { Tag } from "./Tag";
+import { User } from "./User";
 
 export class ModuleResponse {
   id?: number;
@@ -7,7 +8,7 @@ export class ModuleResponse {
   description: string;
   isTemplate: boolean;
   type: string;
-  createdBy?: string;
+  creator?: User;
   createdAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
   updatedAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
   versions?: ModuleVersion[];
@@ -18,7 +19,7 @@ export class ModuleResponse {
       description: string,
       isTemplate: boolean,
       type: string,
-      createdBy?: string,
+      creator?: User,
       createdAt?: string,
       updatedAt?: string,
       versions?: ModuleVersion[],
@@ -30,7 +31,7 @@ export class ModuleResponse {
       this.description = description;
       this.isTemplate = isTemplate;
       this.type = type;
-      this.createdBy = createdBy;
+      this.creator = creator;
       this.createdAt = createdAt;
       this.updatedAt = updatedAt;
       this.versions = versions;

@@ -1,7 +1,9 @@
+import { User } from "./User";
+
 export class ModuleAccess {
   id?: number;
   moduleId: number;
-  userId: number;
+  user: User;
   canView: boolean;
   canEdit: boolean;
   canPublish: boolean;
@@ -9,7 +11,7 @@ export class ModuleAccess {
 
   constructor(
       moduleId: number,
-      userId: number,
+      user: User,
       canView: boolean,
       canEdit: boolean,
       canPublish: boolean,
@@ -18,7 +20,7 @@ export class ModuleAccess {
   ) {
       this.id = id;
       this.moduleId = moduleId;
-      this.userId = userId;
+      this.user = user;
       this.canView = canView;
       this.canEdit = canEdit;
       this.canPublish = canPublish;

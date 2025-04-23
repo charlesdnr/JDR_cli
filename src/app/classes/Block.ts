@@ -1,24 +1,25 @@
+import { User } from "./User";
+
 export abstract class Block {
   id?: number;
   moduleVersionId: number;
   title: string;
   blockOrder: number;
-  createdBy: string;
+  creator: User;
   type: string;
 
   constructor(
       moduleVersionId: number,
       title: string,
       blockOrder: number,
-      createdBy: string,
+      creator: User,
       id?: number
   ) {
       this.id = id;
       this.moduleVersionId = moduleVersionId;
       this.title = title;
       this.blockOrder = blockOrder;
-      this.createdBy = createdBy;
-
+      this.creator = creator;
       this.type = "";
   }
 }

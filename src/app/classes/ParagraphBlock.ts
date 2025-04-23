@@ -1,4 +1,5 @@
 import { Block } from "./Block";
+import { User } from "./User";
 
 export class ParagraphBlock extends Block {
   paragraph?: string;
@@ -8,12 +9,12 @@ export class ParagraphBlock extends Block {
       moduleVersionId: number,
       title: string,
       blockOrder: number,
-      createdBy: string,
+      creator: User,
       paragraph?: string,
       style?: string,
       id?: number
   ) {
-      super(moduleVersionId, title, blockOrder, createdBy, id);
+      super(moduleVersionId, title, blockOrder, creator, id);
       this.paragraph = paragraph;
       this.style = style;
       this.type = 'paragraph';

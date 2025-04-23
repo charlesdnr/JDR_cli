@@ -1,0 +1,437 @@
+/* new-project.component.scss */
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100vh;
+  overflow: hidden; /* Empêcher le scroll global */
+}
+
+.container-edit {
+  display: flex;
+  height: calc(100vh - 120px); /* Hauteur fixe - toolbar et marges */
+  min-height: 600px; /* Hauteur minimale pour éviter les problèmes sur petits écrans */
+  width: 100%;
+  gap: 20px;
+  position: relative;
+}
+
+.toolbar {
+  margin-bottom: 25px;
+  flex-shrink: 0;
+}
+
+/* Icon sidebar styles matching reference design */
+.icone-grab {
+  display: flex;
+  flex-direction: column;
+  width: 70px;
+  background-color: #546e7a; /* Bleu-gris comme dans l'image */
+  border-radius: 0;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 25px;
+  padding: 25px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  height: 20rem;
+  border-radius: 5px;
+  flex-shrink: 0; /* Empêcher de rétrécir */
+}
+
+.icon-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 4px;
+  cursor: grab;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  i {
+    font-size: 1.7rem;
+    color: white;
+  }
+}
+
+/* Mettre en évidence l'icône qu'on est en train d'utiliser */
+.icon-item.active-drag {
+  background-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Icon preview when dragging - flottant qui suit le curseur */
+.icon-drag-preview {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+
+  i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    color: #546e7a;
+  }
+
+  span {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+/* Editor area styles */
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #546e7a;
+  border-radius: 5px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 90%;
+  overflow-y: auto !important;
+  border: 1px solid var(--p-toolbar-border-color);
+}
+
+.columns-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 15px;
+}
+
+.editor-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  padding: 15px;
+  height: 100%;
+  overflow-y: auto;
+  min-height: 200px;
+  transition: background-color 0.3s;
+
+  /* Blue highlight when dragging over */
+  &.cdk-drop-list-dragging {
+    background-color: rgba(var(--primary-rgb, 59, 130, 246), 0.08);
+    border: 2px dashed rgba(var(--primary-rgb, 59, 130, 246), 0.3);
+  }
+}
+
+.drop-here-text {
+  font-weight: 500;
+  color: #888;
+  text-align: center;
+  padding: 15px;
+}
+
+/* Block styles */
+.block-container {
+  background-color: hsl(210deg 72.01% 15.65% / 78%);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  width: 100%;
+  min-height: 180px !important; /* Hauteur minimale fixe pour tous les blocs */
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &.cdk-drag-preview {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+  }
+
+  &.cdk-drag-placeholder {
+    opacity: 0;
+  }
+
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--primary-color);
+  height: 50px; /* Hauteur fixe pour le header */
+  flex-shrink: 0;
+
+  .texte {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+.block-controls-left {
+  cursor: grab;
+  padding: 0 5px;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  i {
+    font-size: 0.9rem;
+  }
+}
+
+.block-controls {
+  cursor: pointer;
+
+  i {
+    color: #888;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #444;
+    }
+  }
+}
+
+/* Block preview when dragging */
+.block-preview {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .block-preview-content {
+    padding: 10px 15px;
+    font-weight: 500;
+    color: var(--primary-color);
+  }
+}
+
+/* Blue placeholder while dragging - THIS IS KEY */
+.block-placeholder {
+  background-color: rgba(59, 130, 246, 0.15);
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  min-height: 180px !important; /* Même hauteur que les blocs */
+  margin: 15px 0;
+  animation: pulse-blue 1.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .placeholder-content {
+    color: rgba(59, 130, 246, 0.6);
+    font-weight: 500;
+  }
+}
+
+@keyframes pulse-blue {
+  0% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* Block content styles with FIXED HEIGHT */
+.text-block,
+.chart-block,
+.form-block,
+.title-block {
+  padding: 15px;
+  min-height: 120px !important;
+  height: calc(100% - 50px); /* Hauteur totale moins la hauteur du header */
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: #555;
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #777;
+  }
+
+  span {
+    font-weight: 500;
+  }
+}
+
+.form-field {
+  background-color: #1f1f1f;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 10px;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.lorem-block {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #444;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.title-box {
+  width: 64px;
+  height: 64px;
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.title-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.titre {
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
+}
+
+.sous-titre {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.form-field-container {
+  margin-bottom: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-field {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-add-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #555;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #333;
+  }
+}
+
+/* PrimeNG component style overrides */
+::ng-deep .p-inputtext {
+  width: 100%;
+  padding-block: 5px;
+}
+
+::ng-deep .p-button {
+  padding-block: 5px;
+}
+
+/* Animation for the drop list */
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.blocks-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 15px;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.text-block {
+  textarea {
+    width: 100%;
+    min-height: 120px !important;
+    height: 100%;
+    resize: vertical;
+  }
+}
+
+/* Style pour mettre en évidence la zone de drop */
+.highlight-drop-zone {
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 1px dashed rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+}
+
+/* Corrections pour PrimeNG */
+::ng-deep .p-fileupload {
+  min-height: 120px;
+  height: 100%;
+}
+
+/* Assurer que le placeholder est visible */
+.cdk-drag-placeholder {
+  opacity: 1 !important;
+}

@@ -1,1 +1,151 @@
-<p>new-project works!</p>
+<!-- new-project.component.html -->
+<div class="toolbar">
+  <p-toolbar>
+    <ng-template pTemplate="start">
+      <p-button icon="pi pi-plus" class="mr-2" text severity="secondary" />
+      <p-button icon="pi pi-print" class="mr-2" text severity="secondary" />
+      <p-button icon="pi pi-upload" text severity="secondary" />
+    </ng-template>
+    <ng-template pTemplate="center">
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
+        <input type="text" pInputText placeholder="Search" />
+      </p-iconfield>
+    </ng-template>
+    <ng-template pTemplate="end">
+      <p-splitbutton label="Save" [model]="items" />
+    </ng-template>
+  </p-toolbar>
+</div>
+
+<div class="container-edit">
+  <!-- Editor area with blocks layout -->
+  <div class="editor">
+    <!-- Main blocks container -->
+    <div
+      class="blocks-container"
+      cdkDropList
+      id="blocksList"
+      [cdkDropListData]="blocks"
+      (cdkDropListDropped)="onDrop($event)"
+      cdkDropListOrientation="vertical"
+      [class.highlight-drop-zone]="isDraggingIcon"
+    >
+      <!-- Les blocs existants -->
+      @for(block of blocks; track block.id; let i = $index) {
+      <div class="block-container" cdkDrag [cdkDragData]="block">
+        <!-- Block header with controls -->
+        <div class="block-header">
+          <div class="block-controls-left">
+            <i class="pi pi-bars" cdkDragHandle aria-hidden="true"></i>
+          </div>
+          <div class="texte">
+            <i [class]="geticonByType(block.type)" aria-hidden="true"></i>
+            <span>{{ block.type }}</span>
+          </div>
+          <div class="block-controls">
+            <p-button
+              icon="pi pi-trash"
+              tabindex="0"
+              (click)="removeBlock(block.id)"
+              severity="danger"
+            >
+            </p-button>
+          </div>
+        </div>
+
+        <!-- Block content based on type -->
+        @switch (block.type) { @case ('Texte') {
+        <div class="text-block">
+          <textarea pTextarea placeholder="Mon Histoire commence maintenant..." ></textarea>
+        </div>
+        } @case ('Statistique') {
+        <div class="chart-block">
+          <div class="chart-placeholder">
+            <i class="pi pi-chart-bar" aria-hidden="true"></i>
+            <span>Graphique</span>
+          </div>
+        </div>
+        } @case ('Audio') {
+        <div class="form-block"></div>
+        } @case ('Image') {
+        <div class="title-block">
+          <p-fileupload
+            name="demo[]"
+            url="https://www.primefaces.org/cdn/api/upload.php"
+            (onUpload)="onUpload($event)"
+            [multiple]="true"
+            accept="image/*"
+            maxFileSize="1000000"
+            mode="advanced"
+          >
+            <ng-template #empty>
+              <div>Glisse et dépose tes fichiers ici pour l'uploader.</div>
+            </ng-template>
+            <ng-template #content>
+              @if(uploadedFiles.length){
+              <ul>
+                @for(file of uploadedFiles; track file){
+                <li>{{ file.name }} - {{ file.size }} bytes</li>
+                }
+              </ul>
+              }
+            </ng-template>
+          </p-fileupload>
+        </div>
+        } }
+
+        <!-- Custom preview when dragging -->
+        <div *cdkDragPreview class="block-preview">
+          <div class="block-preview-content">
+            {{ getBlockPreview(block.type) }}
+          </div>
+        </div>
+
+        <!-- Blue placeholder when dragging -->
+        <div *cdkDragPlaceholder class="block-placeholder"></div>
+      </div>
+      }
+
+      <!-- Placeholder pour l'ajout d'un nouveau block (identique au placeholder de réordonnancement) -->
+      @if(isDraggingIcon && isOverDropZone){
+      <div class="block-placeholder">
+        <div class="placeholder-content">
+          {{ getBlockPreview(draggedIconType || "") }}
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Icons panel avec système de drag personnalisé -->
+  <div class="icone-grab">
+    @for(block of availableBlocks; track block.type) {
+    <div
+      class="icon-item"
+      (mousedown)="startIconDrag($event, block.type)"
+      tabindex="0"
+      role="button"
+      (keydown.enter)="startIconDrag($event, block.type)"
+    >
+      <i
+        [class]="block.icon"
+        [attr.data-type]="block.type"
+        aria-hidden="true"
+      ></i>
+    </div>
+    }
+  </div>
+
+  <!-- Élément de preview qui suit le curseur -->
+  @if(isDraggingIcon){
+  <div
+    class="icon-drag-preview"
+    [style.left.px]="dragPosition.x"
+    [style.top.px]="dragPosition.y"
+  >
+    <i [class]="getDraggedIconClass()" aria-hidden="true"></i>
+    <span>{{ getBlockPreview(draggedIconType || "") }}</span>
+  </div>
+  }
+</div>

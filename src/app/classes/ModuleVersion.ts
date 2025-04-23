@@ -1,8 +1,10 @@
+import { User } from "./User";
+
 export class ModuleVersion {
   id?: number;
   moduleId: number;
   version: number;
-  createdBy?: string;
+  creator?: User;
   createdAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
   updatedAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
   published: boolean;
@@ -13,7 +15,7 @@ export class ModuleVersion {
       moduleId: number,
       version: number,
       published: boolean,
-      createdBy?: string,
+      creator?: User,
       createdAt?: string,
       updatedAt?: string,
       gameSystemId?: number,
@@ -23,7 +25,7 @@ export class ModuleVersion {
       this.id = id;
       this.moduleId = moduleId;
       this.version = version;
-      this.createdBy = createdBy;
+      this.creator = creator;
       this.createdAt = createdAt;
       this.updatedAt = updatedAt;
       this.published = published;
