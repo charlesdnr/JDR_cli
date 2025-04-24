@@ -1,3 +1,4 @@
+import { User } from "../classes/User";
 import { IBlockData } from "./IBlockData";
 
 export interface IModuleVersionResponse {
@@ -5,10 +6,10 @@ export interface IModuleVersionResponse {
   moduleId: number;
   version: number;
   published: boolean;
-  createdBy?: string;
+  creator: User;
   createdAt?: string;
   updatedAt?: string;
-  gameSystemId?: number;
+  gameSystemId: number;
   language?: string;
   blocks: IBlockData[]; // tableau d'objets représentant les blocs
 }

@@ -83,11 +83,11 @@ export class AccountComponent {
           summary: 'Success',
           detail: 'Supprimer avec succés',
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: `Error : ${error.message}`,
+          detail: `Error : ${error}`,
         })
       }
 

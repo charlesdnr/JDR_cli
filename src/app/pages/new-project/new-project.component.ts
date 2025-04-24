@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone, computed, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Toolbar } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
@@ -13,17 +13,20 @@ import {
   CdkDragDrop,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-
-interface BlockElement {
-  type: string;
-  content: Record<string, unknown>;
-  id: string;
-}
-
-interface BlockType {
-  type: string;
-  icon: string;
-}
+import { Block } from '../../classes/Block';
+import { ParagraphBlock } from '../../classes/ParagraphBlock';
+import { ModuleVersion } from '../../classes/ModuleVersion';
+import { ModuleResponse } from '../../classes/ModuleResponse';
+import { UserHttpService } from '../../services/https/user-http.service';
+import { MusicBlock } from '../../classes/MusicBlock';
+import { StatBlock } from '../../classes/StatBlock';
+import { IntegratedModuleBlock } from '../../classes/IntegratedModuleBlock';
+import { EBlockType } from '../../enum/BlockType';
+import { BlockHttpService } from '../../services/https/block-http.service';
+import { ModuleHttpService } from '../../services/https/module-http.service';
+import { ModuleRequest } from '../../classes/ModuleRequest';
+import { EModuleType } from '../../enum/ModuleType';
+import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
 
 interface Position {
   x: number;
@@ -37,19 +40,29 @@ interface Position {
   styleUrl: './new-project.component.scss'
 })
 export class NewProjectComponent implements OnInit, OnDestroy {
+  private userService = inject(UserHttpService);
+  private blockHttpService = inject(BlockHttpService);
+  private moduleHttpService = inject(ModuleHttpService);
+  private moduleVersionHttpService = inject(ModuleVersionHttpService);
+
+  enumBlockType = EBlockType
+
   items: MenuItem[] | undefined;
-  uploadedFiles: any[] = [];
-  blocks: BlockElement[] = [];
-  availableBlocks: BlockType[] = [
-    { type: 'Texte', icon: 'pi pi-comment' },
-    { type: 'Audio', icon: 'pi pi-microphone' },
-    { type: 'Image', icon: 'pi pi-image' },
-    { type: 'Statistique', icon: 'pi pi-chart-bar' }
-  ];
+  uploadedFiles: File[] = [];
+  blocks: Block[] = [];
+  availableBlocks: Block[] = [];
+  currentModule: ModuleResponse = new ModuleResponse();
+  currentModuleVersion: ModuleVersion = new ModuleVersion();
+  currentUser = computed(() => this.userService.currentJdrUser())
+
+  // { type: 'Texte', icon: 'pi pi-comment' },
+  //   { type: 'Audio', icon: 'pi pi-microphone' },
+  //   { type: 'Image', icon: 'pi pi-image' },
+  //   { type: 'Statistique', icon: 'pi pi-chart-bar' }
 
   // Propriétés pour le système de drag personnalisé
   isDraggingIcon = false;
-  draggedIconType: string | null = null;
+  draggedIconType: EBlockType | null = null;
   activeIconElement: HTMLElement | null = null;
   dragPosition: Position = { x: 0, y: 0 };
   isOverDropZone = false;
@@ -63,7 +76,29 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   constructor(private ngZone: NgZone) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    const user = this.currentUser();
+    if(user){
+      this.currentModule = await this.moduleHttpService.createModule(
+        new ModuleRequest('New Module Version','Description', false, EModuleType.Scenario, user)
+      );
+      if(this.currentModule && this.currentModule.id){
+        this.currentModuleVersion = await this.moduleVersionHttpService.createModuleVersion(
+          this.currentModule.id,
+          new ModuleVersion(this.currentModule.id,1,user, 1));
+        // todo get le block si on est en train de modifier un déjà existant
+        if (this.currentModuleVersion.id) {
+          this.availableBlocks.push(
+            new ParagraphBlock(this.currentModuleVersion.id, '', 1, user),
+            new MusicBlock(this.currentModuleVersion.id, '', 1, user),
+            new StatBlock(this.currentModuleVersion.id, '', 1, user),
+            new IntegratedModuleBlock(this.currentModuleVersion.id, '', 1, user))
+          // todo push l'imageblock une fois dispo
+        }
+      }
+    }
+
+
     this.items = [
       {
         label: 'Update',
@@ -76,7 +111,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     ];
 
     // Add a default text block when component initializes
-    this.addBlock('Texte');
+    this.addBlock(EBlockType.paragraph);
 
     // Trouver l'élément de drop zone
     setTimeout(() => {
@@ -90,7 +125,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   // Démarrer le drag d'une icône
-  startIconDrag(event: Event, iconType: string) {
+  startIconDrag(event: Event, iconType: EBlockType) {
     event.preventDefault();
 
     // Si c'est un événement clavier, simuler la position de la souris
@@ -144,7 +179,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         const insertPosition = this.calculateInsertPosition(event);
 
         // Utiliser le type draggedIconType actuel, ou 'Texte' par défaut
-        this.addBlockAtPosition(this.draggedIconType || 'Texte', insertPosition);
+        this.addBlock(this.draggedIconType || EBlockType.paragraph, insertPosition);
       }
 
       this.endIconDrag();
@@ -202,48 +237,46 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     return this.blocks.length;
   }
 
-  // Ajouter un bloc à une position spécifique
-  addBlockAtPosition(type: string, position: number) {
-    const newBlock: BlockElement = {
-      type,
-      content: {},
-      id: `block-${this.blockIdCounter++}`
-    };
-
-    this.blocks.splice(position, 0, newBlock);
-  }
-
-  // Obtenir la classe d'icône pour le preview de drag
-  getDraggedIconClass(): string {
-    if (!this.draggedIconType) return '';
-
-    const block = this.availableBlocks.find(b => b.type === this.draggedIconType);
-    return block ? block.icon : '';
-  }
-
-  geticonByType(type: string) {
+  geticonByType(type: EBlockType) {
     switch (type) {
-      case 'Texte': return 'pi pi-comment';
-      case 'Audio': return 'pi pi-microphone';
-      case 'Image': return 'pi pi-image';
-      case 'Statistique': return 'pi pi-chart-bar';
-      default: return 'Block';
+      case EBlockType.paragraph: return 'pi pi-comment';
+      case EBlockType.music: return 'pi pi-microphone';
+      case EBlockType.module: return 'pi pi-folder';
+      case EBlockType.stat: return 'pi pi-chart-bar';
+      default: return undefined;
     }
   }
 
   // Add a new block at the end of the list
-  addBlock(type: string) {
-    const newBlock: BlockElement = {
-      type,
-      content: {},
-      id: `block-${this.blockIdCounter++}`
-    };
-
-    this.blocks.push(newBlock);
+  addBlock(type: EBlockType, position?: number) {
+    let newBlock: Block | null = null;
+    if(this.currentUser() && this.currentModuleVersion.id){
+      switch(type){
+        case EBlockType.paragraph:
+          newBlock = new ParagraphBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          break;
+        case EBlockType.module:
+          newBlock = new IntegratedModuleBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          break;
+        case EBlockType.music:
+          newBlock = new MusicBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          break;
+        case EBlockType.stat:
+          newBlock = new StatBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          break;
+        default: return
+      }
+    }
+    if(newBlock){
+      if(position) newBlock.blockOrder = position
+      this.blockHttpService.post(newBlock).then((block: unknown) => {
+        this.blocks.push(block as Block);
+      })
+    }
   }
 
   // Remove a block by ID
-  removeBlock(blockId: string) {
+  removeBlock(blockId: number) {
     const index = this.blocks.findIndex(block => block.id === blockId);
     if (index !== -1) {
       this.blocks.splice(index, 1);
@@ -251,18 +284,18 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   // Handle drops (for reordering blocks)
-  onDrop(event: CdkDragDrop<any>) {
+  onDrop(event: CdkDragDrop<Block[]>) {
     moveItemInArray(this.blocks, event.previousIndex, event.currentIndex);
   }
 
   // Get block preview based on type
-  getBlockPreview(type: string): string {
+  getBlockPreview(type: EBlockType): string | undefined {
     switch (type) {
-      case 'Texte': return 'Text Block';
-      case 'Audio': return 'Audio Block';
-      case 'Image': return 'Image Block';
-      case 'Statistique': return 'Statistique Block';
-      default: return 'Block';
+      case EBlockType.paragraph: return 'Block Paragraphe';
+      case EBlockType.music: return 'Block Audio';
+      case EBlockType.module: return 'Block Module';
+      case EBlockType.stat: return 'Block de Statistique';
+      default: return undefined;
     }
   }
 
@@ -270,5 +303,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     for (const file of event.files) {
       this.uploadedFiles.push(file);
     }
+  }
+
+  save() {
+    console.log(this.blocks)
   }
 }

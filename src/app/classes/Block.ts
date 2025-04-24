@@ -1,3 +1,4 @@
+import { EBlockType } from "../enum/BlockType";
 import { User } from "./User";
 
 export abstract class Block {
@@ -6,7 +7,7 @@ export abstract class Block {
   title: string;
   blockOrder: number;
   creator: User;
-  type: string;
+  type: EBlockType;
 
   constructor(
       moduleVersionId: number,
@@ -20,6 +21,6 @@ export abstract class Block {
       this.title = title;
       this.blockOrder = blockOrder;
       this.creator = creator;
-      this.type = "";
+      this.type = EBlockType.paragraph;
   }
 }

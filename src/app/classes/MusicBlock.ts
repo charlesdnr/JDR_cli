@@ -2,19 +2,22 @@ import { EBlockType } from "../enum/BlockType";
 import { Block } from "./Block";
 import { User } from "./User";
 
-export class IntegratedModuleBlock extends Block {
-  moduleId?: number;
+export class MusicBlock extends Block {
+  label?: string;
+  src?: string;
 
   constructor(
     moduleVersionId: number,
     title: string,
     blockOrder: number,
     creator: User,
-    moduleId?: number,
+    label?: string,
+    src?: string,
     id?: number
   ) {
     super(moduleVersionId, title, blockOrder, creator, id);
-    this.moduleId = moduleId;
-    this.type = EBlockType.module;
+    this.label = label;
+    this.src = src;
+    this.type = EBlockType.music;
   }
 }

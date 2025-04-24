@@ -3,10 +3,10 @@ import { BaseHttpService } from './base-http.service';
 import { ModuleVersion } from '../../classes/ModuleVersion';
 import { firstValueFrom, map } from 'rxjs';
 import { createBlock } from '../../utils/createBlock';
-import { IBlockData } from '../../interfaces/IBlockData';
 import { IModuleVersionResponse } from '../../interfaces/IModuleVersionResponse';
 import { Block } from '../../classes/Block';
 import { environment } from '../../../environments/environment';
+import { IBlockData } from '../../interfaces/IBlockData';
 
 @Injectable({
   providedIn: 'root'
@@ -57,8 +57,8 @@ export class ModuleVersionHttpService extends BaseHttpService {
       .pipe(
         map(data => ({
           ...new ModuleVersion(
-            data.moduleId, data.version, data.published, data.createdBy, data.createdAt,
-            data.updatedAt, data.gameSystemId, data.language, data.id
+            data.moduleId, data.version, data.creator, data.gameSystemId, data.published, data.createdAt,
+            data.updatedAt, data.language, data.id
           ),
           blocks: data.blocks.map((blockData: IBlockData) => createBlock(blockData))
         }))

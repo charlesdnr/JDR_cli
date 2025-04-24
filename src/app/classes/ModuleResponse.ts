@@ -14,27 +14,40 @@ export class ModuleResponse {
   versions?: ModuleVersion[];
   tags?: Tag[];
 
+  constructor();
   constructor(
-      title: string,
-      description: string,
-      isTemplate: boolean,
-      type: string,
-      creator?: User,
-      createdAt?: string,
-      updatedAt?: string,
-      versions?: ModuleVersion[],
-      tags?: Tag[],
-      id?: number
+    title: string,
+    description: string,
+    isTemplate: boolean,
+    type: string,
+    creator?: User,
+    createdAt?: string,
+    updatedAt?: string,
+    versions?: ModuleVersion[],
+    tags?: Tag[],
+    id?: number
+  );
+  constructor(
+    title?: string,
+    description?: string,
+    isTemplate?: boolean,
+    type?: string,
+    creator?: User,
+    createdAt?: string,
+    updatedAt?: string,
+    versions?: ModuleVersion[],
+    tags?: Tag[],
+    id?: number
   ) {
-      this.id = id;
-      this.title = title;
-      this.description = description;
-      this.isTemplate = isTemplate;
-      this.type = type;
-      this.creator = creator;
-      this.createdAt = createdAt;
-      this.updatedAt = updatedAt;
-      this.versions = versions;
-      this.tags = tags;
+    this.id = id;
+    this.title = title || '';
+    this.description = description || '';
+    this.isTemplate = isTemplate || false;
+    this.type = type || '';
+    this.creator = creator;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.versions = versions;
+    this.tags = tags;
   }
 }

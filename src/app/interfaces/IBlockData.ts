@@ -1,12 +1,25 @@
+import { User } from "../classes/User";
+
 export interface IBlockData {
-  type: string;
+  id?: number;
   moduleVersionId: number;
   title: string;
   blockOrder: number;
-  createdBy: string;
-  id?: number;
-  // Propriétés optionnelles pour les sous-types
+  creator: User;
+  type: string;
+
+  // Propriétés spécifiques à ParagraphBlock
   paragraph?: string;
   style?: string;
+
+  // Propriétés spécifiques à IntegratedModuleBlock
   moduleId?: number;
+
+  // Propriétés spécifiques à StatBlock
+  statRules?: string;
+  statValues?: string;
+
+  // Propriétés spécifiques à MusicBlock
+  label?: string;
+  src?: string;
 }

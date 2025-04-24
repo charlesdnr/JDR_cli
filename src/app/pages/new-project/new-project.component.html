@@ -13,7 +13,7 @@
       </p-iconfield>
     </ng-template>
     <ng-template pTemplate="end">
-      <p-splitbutton label="Save" [model]="items" />
+      <p-splitbutton label="Save" (onClick)="save()" [model]="items" />
     </ng-template>
   </p-toolbar>
 </div>
@@ -41,34 +41,40 @@
           </div>
           <div class="texte">
             <i [class]="geticonByType(block.type)" aria-hidden="true"></i>
-            <span>{{ block.type }}</span>
+            <span>{{ getBlockPreview(block.type) }}</span>
           </div>
           <div class="block-controls">
-            <p-button
-              icon="pi pi-trash"
-              tabindex="0"
-              (click)="removeBlock(block.id)"
-              severity="danger"
-            >
-            </p-button>
+            @if(block.id){
+              <p-button
+                icon="pi pi-trash"
+                tabindex="0"
+                (click)="removeBlock(block.id)"
+                severity="danger"
+              >
+              </p-button>
+            }
           </div>
         </div>
 
         <!-- Block content based on type -->
-        @switch (block.type) { @case ('Texte') {
+        @switch (block.type) { @case (enumBlockType.paragraph) {
         <div class="text-block">
           <textarea pTextarea placeholder="Mon Histoire commence maintenant..." ></textarea>
         </div>
-        } @case ('Statistique') {
-        <div class="chart-block">
-          <div class="chart-placeholder">
-            <i class="pi pi-chart-bar" aria-hidden="true"></i>
-            <span>Graphique</span>
+        } @case (enumBlockType.stat) {
+        <div class="stat-block">
+          <div class="stat-placeholder">
+            <i class="pi pi-folder" aria-hidden="true"></i>
+            <span>Statistique</span>
           </div>
         </div>
-        } @case ('Audio') {
-        <div class="form-block"></div>
-        } @case ('Image') {
+        } @case (enumBlockType.music) {
+        <div class="music-block"></div>
+        }
+        @case (enumBlockType.module) {
+          <div class="module-block"></div>
+          }
+        <!-- @case ('Image') {
         <div class="title-block">
           <p-fileupload
             name="demo[]"
@@ -93,7 +99,8 @@
             </ng-template>
           </p-fileupload>
         </div>
-        } }
+        }  -->
+      }
 
         <!-- Custom preview when dragging -->
         <div *cdkDragPreview class="block-preview">
@@ -111,7 +118,7 @@
       @if(isDraggingIcon && isOverDropZone){
       <div class="block-placeholder">
         <div class="placeholder-content">
-          {{ getBlockPreview(draggedIconType || "") }}
+          {{ getBlockPreview(draggedIconType || enumBlockType.paragraph) }}
         </div>
       </div>
       }
@@ -129,7 +136,7 @@
       (keydown.enter)="startIconDrag($event, block.type)"
     >
       <i
-        [class]="block.icon"
+        [class]="geticonByType(block.type)"
         [attr.data-type]="block.type"
         aria-hidden="true"
       ></i>
@@ -144,8 +151,8 @@
     [style.left.px]="dragPosition.x"
     [style.top.px]="dragPosition.y"
   >
-    <i [class]="getDraggedIconClass()" aria-hidden="true"></i>
-    <span>{{ getBlockPreview(draggedIconType || "") }}</span>
+    <i [class]="'pi ' + geticonByType(draggedIconType || enumBlockType.paragraph)" aria-hidden="true"></i>
+    <span>{{ getBlockPreview(draggedIconType || enumBlockType.paragraph) }}</span>
   </div>
   }
 </div>

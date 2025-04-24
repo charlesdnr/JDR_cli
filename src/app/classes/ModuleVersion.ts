@@ -11,25 +11,44 @@ export class ModuleVersion {
   gameSystemId?: number;
   language?: string;
 
+  constructor();
   constructor(
-      moduleId: number,
-      version: number,
-      published: boolean,
-      creator?: User,
-      createdAt?: string,
-      updatedAt?: string,
-      gameSystemId?: number,
-      language?: string,
-      id?: number
+    moduleId: number,
+    version: number,
+    creator: User,
+    gameSystemId: number,
+    published?: boolean,
+    createdAt?: string,
+    updatedAt?: string,
+    language?: string,
+    id?: number,
+  );
+  constructor(
+    moduleIdOrVoid?: number,
+    version?: number,
+    creator?: User,
+    gameSystemId?: number,
+    published?: boolean,
+    createdAt?: string,
+    updatedAt?: string,
+    language?: string,
+    id?: number,
   ) {
-      this.id = id;
-      this.moduleId = moduleId;
-      this.version = version;
+    if (moduleIdOrVoid !== undefined) {
+      this.moduleId = moduleIdOrVoid;
+      this.version = version!;
       this.creator = creator;
+      this.gameSystemId = gameSystemId;
+      this.published = published || false;
       this.createdAt = createdAt;
       this.updatedAt = updatedAt;
-      this.published = published;
-      this.gameSystemId = gameSystemId;
       this.language = language;
+      this.id = id;
+    } else {
+      // Default constructor initialization
+      this.moduleId = 0;
+      this.version = 0;
+      this.published = false;
+    }
   }
 }

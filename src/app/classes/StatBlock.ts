@@ -2,19 +2,22 @@ import { EBlockType } from "../enum/BlockType";
 import { Block } from "./Block";
 import { User } from "./User";
 
-export class IntegratedModuleBlock extends Block {
-  moduleId?: number;
+export class StatBlock extends Block {
+  statRules?: string;
+  statValues?: string;
 
   constructor(
     moduleVersionId: number,
     title: string,
     blockOrder: number,
     creator: User,
-    moduleId?: number,
+    statRules?: string,
+    statValues?: string,
     id?: number
   ) {
     super(moduleVersionId, title, blockOrder, creator, id);
-    this.moduleId = moduleId;
-    this.type = EBlockType.module;
+    this.statRules = statRules;
+    this.statValues = statValues;
+    this.type = EBlockType.stat;
   }
 }
