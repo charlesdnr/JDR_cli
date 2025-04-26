@@ -25,6 +25,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ModuleViewerComponent } from '../../components/module-viewer/module-viewer.component';
 import { TreeModule, TreeNodeContextMenuSelectEvent, TreeNodeSelectEvent } from 'primeng/tree';
 import { ContextMenuModule } from 'primeng/contextmenu';
+import { RouterLink } from '@angular/router';
 
 interface DisplayableSavedModule extends UserSavedModule {
   moduleDetails?: ModuleResponse;
@@ -49,7 +50,8 @@ interface DisplayableSavedModule extends UserSavedModule {
     InputIconModule,
     ModuleViewerComponent,
     TreeModule,
-    ContextMenuModule
+    ContextMenuModule,
+    RouterLink
   ],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],

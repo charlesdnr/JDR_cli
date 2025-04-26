@@ -33,6 +33,22 @@
   // textearea
   --p-textarea-background: var(--background-color);
   --p-textarea-focus-border-color: var(--primary-color);
+
+  //tabs panel
+  --p-tabs-tab-active-border-color: var(--text-color);
+  --p-tabs-tab-active-color: var(--background-color);
+  --p-tabs-tablist-border-color:var(--text-color);
+  --p-tabs-tab-border-color:var(--text-color);
+  --p-tabs-tab-color:var(--text-color);
+  --p-tabs-active-bar-background: var(--background-color);
+  --p-tabs-tab-hover-border-color: var(--text-color);
+  --p-tabs-tab-hover-color: var(--text-color);
+
+  //select
+  --p-select-background: var(--background-color);
+  --p-select-focus-border-color: var(--primary-color);
+  --p-select-option-selected-focus-background: var(--primary-color);
+  --p-select-option-selected-focus-color: black;
 }
 h1 {
   margin-block-start: 0;
@@ -75,4 +91,13 @@ p {
 /* Effet hover optionnel */
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--primary-color) !important;
+}
+.p-inputtext{
+  width: 100%;
+  padding-block: 5px;
+}
+
+.p-button{
+  width: 100%;
+  padding-block: 5px;
 }

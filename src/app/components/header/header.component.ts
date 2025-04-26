@@ -42,7 +42,7 @@ export class HeaderComponent {
   isMobileMenuOpen = signal(false);
 
   mapButton: buttonHeader[] = [
-    { name: 'Nouveau Projet', icon: 'assignment_add', link: '/new-project' },
+    // { name: 'Nouveau Projet', icon: 'assignment_add', link: '/new-project' },
     { name: 'Projets', icon: 'assignment', link: '/projects' },
     { name: 'Compte', icon: 'account_circle', link: '/account' },
   ];

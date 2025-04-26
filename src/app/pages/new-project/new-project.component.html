@@ -1,25 +1,95 @@
 <!-- new-project.component.html -->
 <div class="toolbar">
-  <p-toolbar>
-    <ng-template pTemplate="start">
-      <p-button icon="pi pi-plus" class="mr-2" text severity="secondary" />
-      <p-button icon="pi pi-print" class="mr-2" text severity="secondary" />
-      <p-button icon="pi pi-upload" text severity="secondary" />
-    </ng-template>
-    <ng-template pTemplate="center">
-      <p-iconfield iconPosition="left">
-        <p-inputicon styleClass="pi pi-search" />
-        <input type="text" pInputText placeholder="Search" />
-      </p-iconfield>
-    </ng-template>
-    <ng-template pTemplate="end">
-      <p-splitbutton label="Save" (onClick)="save()" [model]="items" />
-    </ng-template>
-  </p-toolbar>
-</div>
+  <p-tabs value="0">
+    <p-tablist>
+      <p-tab value="0"> {{ "Paramètres" | translate }} </p-tab>
+      <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <div class="container-parametres">
+          <div class="container-label">
+            <label for="moduleName">{{ "Titre" | translate }}</label>
+            <input
+              class="input"
+              id="moduleName"
+              type="text"
+              pInputText
+              [(ngModel)]="currentModule().title"
+              autocomplete="false"
+            />
+          </div>
+          <div class="container-label">
+            <label for="moduleDescription">{{
+              "Description" | translate
+            }}</label>
+            <input
+              class="input"
+              id="moduleDescription"
+              type="text"
+              pInputText
+              [(ngModel)]="currentModule().description"
+              autocomplete="false"
+            />
+          </div>
+          <div class="container-label">
+            <label for="gameSystem">{{ "Jeux" | translate }}</label>
+            <p-select
+              [options]="gameSystems()"
+              [(ngModel)]="currentGameSystem"
+              (onChange)="onGameSystemChange($event)"
+              optionLabel="name"
+              placeholder="Selectionner un jeux"
+              inputId="gameSystem"
+            ></p-select>
+          </div>
+          <p-splitbutton label="Save" (onClick)="save()" [model]="items" />
+        </div>
+      </p-tabpanel>
+      <p-tabpanel value="1">
+        <div class="icone-grab">
+          @for(block of availableBlocks; track block.type) {
+          <div
+            class="icon-item"
+            (mousedown)="startIconDrag($event, block.type)"
+            tabindex="0"
+            role="button"
+            (keydown.enter)="startIconDrag($event, block.type)"
+          >
+            <i
+              [class]="geticonByType(block.type)"
+              [attr.data-type]="block.type"
+              aria-hidden="true"
+            ></i>
+            <span> {{ getBlockPreview(block.type) }} </span>
+          </div>
+          }
+        </div>
 
+        <!-- Élément de preview qui suit le curseur -->
+        @if(isDraggingIcon){
+        <div
+          class="icon-drag-preview"
+          [style.left.px]="dragPosition.x"
+          [style.top.px]="dragPosition.y"
+        >
+          <i
+            [class]="
+              'pi ' + geticonByType(draggedIconType || enumBlockType.paragraph)
+            "
+            aria-hidden="true"
+          ></i>
+          <span>{{
+            getBlockPreview(draggedIconType || enumBlockType.paragraph)
+          }}</span>
+        </div>
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
+<div class="separator"></div>
 <div class="container-edit">
-  <!-- Editor area with blocks layout -->
   <div class="editor">
     <!-- Main blocks container -->
     <div
@@ -45,13 +115,13 @@
           </div>
           <div class="block-controls">
             @if(block.id){
-              <p-button
-                icon="pi pi-trash"
-                tabindex="0"
-                (click)="removeBlock(block.id)"
-                severity="danger"
-              >
-              </p-button>
+            <p-button
+              icon="pi pi-trash"
+              tabindex="0"
+              (click)="removeBlock(block.id)"
+              severity="danger"
+            >
+            </p-button>
             }
           </div>
         </div>
@@ -59,7 +129,10 @@
         <!-- Block content based on type -->
         @switch (block.type) { @case (enumBlockType.paragraph) {
         <div class="text-block">
-          <textarea pTextarea placeholder="Mon Histoire commence maintenant..." ></textarea>
+          <textarea
+            pTextarea
+            placeholder="Mon Histoire commence maintenant..."
+          ></textarea>
         </div>
         } @case (enumBlockType.stat) {
         <div class="stat-block">
@@ -70,10 +143,9 @@
         </div>
         } @case (enumBlockType.music) {
         <div class="music-block"></div>
+        } @case (enumBlockType.module) {
+        <div class="module-block"></div>
         }
-        @case (enumBlockType.module) {
-          <div class="module-block"></div>
-          }
         <!-- @case ('Image') {
         <div class="title-block">
           <p-fileupload
@@ -100,7 +172,7 @@
           </p-fileupload>
         </div>
         }  -->
-      }
+        }
 
         <!-- Custom preview when dragging -->
         <div *cdkDragPreview class="block-preview">
@@ -124,35 +196,4 @@
       }
     </div>
   </div>
-
-  <!-- Icons panel avec système de drag personnalisé -->
-  <div class="icone-grab">
-    @for(block of availableBlocks; track block.type) {
-    <div
-      class="icon-item"
-      (mousedown)="startIconDrag($event, block.type)"
-      tabindex="0"
-      role="button"
-      (keydown.enter)="startIconDrag($event, block.type)"
-    >
-      <i
-        [class]="geticonByType(block.type)"
-        [attr.data-type]="block.type"
-        aria-hidden="true"
-      ></i>
-    </div>
-    }
-  </div>
-
-  <!-- Élément de preview qui suit le curseur -->
-  @if(isDraggingIcon){
-  <div
-    class="icon-drag-preview"
-    [style.left.px]="dragPosition.x"
-    [style.top.px]="dragPosition.y"
-  >
-    <i [class]="'pi ' + geticonByType(draggedIconType || enumBlockType.paragraph)" aria-hidden="true"></i>
-    <span>{{ getBlockPreview(draggedIconType || enumBlockType.paragraph) }}</span>
-  </div>
-  }
 </div>

@@ -5,6 +5,9 @@
       <input type="text" pInputText placeholder="Search" />
     </p-iconfield>
   </div>
+  <div class="container-button">
+    <p-button icon="pi pi-plus" label="Nouveau module" routerLink="/new-project" />
+  </div>
   <div class="filtres"></div>
 </div>
 <div class="container">
@@ -25,7 +28,8 @@
       [contextMenu]="cm"
     />
     <p-button
-      label="Créer un nouveau dossier"
+      label="Nouveau dossier"
+      icon="pi pi-folder-plus"
       (onClick)="showNewFolderDialog(null)"
     />
   </div>

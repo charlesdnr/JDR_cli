@@ -14,6 +14,7 @@
   width: 100%;
   display: flex;
   max-height: 50px;
+  gap: 10px;
 
   .searchbar{
     flex: 3;
@@ -41,7 +42,6 @@
   .folders{
     flex-shrink: 0;
     padding: 10px;
-    max-width: 261px;
     border-left: 1px solid var(--primary-color);
   }
 }
@@ -63,8 +63,4 @@
 }
 ::ng-deep .p-tree-node-icon {
   margin-right: 3px;
-}
-::ng-deep .p-inputtext{
-  width: 100%;
-  padding-block: 5px;
 }

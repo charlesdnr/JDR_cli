@@ -1,49 +1,55 @@
-/* new-project.component.scss */
 :host {
   display: flex;
-  flex-direction: column;
-  padding: 20px;
-  height: 100vh;
-  overflow: hidden; /* Empêcher le scroll global */
+  height: 100%;
+  gap: 10px;
+  overflow: hidden;
+  padding: 10px;
 }
 
 .container-edit {
   display: flex;
-  height: calc(100vh - 120px); /* Hauteur fixe - toolbar et marges */
-  min-height: 600px; /* Hauteur minimale pour éviter les problèmes sur petits écrans */
+  min-height: 600px;
   width: 100%;
   gap: 20px;
   position: relative;
 }
 
 .toolbar {
+  background-color: var(--secondary-color);
   margin-bottom: 25px;
   flex-shrink: 0;
+  width: 300px;
+  // border-right: 1px solid white;
+  padding: 3px;
+  border-radius: 10px;
+  height: 92%;
+
+  ::ng-deep .p-tabpanels {
+    background-color: var(--secondary-color);
+  }
+  ::ng-deep .p-tablist-tab-list{
+    background-color: var(--secondary-color);
+  }
 }
 
 /* Icon sidebar styles matching reference design */
 .icone-grab {
   display: flex;
   flex-direction: column;
-  width: 70px;
-  background-color: #546e7a; /* Bleu-gris comme dans l'image */
   border-radius: 0;
   justify-content: flex-start;
-  align-items: center;
   gap: 25px;
   padding: 25px 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   height: 20rem;
   border-radius: 5px;
-  flex-shrink: 0; /* Empêcher de rétrécir */
+  flex-shrink: 0;
 }
 
 .icon-item {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 45px;
-  height: 45px;
+  padding: 10px;
+  background-color: var(--background-color);
+  gap: 10px;
   border-radius: 4px;
   cursor: grab;
   transition: all 0.2s;
@@ -102,13 +108,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #546e7a;
-  border-radius: 5px;
-  padding: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 90%;
   overflow-y: auto !important;
-  border: 1px solid var(--p-toolbar-border-color);
+  // border: 1px solid var(--p-toolbar-border-color);
 }
 
 .columns-container {
@@ -155,7 +157,7 @@
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   width: 100%;
-  min-height: 180px !important; /* Hauteur minimale fixe pour tous les blocs */
+  min-height: 180px !important;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -403,7 +405,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100%;
   gap: 15px;
+  padding: 5px;
+  border: 1px dashed transparent;
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
@@ -420,6 +425,7 @@
 
 /* Style pour mettre en évidence la zone de drop */
 .highlight-drop-zone {
+  padding: 5px;
   background-color: rgba(59, 130, 246, 0.05);
   border: 1px dashed rgba(59, 130, 246, 0.2);
   border-radius: 8px;
@@ -434,4 +440,30 @@
 /* Assurer que le placeholder est visible */
 .cdk-drag-placeholder {
   opacity: 1 !important;
+}
+::ng-deep .p-button-icon-only {
+  width: 2.5rem;
+}
+.container-label {
+  display: flex;
+  flex-direction: column;
+}
+.container-parametres{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.separator{
+  border: 1px solid white;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  height: 86%;
+}
+
+::ng-deep .p-splitbutton {
+  width: 100%;
+}
+::ng-deep .p-tieredmenu{
+  width: 100%;
 }

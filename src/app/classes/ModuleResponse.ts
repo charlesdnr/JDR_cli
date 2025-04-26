@@ -1,53 +1,54 @@
+import { EModuleType } from "../enum/ModuleType";
 import { ModuleVersion } from "./ModuleVersion";
 import { Tag } from "./Tag";
 import { User } from "./User";
 
 export class ModuleResponse {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   isTemplate: boolean;
-  type: string;
+  type: EModuleType;
   creator?: User;
-  createdAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
-  updatedAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
-  versions?: ModuleVersion[];
-  tags?: Tag[];
+  createdAt: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
+  updatedAt: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
+  versions: ModuleVersion[];
+  tags: Tag[];
 
   constructor();
   constructor(
+    id: number,
     title: string,
     description: string,
-    isTemplate: boolean,
-    type: string,
-    creator?: User,
+    type: EModuleType,
+    creator: User,
     createdAt?: string,
     updatedAt?: string,
     versions?: ModuleVersion[],
     tags?: Tag[],
-    id?: number
+    isTemplate?: boolean
   );
   constructor(
+    id?: number,
     title?: string,
     description?: string,
-    isTemplate?: boolean,
-    type?: string,
+    type?: EModuleType,
     creator?: User,
     createdAt?: string,
     updatedAt?: string,
     versions?: ModuleVersion[],
     tags?: Tag[],
-    id?: number
+    isTemplate?: boolean
   ) {
-    this.id = id;
+    this.id = id || 0;
     this.title = title || '';
     this.description = description || '';
-    this.isTemplate = isTemplate || false;
-    this.type = type || '';
+    this.type = type || EModuleType.Scenario;
     this.creator = creator;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.versions = versions;
-    this.tags = tags;
+    this.createdAt = createdAt || new Date().toString();
+    this.updatedAt = updatedAt || new Date().toString();
+    this.versions = versions || [];
+    this.tags = tags || [];
+    this.isTemplate = isTemplate || false;
   }
 }

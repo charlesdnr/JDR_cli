@@ -1,11 +1,8 @@
-import { Component, OnInit, OnDestroy, HostListener, NgZone, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone, computed, inject, signal, effect, linkedSignal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { Toolbar } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { SplitButton } from 'primeng/splitbutton';
 import { InputTextModule } from 'primeng/inputtext';
-import { IconField } from 'primeng/iconfield';
-import { InputIcon } from 'primeng/inputicon';
 import { TextareaModule } from 'primeng/textarea';
 import { FileUploadEvent, FileUploadModule } from 'primeng/fileupload';
 import {
@@ -27,6 +24,14 @@ import { ModuleHttpService } from '../../services/https/module-http.service';
 import { ModuleRequest } from '../../classes/ModuleRequest';
 import { EModuleType } from '../../enum/ModuleType';
 import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import aleaRNGFactory from "number-generator/lib/aleaRNGFactory";
+import { GameSystem } from '../../classes/GameSystem';
+import { TabsModule } from 'primeng/tabs';
+import { GameSystemHttpService } from '../../services/https/game-system-http.service';
+import { SelectChangeEvent, SelectModule } from 'primeng/select';
 
 interface Position {
   x: number;
@@ -35,7 +40,7 @@ interface Position {
 
 @Component({
   selector: 'app-new-project',
-  imports: [Toolbar, ButtonModule, SplitButton, InputTextModule, IconField, InputIcon, DragDropModule, TextareaModule, FileUploadModule],
+  imports: [TabsModule, FormsModule, ButtonModule, SplitButton, InputTextModule, DragDropModule, TextareaModule, FileUploadModule, FloatLabelModule, TranslateModule, SelectModule],
   templateUrl: './new-project.component.html',
   styleUrl: './new-project.component.scss'
 })
@@ -44,6 +49,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   private blockHttpService = inject(BlockHttpService);
   private moduleHttpService = inject(ModuleHttpService);
   private moduleVersionHttpService = inject(ModuleVersionHttpService);
+  private gameSystemHttpService = inject(GameSystemHttpService);
 
   enumBlockType = EBlockType
 
@@ -51,14 +57,11 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   uploadedFiles: File[] = [];
   blocks: Block[] = [];
   availableBlocks: Block[] = [];
-  currentModule: ModuleResponse = new ModuleResponse();
-  currentModuleVersion: ModuleVersion = new ModuleVersion();
+  currentModule = signal<ModuleResponse>(new ModuleResponse());
+  currentModuleVersion = signal<ModuleVersion>(new ModuleVersion());
   currentUser = computed(() => this.userService.currentJdrUser())
-
-  // { type: 'Texte', icon: 'pi pi-comment' },
-  //   { type: 'Audio', icon: 'pi pi-microphone' },
-  //   { type: 'Image', icon: 'pi pi-image' },
-  //   { type: 'Statistique', icon: 'pi pi-chart-bar' }
+  currentGameSystem = linkedSignal(() => this.gameSystems().find(game => game.id == this.currentModuleVersion().gameSystemId))
+  gameSystems = signal<GameSystem[]>([])
 
   // Propriétés pour le système de drag personnalisé
   isDraggingIcon = false;
@@ -74,36 +77,26 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   // We'll use this to generate unique IDs for blocks
   private blockIdCounter = 0;
 
-  constructor(private ngZone: NgZone) { }
+
+  constructor(private ngZone: NgZone) {}
 
   async ngOnInit() {
     const user = this.currentUser();
-    if(user){
-      this.currentModule = await this.moduleHttpService.createModule(
-        new ModuleRequest('New Module Version','Description', false, EModuleType.Scenario, user)
-      );
-      if(this.currentModule && this.currentModule.id){
-        this.currentModuleVersion = await this.moduleVersionHttpService.createModuleVersion(
-          this.currentModule.id,
-          new ModuleVersion(this.currentModule.id,1,user, 1));
-        // todo get le block si on est en train de modifier un déjà existant
-        if (this.currentModuleVersion.id) {
-          this.availableBlocks.push(
-            new ParagraphBlock(this.currentModuleVersion.id, '', 1, user),
-            new MusicBlock(this.currentModuleVersion.id, '', 1, user),
-            new StatBlock(this.currentModuleVersion.id, '', 1, user),
-            new IntegratedModuleBlock(this.currentModuleVersion.id, '', 1, user))
-          // todo push l'imageblock une fois dispo
-        }
+    if (user) {
+      this.currentModule.set(new ModuleResponse(aleaRNGFactory(4836325).uInt32(), 'New Module', 'Description', EModuleType.Scenario, user))
+      this.gameSystems.set(await this.gameSystemHttpService.getAllGameSystems());
+      this.currentModuleVersion.set(new ModuleVersion(this.currentModule().id, 1, user, 1))
+      this.currentModuleVersion().id = 1
+      if (this.currentModuleVersion().id) {
+        this.availableBlocks.push(
+          new ParagraphBlock(this.currentModuleVersion().id!, '', 1, user),
+          new MusicBlock(this.currentModuleVersion().id!, '', 1, user),
+          new StatBlock(this.currentModuleVersion().id!, '', 1, user),
+          new IntegratedModuleBlock(this.currentModuleVersion().id!, '', 1, user))
+        // todo push l'imageblock une fois dispo
       }
     }
-
-
     this.items = [
-      {
-        label: 'Update',
-        icon: 'pi pi-refresh'
-      },
       {
         label: 'Delete',
         icon: 'pi pi-times'
@@ -250,28 +243,27 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   // Add a new block at the end of the list
   addBlock(type: EBlockType, position?: number) {
     let newBlock: Block | null = null;
-    if(this.currentUser() && this.currentModuleVersion.id){
-      switch(type){
+    if (this.currentUser() && this.currentModuleVersion().id) {
+      switch (type) {
         case EBlockType.paragraph:
-          newBlock = new ParagraphBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          newBlock = new ParagraphBlock(this.currentModuleVersion().id!, this.getBlockPreview(type)!, this.blocks.length - 1, this.currentUser()!);
           break;
         case EBlockType.module:
-          newBlock = new IntegratedModuleBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          newBlock = new IntegratedModuleBlock(this.currentModuleVersion().id!, this.getBlockPreview(type)!, this.blocks.length - 1, this.currentUser()!);
           break;
         case EBlockType.music:
-          newBlock = new MusicBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          newBlock = new MusicBlock(this.currentModuleVersion().id!, this.getBlockPreview(type)!, this.blocks.length - 1, this.currentUser()!);
           break;
         case EBlockType.stat:
-          newBlock = new StatBlock(this.currentModuleVersion.id,this.getBlockPreview(type)!,this.blocks.length-1,this.currentUser()!);
+          newBlock = new StatBlock(this.currentModuleVersion().id!, this.getBlockPreview(type)!, this.blocks.length - 1, this.currentUser()!);
           break;
         default: return
       }
     }
-    if(newBlock){
-      if(position) newBlock.blockOrder = position
-      this.blockHttpService.post(newBlock).then((block: unknown) => {
-        this.blocks.push(block as Block);
-      })
+    if (newBlock) {
+      if (position) newBlock.blockOrder = position
+      newBlock.id = aleaRNGFactory(4836325).uInt32()
+      this.blocks.push(newBlock);
     }
   }
 
@@ -305,7 +297,27 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  save() {
-    console.log(this.blocks)
+  async save() {
+    const user = this.currentUser();
+    if (user) {
+      this.currentModule.set(await this.moduleHttpService.createModule(
+        new ModuleRequest(this.currentModule().title, this.currentModule().description, this.currentModule().isTemplate, this.currentModule().type, this.currentModule().creator || user)
+      ));
+      if (this.currentModule && this.currentModule().id) {
+        this.currentModuleVersion.set(await this.moduleVersionHttpService.createModuleVersion(
+          this.currentModule().id,
+          //todo modifier le gameId = 1 par le currentgameid
+          this.currentModuleVersion()));
+      }
+    }
+  }
+  onGameSystemChange(event: SelectChangeEvent) {
+    const gameSystem = event.value;
+    if (gameSystem && gameSystem.id) {
+      console.log(gameSystem)
+      console.log(this.currentGameSystem())
+      this.currentModuleVersion.update(version => version.gameSystemId = gameSystem.id);
+      console.log(this.currentModuleVersion())
+    }
   }
 }

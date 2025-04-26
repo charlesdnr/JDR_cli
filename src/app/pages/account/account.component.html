@@ -58,18 +58,18 @@
           <div class="first">
             <p-button
             (onClick)="saveUser()"
-            label="{{ 'Sauvegarder les changements' | translate }}"
+            [label]="'Sauvegarder les changements' | translate"
             severity="secondary"
           />
             <p-button
             (onClick)="changePassword()"
-            label="{{ 'Change Password' | translate }}"
+            [label]="'Change Password' | translate"
             severity="secondary"
           />
           </div>
           <p-button
             (onClick)="deleteAccount()"
-            label="{{ 'Delete account' | translate }}"
+            [label]="'Delete account' | translate"
             severity="danger"
             styleClass="p-button-danger"
           />
