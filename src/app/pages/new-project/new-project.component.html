@@ -67,7 +67,7 @@
         </div>
 
         <!-- Élément de preview qui suit le curseur -->
-        @if(isDraggingIcon){
+        @if(isDraggingIcon()){
         <div
           class="icon-drag-preview"
           [style.left.px]="dragPosition.x"
@@ -96,13 +96,13 @@
       class="blocks-container"
       cdkDropList
       id="blocksList"
-      [cdkDropListData]="blocks"
+      [cdkDropListData]="blocks()"
       (cdkDropListDropped)="onDrop($event)"
       cdkDropListOrientation="vertical"
-      [class.highlight-drop-zone]="isDraggingIcon"
+      [class.highlight-drop-zone]="isDraggingIcon()"
     >
       <!-- Les blocs existants -->
-      @for(block of blocks; track block.id; let i = $index) {
+      @for(block of blocks(); track block.id; let i = $index) {
       <div class="block-container" cdkDrag [cdkDragData]="block">
         <!-- Block header with controls -->
         <div class="block-header">
@@ -187,7 +187,7 @@
       }
 
       <!-- Placeholder pour l'ajout d'un nouveau block (identique au placeholder de réordonnancement) -->
-      @if(isDraggingIcon && isOverDropZone){
+      @if(isDraggingIcon() && isOverDropZone()){
       <div class="block-placeholder">
         <div class="placeholder-content">
           {{ getBlockPreview(draggedIconType || enumBlockType.paragraph) }}

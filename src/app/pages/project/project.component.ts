@@ -76,9 +76,9 @@ export class ProjectComponent implements OnInit {
   isLoadingModules = signal(false);
   searchValue = signal('');
 
-  selectedFolderName = computed(() => {
+  // selectedFolderName = computed(() => {
 
-  });
+  // });
   contextMenuItems: MenuItem[] = [
     {
       label: 'Nouveau dossier',
