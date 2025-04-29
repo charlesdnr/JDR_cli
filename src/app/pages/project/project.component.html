@@ -15,6 +15,10 @@
     @for(module of displayedModules(); track module){
     <app-module-viewer [moduleId]="module.moduleId" />
     }
+    <h2> Aucun Dossier Lié </h2>
+    @for(module of moduleWithoutFolder(); track module){
+      <app-module-viewer [moduleId]="module.moduleId" />
+    }
   </div>
   <div class="folders">
     <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>

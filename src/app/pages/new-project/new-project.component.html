@@ -102,7 +102,7 @@
       [class.highlight-drop-zone]="isDraggingIcon()"
     >
       <!-- Les blocs existants -->
-      @for(block of blocks(); track block.id; let i = $index) {
+      @for(block of blocks(); track block; let i = $index) {
       <div class="block-container" cdkDrag [cdkDragData]="block">
         <!-- Block header with controls -->
         <div class="block-header">
@@ -122,6 +122,7 @@
               severity="danger"
             >
             </p-button>
+            <p-button icon="pi pi-microchip-ai" (onClick)="show(block.type, block.id)" ></p-button>
             }
           </div>
         </div>

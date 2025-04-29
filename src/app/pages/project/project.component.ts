@@ -71,6 +71,7 @@ export class ProjectComponent implements OnInit {
   selectedFolder: WritableSignal<TreeNode | null> = signal(null);
 
   displayedModules: WritableSignal<DisplayableSavedModule[]> = signal([]);
+  moduleWithoutFolder = signal<DisplayableSavedModule[]>([]);
 
   isLoadingFolders = signal(false);
   isLoadingModules = signal(false);
@@ -193,6 +194,7 @@ export class ProjectComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadFolders();
+    await this.loadModulesWithoutFolder();
     // Sélectionner le premier dossier s'il existe
     if (this.treeNode().length > 0) {
       const firstNode = this.treeNode()[0];
@@ -242,6 +244,21 @@ export class ProjectComponent implements OnInit {
       console.error('Erreur lors du chargement des modules sauvegardés:', error);
       this.messageService.add({ severity: 'error', summary: 'Erreur Modules', detail: 'Impossible de charger les modules sauvegardés.' });
       this.displayedModules.set([]); // Assure que la liste est vide en cas d'erreur
+    } finally {
+      this.isLoadingModules.set(false);
+    }
+  }
+
+  async loadModulesWithoutFolder(){
+    this.isLoadingModules.set(true);
+    try {
+      const user = this.currentUser()
+      if (!user) return
+      this.moduleWithoutFolder.set(await this.httpUserSavedModuleService.getAllUserSavedModules(user.id));
+    } catch (error: unknown) {
+      console.error('Erreur lors du chargement des modules sauvegardés:', error);
+      this.messageService.add({ severity: 'error', summary: 'Erreur Modules', detail: 'Impossible de charger les modules sauvegardés.' });
+      this.moduleWithoutFolder.set([]); // Assure que la liste est vide en cas d'erreur
     } finally {
       this.isLoadingModules.set(false);
     }

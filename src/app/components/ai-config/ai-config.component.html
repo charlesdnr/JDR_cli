@@ -1,0 +1,35 @@
+@if(loading()){
+    <ng-lottie [options]="options" />
+}@else {
+    @switch (type()) {
+        @case ("paragraph") {
+            <form [formGroup]="formgroupParaph" (ngSubmit)="generate()" >
+                <div class="form-content">
+                    <label for="contexte">{{'Contexte*'|translate}}</label>
+                    <textarea [rows]="3" formControlName="contexte" pTextarea [placeholder]="contextPlaceHolder" id="content" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="tone">{{"Ton de l'histoire"|translate}}</label>
+                    <textarea [rows]="3" formControlName="tone" pTextarea [placeholder]="tonePlaceHolder" id="tone" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="characters">{{"Personnage de l'histoire"|translate}}</label>
+                    <textarea [rows]="3" formControlName="characters" pTextarea id="characters" [placeholder]="charactersPlaceHolder" ></textarea>
+                </div>
+                <div class="container-button">
+                    <p-button type="submit" [disabled]="formgroupParaph.invalid" label="Générer" icon="pi pi-arrow-up" />
+                    <p-button severity="secondary" (onClick)="ref.close('')" label="Annuler" icon="pi pi-times" />
+                </div>
+            </form>
+        }
+    }
+    @if(response.length > 0){
+        <div class="form-content">
+            <label for="response">Réponse</label>
+            <textarea pTextarea id="response" [rows]="5" [disabled]="response.length === 0" [(ngModel)]="response" ></textarea>
+        </div>
+        <p-button label="Accepter la réponse" icon="pi pi-check" (onClick)="ref.close(response())" />
+        <p-button label="Regénerer la réponse" icon="pi pi-spinner" (onClick)="generate()" />
+    }
+}
+

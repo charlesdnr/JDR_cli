@@ -21,6 +21,8 @@ import Aura from '@primeng/themes/aura';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { firebaseConfig } from '../environments/environment.secret';
+import { provideLottieOptions } from 'ngx-lottie';
+import { DialogService } from 'primeng/dynamicdialog';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
@@ -55,5 +57,9 @@ export const appConfig: ApplicationConfig = {
     ]),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
+    provideLottieOptions({
+      player: () => import('lottie-web'),
+    }),
+    DialogService
   ],
 };
