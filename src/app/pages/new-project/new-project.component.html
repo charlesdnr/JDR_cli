@@ -44,6 +44,16 @@
             ></p-select>
           </div>
           <p-splitbutton label="Save" (onClick)="save()" [model]="items" />
+          <div class="ai-module-generation">
+            <p-button
+              label="Générer avec l'IA"
+              icon="pi pi-magic"
+              styleClass="p-button-help p-button-raised"
+              (onClick)="generateCompleteModule()"
+              [disabled]="!currentUser()"
+            >
+            </p-button>
+          </div>
         </div>
       </p-tabpanel>
       <p-tabpanel value="1">
@@ -122,7 +132,15 @@
               severity="danger"
             >
             </p-button>
-            <p-button icon="pi pi-microchip-ai" (onClick)="show(block.type, block.id)" ></p-button>
+            <p-button
+              icon="pi pi-magic"
+              tooltip="Générer avec l'IA"
+              tooltipPosition="top"
+              (onClick)="show(block.type, block.id)"
+              [disabled]="block.type === enumBlockType.module"
+              severity="help"
+            >
+            </p-button>
             }
           </div>
         </div>

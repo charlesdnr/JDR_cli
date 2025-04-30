@@ -27,7 +27,7 @@
   ::ng-deep .p-tabpanels {
     background-color: var(--secondary-color);
   }
-  ::ng-deep .p-tablist-tab-list{
+  ::ng-deep .p-tablist-tab-list {
     background-color: var(--secondary-color);
   }
 }
@@ -448,13 +448,13 @@
   display: flex;
   flex-direction: column;
 }
-.container-parametres{
+.container-parametres {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.separator{
+.separator {
   border: 1px solid white;
   margin-top: 30px;
   margin-bottom: 30px;
@@ -464,6 +464,51 @@
 ::ng-deep .p-splitbutton {
   width: 100%;
 }
-::ng-deep .p-tieredmenu{
+::ng-deep .p-tieredmenu {
   width: 100%;
+}
+
+/* Styles à ajouter à ai-config.component.scss */
+.response-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Styles à ajouter à new-project.component.scss */
+.ai-module-generation {
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Ajout d'une animation de brillance pour le bouton IA */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(var(--primary-color-rgb), 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(var(--primary-color-rgb), 0.5);
+  }
+}
+
+:host ::ng-deep .p-button.p-button-help:not(:disabled) {
+  animation: glow 2s infinite;
+}
+
+/* Style pour les blocs générés par IA */
+.ai-generated {
+  position: relative;
+}
+
+.ai-generated::before {
+  content: "✨";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 16px;
+  opacity: 0.7;
 }

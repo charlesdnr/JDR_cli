@@ -1,6 +1,7 @@
 export enum EBlockType {
   paragraph = 'paragraph',
-  module = 'module',
+  module = 'complete-module',
   stat = 'stat',
-  music = 'music'
+  music = 'music',
+  picture = "picture",
 }

@@ -2,19 +2,23 @@
     <ng-lottie [options]="options" />
 }@else {
     @switch (type()) {
-        @case ("paragraph") {
+        @case (EBlockType.paragraph) {
             <form [formGroup]="formgroupParaph" (ngSubmit)="generate()" >
                 <div class="form-content">
-                    <label for="contexte">{{'Contexte*'|translate}}</label>
-                    <textarea [rows]="3" formControlName="contexte" pTextarea [placeholder]="contextPlaceHolder" id="content" ></textarea>
+                    <label for="context">{{'Contexte*'|translate}}</label>
+                    <textarea [rows]="3" formControlName="context" pTextarea [placeholder]="contextPlaceHolder" id="context" ></textarea>
                 </div>
                 <div class="form-content">
                     <label for="tone">{{"Ton de l'histoire"|translate}}</label>
                     <textarea [rows]="3" formControlName="tone" pTextarea [placeholder]="tonePlaceHolder" id="tone" ></textarea>
                 </div>
                 <div class="form-content">
-                    <label for="characters">{{"Personnage de l'histoire"|translate}}</label>
+                    <label for="characters">{{"Personnages de l'histoire"|translate}}</label>
                     <textarea [rows]="3" formControlName="characters" pTextarea id="characters" [placeholder]="charactersPlaceHolder" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="gameSystem">{{"Système de jeu"|translate}}</label>
+                    <input type="text" formControlName="gameSystem" pInputText id="gameSystem" placeholder="fantasy, médiéval, futuriste..." />
                 </div>
                 <div class="container-button">
                     <p-button type="submit" [disabled]="formgroupParaph.invalid" label="Générer" icon="pi pi-arrow-up" />
@@ -22,14 +26,79 @@
                 </div>
             </form>
         }
+        @case (EBlockType.music) {
+            <form [formGroup]="formgroupMusic" (ngSubmit)="generate()" >
+                <div class="form-content">
+                    <label for="scene">{{'Scène à illustrer*'|translate}}</label>
+                    <textarea [rows]="3" formControlName="scene" pTextarea [placeholder]="scenePlaceHolder" id="scene" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="atmosphere">{{"Atmosphère souhaitée"|translate}}</label>
+                    <textarea [rows]="3" formControlName="atmosphere" pTextarea [placeholder]="atmospherePlaceHolder" id="atmosphere" ></textarea>
+                </div>
+                <div class="container-button">
+                    <p-button type="submit" [disabled]="formgroupMusic.invalid" label="Générer" icon="pi pi-arrow-up" />
+                    <p-button severity="secondary" (onClick)="ref.close('')" label="Annuler" icon="pi pi-times" />
+                </div>
+            </form>
+        }
+        @case (EBlockType.stat) {
+            <form [formGroup]="formgroupStat" (ngSubmit)="generate()" >
+                <div class="form-content">
+                    <label for="entityType">{{'Type d\'entité*'|translate}}</label>
+                    <textarea [rows]="2" formControlName="entityType" pTextarea [placeholder]="entityTypePlaceHolder" id="entityType" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="entityName">{{"Nom de l'entité"|translate}}</label>
+                    <input type="text" formControlName="entityName" pInputText id="entityName" [placeholder]="entityNamePlaceHolder" />
+                </div>
+                <div class="form-content">
+                    <label for="powerLevel">{{"Niveau de puissance"|translate}}</label>
+                    <p-select formControlName="powerLevel" [options]="powerLevels" optionLabel="name" optionValue="value"></p-select>
+                </div>
+                <div class="form-content">
+                    <label for="gameSystemId">{{"ID du système de jeu"|translate}}</label>
+                    <input type="text" formControlName="gameSystemId" pInputText id="gameSystemId" placeholder="1" />
+                </div>
+                <div class="container-button">
+                    <p-button type="submit" [disabled]="formgroupStat.invalid" label="Générer" icon="pi pi-arrow-up" />
+                    <p-button severity="secondary" (onClick)="ref.close('')" label="Annuler" icon="pi pi-times" />
+                </div>
+            </form>
+        }
+        @case ("complete-module") {
+            <form [formGroup]="formgroupCompleteModule" (ngSubmit)="generateCompleteModule()" >
+                <div class="form-content">
+                    <label for="theme">{{'Thème*'|translate}}</label>
+                    <textarea [rows]="3" formControlName="theme" pTextarea placeholder="Une aventure dans les montagnes glacées..." id="theme" ></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="title">{{"Titre*"|translate}}</label>
+                    <input type="text" formControlName="title" pInputText id="title" placeholder="Le Secret des Glaces Éternelles" />
+                </div>
+                <div class="form-content">
+                    <label for="description">{{"Description"|translate}}</label>
+                    <textarea [rows]="3" formControlName="description" pTextarea id="description" placeholder="Aventure pour 4-6 personnages de niveau 5-7..."></textarea>
+                </div>
+                <div class="form-content">
+                    <label for="gameSystemId">{{"ID du système de jeu"|translate}}</label>
+                    <input type="text" formControlName="gameSystemId" pInputText id="gameSystemId" placeholder="1" />
+                </div>
+                <div class="container-button">
+                    <p-button type="submit" [disabled]="formgroupCompleteModule.invalid" label="Générer Module Complet" icon="pi pi-arrow-up" />
+                    <p-button severity="secondary" (onClick)="ref.close('')" label="Annuler" icon="pi pi-times" />
+                </div>
+            </form>
+        }
     }
-    @if(response.length > 0){
+    @if(response().length > 0){
         <div class="form-content">
             <label for="response">Réponse</label>
-            <textarea pTextarea id="response" [rows]="5" [disabled]="response.length === 0" [(ngModel)]="response" ></textarea>
+            <textarea pTextarea id="response" [rows]="8" [disabled]="response().length === 0" [(ngModel)]="response" ></textarea>
         </div>
-        <p-button label="Accepter la réponse" icon="pi pi-check" (onClick)="ref.close(response())" />
-        <p-button label="Regénerer la réponse" icon="pi pi-spinner" (onClick)="generate()" />
+        <div class="response-actions">
+            <p-button label="Accepter la réponse" icon="pi pi-check" (onClick)="ref.close(response())" />
+            <p-button label="Regénérer la réponse" icon="pi pi-sync" (onClick)="generate()" />
+        </div>
     }
 }
-

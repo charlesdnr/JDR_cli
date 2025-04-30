@@ -652,22 +652,162 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Mise à jour de la méthode show() dans NewProjectComponent pour gérer les réponses de l'IA
   show(type: string, blockId: number) {
     this.ref = this.dialogService.open(AiConfigComponent, {
       header: "Générer avec l'IA",
-      width: "60rem",
-      modal:true,
+      width: '60rem',
+      modal: true,
       inputValues: {
-        type: type
-      }
+        type: type,
+      },
     });
 
     this.ref.onClose.subscribe((response: string) => {
-      switch(type){
+      if (!response || response.length === 0) return;
+
+      switch (type) {
         case EBlockType.paragraph:
-          (this.blocks().find(bl => bl.id == blockId) as ParagraphBlock).paragraph = response;
+          (
+            this.blocks().find((bl) => bl.id == blockId) as ParagraphBlock
+          ).paragraph = response;
+          break;
+        case EBlockType.music:
+          try {
+            const musicData = JSON.parse(response);
+            const musicBlock = this.blocks().find(
+              (bl) => bl.id == blockId
+            ) as MusicBlock;
+            musicBlock.label = musicData.label || 'Musique générée';
+            musicBlock.src = musicData.src || '';
+            // Si on a une description dans la réponse, on peut l'ajouter comme attribut supplémentaire
+            if (musicData.description) {
+              // Note: Vous devrez peut-être ajouter cette propriété au modèle MusicBlock
+              // musicBlock.description = musicData.description;
+              console.log(
+                'Description musicale générée:',
+                musicData.description
+              );
+            }
+          } catch (e) {
+            console.error('Erreur lors du parsing des données de musique:', e);
+          }
+          break;
+        case EBlockType.stat:
+          try {
+            const statData = JSON.parse(response);
+            const statBlock = this.blocks().find(
+              (bl) => bl.id == blockId
+            ) as StatBlock;
+            statBlock.statRules = statData.statRules || '';
+            statBlock.statValues = statData.statValues || '';
+          } catch (e) {
+            console.error(
+              'Erreur lors du parsing des données de statistiques:',
+              e
+            );
+          }
           break;
       }
-  });
+    });
+  }
+
+  // Nouvelle méthode pour générer un module complet avec l'IA
+  generateCompleteModule() {
+    this.ref = this.dialogService.open(AiConfigComponent, {
+      header: "Générer un module complet avec l'IA",
+      width: '70rem',
+      modal: true,
+      inputValues: {
+        type: 'complete-module',
+      },
+    });
+
+    this.ref.onClose.subscribe((response: string) => {
+      if (!response || response.length === 0) return;
+
+      try {
+        const moduleData = JSON.parse(response);
+
+        // Mise à jour des métadonnées du module
+        if (moduleData.title) {
+          this.currentModule.update((module) => ({
+            ...module,
+            title: moduleData.title,
+            description: moduleData.description || module.description,
+          }));
+        }
+
+        // Création des blocs générés
+        if (moduleData.blocks && Array.isArray(moduleData.blocks)) {
+          // Vider les blocs existants ou conserver certains blocs
+          const existingBlocks = [...this.blocks()];
+
+          // Filtrer les blocs existants qui ne sont pas d'image ou de module intégré
+          // Ceci est optionnel - vous pouvez également décider de tout remplacer
+          const filteredBlocks = existingBlocks.filter(
+            (block) =>
+              block.type === EBlockType.module || block.type === 'picture'
+          );
+
+          // Créer et ajouter les nouveaux blocs générés
+          moduleData.blocks.forEach((block: any, index: number) => {
+            if (this.currentUser()) {
+              switch (block.type) {
+                case 'paragraph':
+                  const paragraphBlock = new ParagraphBlock(
+                    this.currentModuleVersion().id ?? 0,
+                    block.title || 'Paragraphe généré',
+                    filteredBlocks.length + index,
+                    this.currentUser()!
+                  );
+                  paragraphBlock.paragraph = block.content || '';
+                  paragraphBlock.style = block.style || '';
+                  filteredBlocks.push(paragraphBlock);
+                  break;
+
+                case 'music':
+                  const musicBlock = new MusicBlock(
+                    this.currentModuleVersion().id ?? 0,
+                    block.title || 'Musique générée',
+                    filteredBlocks.length + index,
+                    this.currentUser()!
+                  );
+                  musicBlock.label = block.label || 'Musique ambiance';
+                  musicBlock.src = block.src || '';
+                  filteredBlocks.push(musicBlock);
+                  break;
+
+                case 'stat':
+                  const statBlock = new StatBlock(
+                    this.currentModuleVersion().id ?? 0,
+                    block.title || 'Statistiques générées',
+                    filteredBlocks.length + index,
+                    this.currentUser()!
+                  );
+                  statBlock.statRules = block.statRules || '';
+                  statBlock.statValues = block.statValues || '';
+                  filteredBlocks.push(statBlock);
+                  break;
+              }
+            }
+          });
+
+          // Mettre à jour les IDs des blocs
+          filteredBlocks.forEach((block, index) => {
+            block.id = index + 1; // Commencer à 1
+            block.blockOrder = index;
+          });
+
+          // Mettre à jour les blocs
+          this.blocks.set(filteredBlocks);
+        }
+      } catch (e) {
+        console.error(
+          'Erreur lors du parsing des données de module complet:',
+          e
+        );
+      }
+    });
   }
 }
