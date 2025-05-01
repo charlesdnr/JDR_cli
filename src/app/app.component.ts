@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { HeaderComponent } from './components/header/header.component';
 import { filter } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -11,11 +10,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, TranslateModule, ToastModule, HeaderComponent, ConfirmDialogModule],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
   onAuth = false;
   url = '';
 

@@ -1,23 +1,192 @@
-form{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.ai-config-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
-.form-content{
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 50px;
+
+.ai-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+  animation: fadeIn 0.5s ease-in-out;
+
+  .ai-form-title {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+  }
+
+  .ai-form-subtitle {
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
 }
-.container-button{
-    display: flex;
-    position: absolute;
-    gap: 10px;
-    right: 0;
-    bottom: 0;
-    margin: 10px;
+
+.module-form {
+  .module-form-content {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+
+      .form-content:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+    }
+  }
 }
-ng-lottie{
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    transform: translateY(-2px);
+  }
+
+  label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+  }
+}
+
+.generation-in-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 2rem;
+  text-align: center;
+  animation: pulseBackground 3s infinite alternate;
+
+  .lottie-animation {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 1rem;
+  }
+
+  .generation-messages {
+    margin-top: 1rem;
+
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+  }
+}
+
+.typing-indicator {
+  display: flex;
+  justify-content: center;
+
+  span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    margin: 0 3px;
+    opacity: 0.5;
+    animation: typingAnimation 1.5s infinite ease-in-out;
+
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+.response-container {
+  margin-top: 1rem;
+  border-top: 1px solid var(--surface-300);
+  padding-top: 1rem;
+  animation: slideUp 0.5s ease-out;
+
+  .response-header {
     display: flex;
-    width: 100%;
-    height: 20rem;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+
+    h3 {
+      margin: 0;
+    }
+  }
+}
+
+.response-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+.container-button {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseBackground {
+  0% { background-color: rgba(var(--primary-color-rgb), 0.02); }
+  100% { background-color: rgba(var(--primary-color-rgb), 0.08); }
+}
+
+@keyframes typingAnimation {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* Fix pour les éditeurs PrimeNG */
+::ng-deep {
+  .p-editor-container .p-editor-content {
+    height: 200px;
+  }
 }

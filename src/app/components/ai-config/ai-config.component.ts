@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { EBlockType } from '../../enum/BlockType';
 import {
   FormControl,
@@ -11,12 +11,17 @@ import { TranslateModule } from '@ngx-translate/core';
 import { TextareaModule } from 'primeng/textarea';
 import { AnimationOptions, LottieComponent } from 'ngx-lottie';
 import { ButtonModule } from 'primeng/button';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
 import { SelectModule } from 'primeng/select';
 import { AIGenerationService } from '../../services/https/AIGeneration.service';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageService } from 'primeng/api';
+import { BadgeModule } from 'primeng/badge';
+import { TooltipModule } from 'primeng/tooltip';
+import { GameSystemService } from '../../services/https/GameSystemService.service';
+import { EditorModule } from 'primeng/editor';
 
 @Component({
   selector: 'app-ai-config',
@@ -30,16 +35,35 @@ import { InputTextModule } from 'primeng/inputtext';
     InputNumberModule,
     InputTextModule,
     DropdownModule,
-    SelectModule
+    SelectModule,
+    BadgeModule,
+    TooltipModule,
+    EditorModule
   ],
   templateUrl: './ai-config.component.html',
   styleUrl: './ai-config.component.scss',
 })
-export class AiConfigComponent {
+export class AiConfigComponent implements OnInit {
   ref = inject(DynamicDialogRef);
+  config = inject(DynamicDialogConfig);
+  private AIService = inject(AIGenerationService);
+  private messageService = inject(MessageService);
+  private gameSystemService = inject(GameSystemService);
 
   type = input<EBlockType>(EBlockType.paragraph);
-  private AIService = inject(AIGenerationService);
+  generatingMessage = signal<string>('Génération en cours...');
+  gameSystems = signal<any[]>([]);
+
+  // Messages aléatoires pour l'animation de génération
+  private generationMessages = [
+    'Exploration des royaumes créatifs...',
+    'Tissage d\'histoires épiques...',
+    'Création de mondes extraordinaires...',
+    'Invocation de personnages mémorables...',
+    'Forgeage d\'aventures légendaires...',
+    'Distillation d\'idées brillantes...',
+    'Harmonisation des éléments narratifs...'
+  ];
 
   // Formulaire pour les paragraphes
   formgroupParaph = new FormGroup({
@@ -75,7 +99,7 @@ export class AiConfigComponent {
   contextPlaceHolder = 'Une ancienne cité naine abandonnée...';
   tonePlaceHolder = "Mystérieux et oppressant...";
   charactersPlaceHolder = "Un groupe d'aventuriers découvrant les lieux pour la première fois...";
-  
+
   // Music placeholders
   scenePlaceHolder = "Une taverne animée...";
   atmospherePlaceHolder = "Joyeuse et festive...";
@@ -98,11 +122,40 @@ export class AiConfigComponent {
   loading = signal(false);
   response = signal('');
 
-  EBlockType = EBlockType
+  EBlockType = EBlockType;
+  successAnimation = signal(false);
+  successOptions: AnimationOptions = {
+    path: 'assets/lottie/success.json', // You'll need to add this animation file
+  };
+
+  async ngOnInit() {
+    // Charge les systèmes de jeu pour le dropdown
+    try {
+      const systems = await this.gameSystemService.getAllGameSystems();
+      this.gameSystems.set(systems.map((system: any) => ({
+        name: system.name,
+        id: system.id.toString()
+      })));
+
+      // Pré-sélectionne le premier système
+      if (systems.length > 0) {
+        this.formgroupCompleteModule.get('gameSystemId')?.setValue(systems[0].id.toString());
+        this.formgroupStat.get('gameSystemId')?.setValue(systems[0].id.toString());
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des systèmes de jeu:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Impossible de charger les systèmes de jeu.'
+      });
+    }
+  }
 
   generate() {
     this.loading.set(true);
-    
+    this.startGenerationAnimation();
+
     switch (this.type()) {
       case EBlockType.paragraph:
         this.AIService.generateParagraph(
@@ -111,15 +164,12 @@ export class AiConfigComponent {
           this.formgroupParaph.value.characters || '',
           this.formgroupParaph.value.gameSystem || 'fantasy'
         )
-        .then(resp => {
-          console.log('Réponse IA paragraphe:', resp);
-          this.response.set(resp.content);
-        })
-        .catch(error => {
-          console.error('Erreur lors de la génération du paragraphe:', error);
-          this.response.set('Erreur lors de la génération. Veuillez réessayer.');
-        })
-        .finally(() => this.loading.set(false));
+          .then(resp => {
+            this.handleSuccessResponse('paragraphe', resp.content);
+          })
+          .catch(error => {
+            this.handleErrorResponse('paragraphe', error);
+          });
         break;
 
       case EBlockType.music:
@@ -127,21 +177,18 @@ export class AiConfigComponent {
           this.formgroupMusic.value.scene || '',
           this.formgroupMusic.value.atmosphere || ''
         )
-        .then(resp => {
-          console.log('Réponse IA musique:', resp);
-          // La réponse est une description textuelle, on peut l'utiliser comme description
-          // et générer un label basé sur la scène
-          this.response.set(JSON.stringify({
-            label: `Musique pour ${this.formgroupMusic.value.scene}`,
-            description: resp.content,
-            src: ""
-          }));
-        })
-        .catch(error => {
-          console.error('Erreur lors de la génération de la musique:', error);
-          this.response.set('Erreur lors de la génération. Veuillez réessayer.');
-        })
-        .finally(() => this.loading.set(false));
+          .then(resp => {
+            // Format en JSON pour maintenir la structure
+            const musicData = {
+              label: `Musique pour ${this.formgroupMusic.value.scene}`,
+              description: resp.content,
+              src: ""
+            };
+            this.handleSuccessResponse('musique', JSON.stringify(musicData, null, 2));
+          })
+          .catch(error => {
+            this.handleErrorResponse('musique', error);
+          });
         break;
 
       case EBlockType.stat:
@@ -149,31 +196,33 @@ export class AiConfigComponent {
           this.formgroupStat.value.entityType || '',
           this.formgroupStat.value.entityName || '',
           this.formgroupStat.value.powerLevel || 'moyen',
-          'Donjon et Dragon',
+          this.getGameSystemName(this.formgroupStat.value.gameSystemId || '1'),
           this.formgroupStat.value.gameSystemId || '1'
         )
-        .then(resp => {
-          console.log('Réponse IA stats:', resp);
-          this.response.set(JSON.stringify({
-            statRules: '',
-            statValues: resp.content
-          }));
-        })
-        .catch(error => {
-          console.error('Erreur lors de la génération des stats:', error);
-          this.response.set('Erreur lors de la génération. Veuillez réessayer.');
-        })
-        .finally(() => this.loading.set(false));
+          .then(resp => {
+            const statData = {
+              statRules: '',
+              statValues: resp.content
+            };
+            this.handleSuccessResponse('statistiques', JSON.stringify(statData, null, 2));
+          })
+          .catch(error => {
+            this.handleErrorResponse('statistiques', error);
+          });
         break;
 
       default:
         this.loading.set(false);
         this.response.set('Type de bloc non supporté');
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Type de bloc non supporté'
+        });
         break;
     }
   }
 
-  // Génère un module complet
   generateCompleteModule() {
     this.loading.set(true);
     this.AIService.generateCompleteModule(
@@ -182,14 +231,62 @@ export class AiConfigComponent {
       this.formgroupCompleteModule.value.description || '',
       this.formgroupCompleteModule.value.gameSystemId || '1'
     )
-    .then(resp => {
-      console.log('Réponse module complet:', resp);
-      this.response.set(JSON.stringify(resp));
-    })
-    .catch(error => {
-      console.error('Erreur lors de la génération du module complet:', error);
-      this.response.set('Erreur lors de la génération. Veuillez réessayer.');
-    })
-    .finally(() => this.loading.set(false));
+      .then(resp => {
+        console.log('Réponse module complet:', resp);
+        this.response.set(JSON.stringify(resp));
+
+        // Show success animation
+        this.loading.set(false);
+        this.successAnimation.set(true);
+
+        // Close after a short delay
+        setTimeout(() => {
+          this.ref.close(this.response());
+        }, 1200);
+      })
+      .catch(error => {
+        console.error('Erreur lors de la génération du module complet:', error);
+        this.response.set('Erreur lors de la génération. Veuillez réessayer.');
+        this.loading.set(false);
+      });
+  }
+
+  // Méthodes utilitaires
+  private startGenerationAnimation() {
+    // Change périodiquement le message pendant la génération
+    const interval = setInterval(() => {
+      if (this.loading()) {
+        const randomIndex = Math.floor(Math.random() * this.generationMessages.length);
+        this.generatingMessage.set(this.generationMessages[randomIndex]);
+      } else {
+        clearInterval(interval);
+      }
+    }, 3000);
+  }
+
+  private handleSuccessResponse(type: string, content: string) {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Génération réussie',
+      detail: `Le ${type} a été généré avec succès!`
+    });
+    this.response.set(content);
+    this.loading.set(false);
+  }
+
+  private handleErrorResponse(type: string, error: any) {
+    console.error(`Erreur lors de la génération du ${type}:`, error);
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: `Impossible de générer le ${type}. Veuillez réessayer.`
+    });
+    this.response.set(`Erreur lors de la génération. Veuillez réessayer.`);
+    this.loading.set(false);
+  }
+
+  private getGameSystemName(id: string): string {
+    const system = this.gameSystems().find(sys => sys.id === id);
+    return system ? system.name : 'Système inconnu';
   }
 }

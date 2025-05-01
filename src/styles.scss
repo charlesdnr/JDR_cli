@@ -101,3 +101,42 @@ p {
   width: 100%;
   padding-block: 5px;
 }
+/* Styles supplémentaires pour les composants AI */
+:root {
+  /* Variable pour les animations liées à l'IA */
+  --ai-animation-duration: 0.8s;
+  --ai-animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
+  --ai-highlight-color: rgba(var(--primary-color-rgb), 0.2);
+}
+
+/* Animation de pulse pour éléments générés par IA */
+.ai-pulse {
+  animation: aiPulse 2s var(--ai-animation-timing) infinite;
+}
+
+@keyframes aiPulse {
+  0% { box-shadow: 0 0 0 0 var(--ai-highlight-color); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--primary-color-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0); }
+}
+
+/* Adaptations pour les formulaires avec génération IA */
+.p-button.p-button-ai {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.p-button.p-button-ai:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.p-button.p-button-ai .p-button-icon {
+  animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

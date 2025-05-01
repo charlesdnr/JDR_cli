@@ -23,6 +23,7 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { firebaseConfig } from '../environments/environment.secret';
 import { provideLottieOptions } from 'ngx-lottie';
 import { DialogService } from 'primeng/dynamicdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
@@ -60,6 +61,8 @@ export const appConfig: ApplicationConfig = {
     provideLottieOptions({
       player: () => import('lottie-web'),
     }),
-    DialogService
+    DialogService,
+    MessageService,
+    ConfirmationService
   ],
 };

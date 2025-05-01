@@ -12,7 +12,7 @@ import {
   untracked,
   Injector,
 } from '@angular/core'; // Import effect, untracked, Injector
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { InputTextModule } from 'primeng/inputtext';
@@ -94,6 +94,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private injector = inject(Injector); // Inject Injector for effect cleanup
   public dialogService = inject(DialogService);
+  private messageService = inject(MessageService);
 
   // --- Enums ---
   enumBlockType = EBlockType;
@@ -712,7 +713,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Nouvelle méthode pour générer un module complet avec l'IA
   generateCompleteModule() {
     this.ref = this.dialogService.open(AiConfigComponent, {
       header: "Générer un module complet avec l'IA",
@@ -728,86 +728,114 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
       try {
         const moduleData = JSON.parse(response);
+        console.log('Module data received:', moduleData);
 
-        // Mise à jour des métadonnées du module
-        if (moduleData.title) {
-          this.currentModule.update((module) => ({
-            ...module,
-            title: moduleData.title,
-            description: moduleData.description || module.description,
-          }));
+        // Update the current module with metadata
+        this.currentModule.update((module) => ({
+          ...module,
+          title: moduleData.title || module.title,
+          description: moduleData.description || module.description,
+        }));
+
+        // Update game system if provided
+        if (moduleData.gameSystemId) {
+          const gameSystemId = parseInt(moduleData.gameSystemId);
+          const gameSystem = this.gameSystems().find(gs => gs.id === gameSystemId);
+          if (gameSystem) {
+            this.currentGameSystem.set(gameSystem);
+
+            // Update the moduleVersion
+            this.currentModuleVersion.update(version => ({
+              ...version,
+              gameSystemId: gameSystemId
+            }));
+          }
         }
 
-        // Création des blocs générés
+        // Clear existing blocks and create new ones from the response
         if (moduleData.blocks && Array.isArray(moduleData.blocks)) {
-          // Vider les blocs existants ou conserver certains blocs
-          const existingBlocks = [...this.blocks()];
+          // Create a new array for blocks
+          const newBlocks: Block[] = [];
 
-          // Filtrer les blocs existants qui ne sont pas d'image ou de module intégré
-          // Ceci est optionnel - vous pouvez également décider de tout remplacer
-          const filteredBlocks = existingBlocks.filter(
-            (block) =>
-              block.type === EBlockType.module || block.type === 'picture'
-          );
-
-          // Créer et ajouter les nouveaux blocs générés
+          // Process each block from the response
           moduleData.blocks.forEach((block: any, index: number) => {
             if (this.currentUser()) {
+              let newBlock: Block | null = null;
+
               switch (block.type) {
                 case 'paragraph':
-                  const paragraphBlock = new ParagraphBlock(
-                    this.currentModuleVersion().id ?? 0,
+                  newBlock = new ParagraphBlock(
+                    this.currentModuleVersion().id || 0,
                     block.title || 'Paragraphe généré',
-                    filteredBlocks.length + index,
-                    this.currentUser()!
+                    index,
+                    this.currentUser()!,
+                    block.content || '',
+                    block.style || 'narrative',
                   );
-                  paragraphBlock.paragraph = block.content || '';
-                  paragraphBlock.style = block.style || '';
-                  filteredBlocks.push(paragraphBlock);
                   break;
 
                 case 'music':
-                  const musicBlock = new MusicBlock(
-                    this.currentModuleVersion().id ?? 0,
+                  newBlock = new MusicBlock(
+                    this.currentModuleVersion().id || 0,
                     block.title || 'Musique générée',
-                    filteredBlocks.length + index,
-                    this.currentUser()!
+                    index,
+                    this.currentUser()!,
+                    block.label || block.title || 'Ambiance musicale',
+                    block.src || '',
                   );
-                  musicBlock.label = block.label || 'Musique ambiance';
-                  musicBlock.src = block.src || '';
-                  filteredBlocks.push(musicBlock);
                   break;
 
                 case 'stat':
-                  const statBlock = new StatBlock(
-                    this.currentModuleVersion().id ?? 0,
+                  newBlock = new StatBlock(
+                    this.currentModuleVersion().id || 0,
                     block.title || 'Statistiques générées',
-                    filteredBlocks.length + index,
-                    this.currentUser()!
+                    index,
+                    this.currentUser()!,
+                    block.statRules || '',
+                    block.statValues || block.content || '',
                   );
-                  statBlock.statRules = block.statRules || '';
-                  statBlock.statValues = block.statValues || '';
-                  filteredBlocks.push(statBlock);
                   break;
+              }
+
+              if (newBlock) {
+                // Give each block a temporary ID
+                newBlock.id = index + 1;
+                newBlocks.push(newBlock);
               }
             }
           });
 
-          // Mettre à jour les IDs des blocs
-          filteredBlocks.forEach((block, index) => {
-            block.id = index + 1; // Commencer à 1
-            block.blockOrder = index;
-          });
-
-          // Mettre à jour les blocs
-          this.blocks.set(filteredBlocks);
+          // Update blocks signal with the new array
+          this.blocks.set(newBlocks);
         }
+
+        // Notify user of successful generation
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Génération réussie',
+          detail: 'Le module a été généré avec succès!'
+        });
       } catch (e) {
-        console.error(
-          'Erreur lors du parsing des données de module complet:',
-          e
-        );
+        console.error('Erreur lors du traitement de la réponse:', e);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de traiter la réponse de l\'IA.'
+        });
       }
     });
+  }
+
+  blockIsParagraphe(block: Block): ParagraphBlock | undefined {
+    if(block instanceof ParagraphBlock) return (Block as any) as ParagraphBlock
+    return undefined
+  }
+  blockIsMusic(block: Block): MusicBlock | undefined {
+    if(block instanceof MusicBlock) return (Block as any) as MusicBlock
+    return undefined
+  }
+  blockIsStat(block: Block): StatBlock | undefined {
+    if(block instanceof StatBlock) return (Block as any) as StatBlock
+    return undefined
   }
 }
