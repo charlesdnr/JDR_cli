@@ -3,27 +3,20 @@ import {
   OnInit,
   OnDestroy,
   HostListener,
-  NgZone,
   computed,
   inject,
   signal,
-  WritableSignal,
-  effect,
-  untracked,
-  Injector,
-} from '@angular/core'; // Import effect, untracked, Injector
-import { MenuItem, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { SplitButtonModule } from 'primeng/splitbutton';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { FileUploadEvent, FileUploadModule } from 'primeng/fileupload';
+  viewChild,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TabsModule } from 'primeng/tabs';
 import {
-  DragDropModule,
   CdkDragDrop,
+  DragDropModule,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-// ----- VOS CLASSES -----
+import { MessageService } from 'primeng/api';
+import { ProjectParametersComponent } from '../../components/project-parameters/project-parameters.component';
 import { Block } from '../../classes/Block';
 import { ParagraphBlock } from '../../classes/ParagraphBlock';
 import { ModuleVersion } from '../../classes/ModuleVersion';
@@ -31,39 +24,22 @@ import { ModuleResponse } from '../../classes/ModuleResponse';
 import { MusicBlock } from '../../classes/MusicBlock';
 import { IntegratedModuleBlock } from '../../classes/IntegratedModuleBlock';
 import { GameSystem } from '../../classes/GameSystem';
-import { ModuleRequest } from '../../classes/ModuleRequest';
-// ----- VOS ENUMS -----
+import { StatBlock } from '../../classes/StatBlock';
 import { EBlockType } from '../../enum/BlockType';
-import { EModuleType } from '../../enum/ModuleType';
-// ----- VOS SERVICES -----
 import { UserHttpService } from '../../services/https/user-http.service';
 import { BlockHttpService } from '../../services/https/block-http.service';
 import { ModuleHttpService } from '../../services/https/module-http.service';
 import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
-// ----- MODULES ANGULAR/PRIMENG -----
-import { FloatLabelModule } from 'primeng/floatlabel';
+import { AiConfigComponent } from '../../components/ai-config/ai-config.component';
+import { BlockTypesToolbarComponent } from '../../components/blocksComponents/block-types-toolbar/block-types-toolbar.component';
+import { BlockListComponent } from '../../components/blocksComponents/block-list/block-list.component';
 import { TranslateModule } from '@ngx-translate/core';
-import { FormsModule } from '@angular/forms';
-import { TabsModule } from 'primeng/tabs';
-import { SelectChangeEvent, SelectModule } from 'primeng/select';
-import { StatBlock } from '../../classes/StatBlock';
-import { CommonModule } from '@angular/common';
 import {
   DialogService,
   DynamicDialogModule,
   DynamicDialogRef,
 } from 'primeng/dynamicdialog';
-import { AiConfigComponent } from '../../components/ai-config/ai-config.component';
-import { TooltipModule } from 'primeng/tooltip';
-import { UserAvatarChooseComponent } from '../../components/user-avatar-choose/user-avatar-choose.component';
-
-
-// --- Interface Position ---
-interface Position {
-  x: number;
-  y: number;
-}
 
 @Component({
   selector: 'app-new-project',
@@ -71,136 +47,58 @@ interface Position {
   imports: [
     CommonModule,
     TabsModule,
-    FormsModule,
-    ButtonModule,
-    SplitButtonModule,
-    InputTextModule,
     DragDropModule,
-    TextareaModule,
-    FileUploadModule,
-    FloatLabelModule,
+    ProjectParametersComponent,
+    BlockTypesToolbarComponent,
+    BlockListComponent,
     TranslateModule,
-    SelectModule,
     DynamicDialogModule,
-    TooltipModule,
-    UserAvatarChooseComponent
   ],
   templateUrl: './new-project.component.html',
   styleUrl: './new-project.component.scss',
 })
-export class NewProjectComponent implements OnInit, OnDestroy {
-  // --- Injections ---
+export class NewProjectComponent implements OnInit {
   private userService = inject(UserHttpService);
   private blockHttpService = inject(BlockHttpService);
   private moduleHttpService = inject(ModuleHttpService);
   private moduleVersionHttpService = inject(ModuleVersionHttpService);
   private gameSystemHttpService = inject(GameSystemHttpService);
-  private ngZone = inject(NgZone);
-  private injector = inject(Injector); // Inject Injector for effect cleanup
   public dialogService = inject(DialogService);
   private messageService = inject(MessageService);
 
-  // --- Enums ---
-  enumBlockType = EBlockType;
-
-  // --- Properties & Signals ---
-  items: MenuItem[] | undefined;
-  uploadedFiles: File[] = [];
-  blocks: WritableSignal<Block[]> = signal([]);
-  availableBlocks: Block[] = []; // Keep as regular array if definition doesn't change
-  currentModule: WritableSignal<ModuleResponse> = signal(new ModuleResponse());
-  currentModuleVersion: WritableSignal<ModuleVersion> = signal(
-    new ModuleVersion()
-  );
-  currentUser = computed(() => this.userService.currentJdrUser());
-  currentGameSystem: WritableSignal<GameSystem | undefined> = signal(undefined);
-  gameSystems = signal<GameSystem[]>([]);
-
-  isDraggingIcon = signal(false); // Use signal for boolean flags
-  draggedIconType: EBlockType | null = null;
-  activeIconElement: HTMLElement | null = null;
-  dragPosition: Position = { x: 0, y: 0 };
-  isOverDropZone = signal(false); // Use signal
-  dropZoneElement: HTMLElement | null = null;
-  initialSetupDone = signal(false); // Flag to run user-dependent setup only once
-
   ref: DynamicDialogRef | undefined;
 
+  blockListComponent = viewChild(BlockListComponent);
+  dropZoneElement = computed(() =>
+    this.blockListComponent()?.blocksContainerRef()
+  );
+
+  // Enums
+  enumBlockType = EBlockType;
+
+  // States
+  blocks = signal<Block[]>([]);
+  availableBlocks: Block[] = [];
+  currentModule = signal<ModuleResponse>(new ModuleResponse());
+  currentModuleVersion = signal<ModuleVersion>(new ModuleVersion());
+  currentUser = computed(() => this.userService.currentJdrUser());
+  currentGameSystem = signal<GameSystem | undefined>(undefined);
+  gameSystems = signal<GameSystem[]>([]);
+
+  isDraggingIcon = signal(false);
+  draggedIconType: EBlockType | null = null;
+  activeIconElement: HTMLElement | null = null;
+  dragPosition = { x: 0, y: 0 };
+  isOverDropZone = signal(false);
+  insertPosition = signal<number | null>(null);
+
+  initialSetupDone = signal(false);
+
   constructor() {
-    // Effect to handle setup once user is available
-    effect(
-      () => {
-        const user = this.currentUser(); // Depend on currentUser signal
-        console.log(
-          'Effect triggered. User:',
-          user,
-          'Setup done:',
-          this.initialSetupDone()
-        );
-
-        // Check if user exists AND setup hasn't run yet
-        if (user && !this.initialSetupDone()) {
-          console.log('User available, performing initial setup...');
-          // Run setup logic within untracked if it reads other signals
-          // that shouldn't re-trigger this effect (like gameSystems)
-          untracked(() => {
-            // Initialize module and version now that user is available
-            const defaultGameSystemId = this.currentGameSystem()?.id ?? 1; // Read current game system ID
-            this.currentModule.set(
-              new ModuleResponse(
-                0,
-                'New Module',
-                'Description',
-                EModuleType.Scenario,
-                user
-              )
-            );
-            this.currentModuleVersion.set(
-              new ModuleVersion(0, 1, user, defaultGameSystemId, false)
-            );
-
-            // Setup available blocks (can now use the real user object)
-            const tempModuleVersionId = 0; // Placeholder ID
-            this.availableBlocks = [
-              // Assign directly
-              new ParagraphBlock(
-                tempModuleVersionId,
-                'Preview Paragraphe',
-                0,
-                user
-              ),
-              new MusicBlock(tempModuleVersionId, 'Preview Musique', 1, user),
-              new StatBlock(tempModuleVersionId, 'Preview Stats', 2, user),
-              new IntegratedModuleBlock(
-                tempModuleVersionId,
-                'Preview Module Intégré',
-                3,
-                user
-              ),
-            ];
-
-            // Add the initial block
-            this.addBlock(EBlockType.paragraph);
-
-            // Mark setup as done
-            this.initialSetupDone.set(true);
-            console.log('Initial setup complete. Blocks:', this.blocks());
-          });
-        } else if (!user && this.initialSetupDone()) {
-          // Optional: Reset if user logs out after setup was done
-          console.log('User logged out or became null after setup.');
-          this.initialSetupDone.set(false); // Allow setup again if user logs back in
-          this.blocks.set([]); // Clear blocks
-          this.currentModule.set(new ModuleResponse()); // Reset module
-          this.currentModuleVersion.set(new ModuleVersion()); // Reset version
-        }
-      },
-      { injector: this.injector }
-    ); // Pass injector for automatic cleanup
+    // Logique d'initialisation selon les utilisateurs disponibles...
   }
 
   async ngOnInit() {
-    // Load things that DON'T depend on the user object being immediately available
     try {
       const systems = await this.gameSystemHttpService.getAllGameSystems();
       this.gameSystems.set(systems);
@@ -208,128 +106,164 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       this.currentGameSystem.set(defaultGameSystem);
     } catch (error) {
       console.error('Error loading game systems:', error);
-      //todo Handle error appropriately
     }
 
-    this.items = [{ label: 'Delete', icon: 'pi pi-times' }];
-    // Use ngZone.runOutsideAngular for setting up the drop zone element listener
-    // to potentially avoid unnecessary change detection cycles.
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => {
-        this.dropZoneElement = document.getElementById('blocksList');
-      }, 0);
-    });
-    // User-dependent setup is now handled by the effect
+    // Initialisation des blocs disponibles si l'utilisateur est connecté
+    this.initializeAvailableBlocks();
   }
 
-  ngOnDestroy() {
-    // Cleanup listeners if they weren't automatically cleaned up
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
-    console.log('Component destroyed, listeners removed.');
+  // Méthode d'initialisation des blocs disponibles
+  private initializeAvailableBlocks() {
+    const user = this.currentUser();
+    if (user) {
+      const tempModuleVersionId = 0;
+      this.availableBlocks = [
+        new ParagraphBlock(tempModuleVersionId, 'Preview Paragraphe', 0, user),
+        new MusicBlock(tempModuleVersionId, 'Preview Musique', 1, user),
+        new StatBlock(tempModuleVersionId, 'Preview Stats', 2, user),
+        new IntegratedModuleBlock(
+          tempModuleVersionId,
+          'Preview Module Intégré',
+          3,
+          user
+        ),
+      ];
+      this.addBlock(EBlockType.paragraph);
+      this.initialSetupDone.set(true);
+    }
   }
 
-  // --- Drag & Drop Methods ---
-  startIconDrag(event: Event, iconType: EBlockType) {
-    event.preventDefault();
-    if (this.isDraggingIcon()) return; // Prevent starting drag if already dragging
+  // Méthodes de gestion du drag & drop
+  startIconDrag(event: { event: Event; blockType: EBlockType }) {
+    if (this.isDraggingIcon()) return;
 
     let clientX = 0,
       clientY = 0;
-    if (event instanceof MouseEvent) {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    } else if (event.target) {
-      const rect = (event.target as HTMLElement).getBoundingClientRect();
+    if (event.event instanceof MouseEvent) {
+      clientX = event.event.clientX;
+      clientY = event.event.clientY;
+    } else if (event.event.target) {
+      const rect = (event.event.target as HTMLElement).getBoundingClientRect();
       clientX = rect.left + rect.width / 2;
       clientY = rect.top + rect.height / 2;
     }
-    this.isDraggingIcon.set(true); // Use signal
-    this.draggedIconType = iconType;
+
+    this.isDraggingIcon.set(true);
+    this.draggedIconType = event.blockType;
     this.dragPosition = { x: clientX, y: clientY };
-    if (event.target) {
-      this.activeIconElement = (event.target as HTMLElement).closest(
+
+    if (event.event.target) {
+      this.activeIconElement = (event.event.target as HTMLElement).closest(
         '.icon-item'
       );
       this.activeIconElement?.classList.add('active-drag');
     }
-    document.addEventListener('mousemove', this.onMouseMove);
-    document.addEventListener('mouseup', this.onMouseUp);
-    console.log('Drag started:', iconType);
   }
 
   @HostListener('document:mousemove', ['$event']) onMouseMove = (
     event: MouseEvent
   ) => {
     if (!this.isDraggingIcon()) return;
-    // Use ngZone run only if absolutely necessary for updating UI outside Angular zone tasks
     this.dragPosition = { x: event.clientX, y: event.clientY };
     this.checkIfOverDropZone(event);
+
+    // Mettre à jour la position d'insertion en temps réel
+    if (this.isOverDropZone()) {
+      this.insertPosition.set(this.calculateInsertPosition(event));
+    } else {
+      this.insertPosition.set(null);
+    }
   };
 
   @HostListener('document:mouseup', ['$event']) onMouseUp = (
     event: MouseEvent
   ) => {
     if (!this.isDraggingIcon()) return;
-    console.log('Mouse up event');
-    // Use ngZone.run to ensure updates are within Angular's zone if needed
-    this.ngZone.run(() => {
-      if (this.isOverDropZone()) {
-        const insertPosition = this.calculateInsertPosition(event);
-        console.log('Dropping icon at position:', insertPosition);
-        this.addBlock(
-          this.draggedIconType || EBlockType.paragraph,
-          insertPosition
-        );
-      } else {
-        console.log('Dropped outside zone.');
-      }
-      this.endIconDrag();
-    });
+    if (this.isOverDropZone()) {
+      const insertPosition = this.calculateInsertPosition(event);
+      this.addBlock(
+        this.draggedIconType || EBlockType.paragraph,
+        insertPosition
+      );
+    }
+    this.endIconDrag();
   };
 
   endIconDrag() {
-    if (!this.isDraggingIcon()) return; // Prevent multiple calls
+    if (!this.isDraggingIcon()) return;
     this.isDraggingIcon.set(false);
     this.draggedIconType = null;
-    this.isOverDropZone.set(false); // Reset drop zone flag
+    this.isOverDropZone.set(false);
+    this.insertPosition.set(null);
+
     if (this.activeIconElement) {
       this.activeIconElement.classList.remove('active-drag');
       this.activeIconElement = null;
     }
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
-    console.log('Drag ended.');
   }
 
   checkIfOverDropZone(event: MouseEvent) {
-    if (!this.dropZoneElement) {
+    if (!(this.dropZoneElement() != undefined)) {
       this.isOverDropZone.set(false);
       return;
     }
-    const rect = this.dropZoneElement.getBoundingClientRect();
+
+    const rect = this.dropZoneElement()!.nativeElement.getBoundingClientRect();
     const isOver =
       event.clientX >= rect.left &&
       event.clientX <= rect.right &&
       event.clientY >= rect.top &&
       event.clientY <= rect.bottom;
+
     if (isOver !== this.isOverDropZone()) {
-      this.isOverDropZone.set(isOver); // Update signal only on change
-      console.log('Is over drop zone:', isOver);
+      this.isOverDropZone.set(isOver);
     }
   }
+
   calculateInsertPosition(event: MouseEvent): number {
     const currentBlocks = this.blocks();
-    if (!this.dropZoneElement) return currentBlocks.length;
+    if (!this.dropZoneElement()) return currentBlocks.length;
+
     const blockElements = Array.from(
-      this.dropZoneElement.querySelectorAll(
+      this.dropZoneElement()?.nativeElement.querySelectorAll(
         '.block-container:not(.cdk-drag-preview):not(.cdk-drag-placeholder)'
-      )
-    ); // Exclude helper elements
+      ) || []
+    );
+
     if (blockElements.length === 0) return 0;
 
-    // Find the element we are hovering over or closest to
-    let closestIndex = currentBlocks.length; // Default to end
+    // Pour chaque bloc, déterminer si le curseur est au-dessus ou en-dessous
+    for (let i = 0; i < blockElements.length; i++) {
+      const blockRect = blockElements[i].getBoundingClientRect();
+
+      // Si la souris est au-dessus de ce bloc
+      if (event.clientY < blockRect.top) return i;
+
+      // Si la souris est dans ce bloc
+      if (event.clientY >= blockRect.top && event.clientY <= blockRect.bottom) {
+        const blockMiddle = blockRect.top + blockRect.height / 2;
+        return event.clientY < blockMiddle ? i : i + 1;
+      }
+
+      // Si c'est le dernier bloc et que la souris est en-dessous
+      if (i === blockElements.length - 1 && event.clientY > blockRect.bottom) {
+        return blockElements.length;
+      }
+
+      // Si la souris est entre ce bloc et le suivant
+      if (i < blockElements.length - 1) {
+        const nextBlockRect = blockElements[i + 1].getBoundingClientRect();
+        if (
+          event.clientY > blockRect.bottom &&
+          event.clientY < nextBlockRect.top
+        ) {
+          return i + 1;
+        }
+      }
+    }
+
+    // Fallback : trouver le bloc le plus proche
+    let closestIndex = currentBlocks.length;
     let smallestDistance = Infinity;
 
     blockElements.forEach((element, index) => {
@@ -339,55 +273,14 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
       if (distance < smallestDistance) {
         smallestDistance = distance;
-        // If mouse is above the closest midpoint, insert before; otherwise, insert after
         closestIndex = event.clientY < elementMidY ? index : index + 1;
       }
     });
 
-    // Refined logic based on boundaries
-    for (let i = 0; i < blockElements.length; i++) {
-      const blockRect = blockElements[i].getBoundingClientRect();
-      // If the mouse Y is within the bounds of this element
-      if (event.clientY >= blockRect.top && event.clientY <= blockRect.bottom) {
-        const blockMiddle = blockRect.top + blockRect.height / 2;
-        return event.clientY < blockMiddle ? i : i + 1;
-      }
-      // If the mouse Y is between this element and the next one (or above the first/below the last)
-      if (i === 0 && event.clientY < blockRect.top) return 0; // Above first element
-      if (i < blockElements.length - 1) {
-        const nextBlockRect = blockElements[i + 1].getBoundingClientRect();
-        if (
-          event.clientY > blockRect.bottom &&
-          event.clientY < nextBlockRect.top
-        ) {
-          return i + 1; // Between elements
-        }
-      } else if (event.clientY > blockRect.bottom) {
-        return blockElements.length; // Below last element
-      }
-    }
-
-    return closestIndex; // Fallback to closest index logic if boundary logic fails
+    return closestIndex;
   }
 
-  geticonByType(type: EBlockType): string | undefined {
-    switch (type) {
-      case EBlockType.paragraph:
-        return 'pi pi-align-left';
-      case EBlockType.music:
-        return 'pi pi-volume-up';
-      case EBlockType.module:
-        return 'pi pi-book';
-      case EBlockType.stat:
-        return 'pi pi-chart-bar';
-      case EBlockType.picture:
-        return 'pi pi-image';
-      default:
-        return 'pi pi-question-circle'; // Default icon
-    }
-  }
-
-  // --- Block Management Methods ---
+  // Méthodes de gestion des blocs
   addBlock(type: EBlockType, position?: number) {
     const user = this.currentUser();
     if (!user) {
@@ -400,9 +293,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     const currentBlockArray = this.blocks();
     const blockOrder =
       position !== undefined ? position : currentBlockArray.length;
-    const blockPreviewTitle = this.getBlockPreview(type) ?? 'Nouveau Bloc'; // Use preview or default
-
-    console.log(`Adding block of type ${type} at position ${blockOrder}`);
+    const blockPreviewTitle = this.getBlockPreview(type) ?? 'Nouveau Bloc';
 
     switch (type) {
       case EBlockType.paragraph:
@@ -441,53 +332,44 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         console.warn(`Block type ${type} not handled in addBlock`);
         return;
     }
+
     newBlock.id = this.blocks().length + 1;
 
-    const newBlocks = [...currentBlockArray]; // Create new array reference
+    const newBlocks = [...currentBlockArray];
 
     if (position !== undefined) {
       newBlocks.splice(position, 0, newBlock);
     } else {
       newBlocks.push(newBlock);
     }
-    // Update order for all blocks in the new array
+
     newBlocks.forEach((block, index) => {
       block.blockOrder = index;
     });
 
-    this.blocks.set(newBlocks); // Update the signal
-    console.log('Blocks after adding:', this.blocks());
+    this.blocks.set(newBlocks);
   }
 
   removeBlock(blockId: number) {
     const currentBlocks = this.blocks();
-    const index = currentBlocks.findIndex((block) => block.id === blockId);
-    if (index !== -1) {
-      console.log(`Removing block with ID: ${blockId} at index ${index}`);
-      const newBlocks = currentBlocks.filter((block) => block.id !== blockId);
-      // Update order after removal
-      newBlocks.forEach((block, idx) => {
-        block.blockOrder = idx;
-      });
-      this.blocks.set(newBlocks);
-      console.log('Blocks after removing:', this.blocks());
-    } else {
-      console.warn(`Block with ID ${blockId} not found for removal.`);
-    }
+    const newBlocks = currentBlocks.filter((block) => block.id !== blockId);
+
+    newBlocks.forEach((block, idx) => {
+      block.blockOrder = idx;
+    });
+
+    this.blocks.set(newBlocks);
   }
 
   onDrop(event: CdkDragDrop<Block[]>) {
-    console.log(
-      `Block dropped from index ${event.previousIndex} to ${event.currentIndex}`
-    );
-    const currentBlocks = [...this.blocks()]; // Clone the array
+    const currentBlocks = [...this.blocks()];
     moveItemInArray(currentBlocks, event.previousIndex, event.currentIndex);
-    // Update order after drop
+
     currentBlocks.forEach((block, index) => {
       block.blockOrder = index;
     });
-    this.blocks.set(currentBlocks); // Update the signal
-    console.log('Blocks after drop:', this.blocks());
+
+    this.blocks.set(currentBlocks);
   }
 
   getBlockPreview(type: EBlockType): string | undefined {
@@ -507,218 +389,40 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  onUpload(event: FileUploadEvent) {
-    for (const file of event.files) {
-      this.uploadedFiles.push(file);
-    }
-    // TODO: Handle the uploaded files (e.g., associate with a block)
-  }
-
-  // --- Save Method (Upsert Logic) ---
-  async save() {
-    const user = this.currentUser();
-    if (!user) {
-      console.error('Cannot save module, user is not logged in.');
-      // TODO: Add user feedback (e.g., messageService.add)
-      return;
-    }
-
-    try {
-      // Determine if we are creating or updating the module
-      const existingModuleId = this.currentModule()?.id;
-      if (existingModuleId && existingModuleId > 0) {
-        // --- UPDATE PATH ---
-        const moduleToUpdate = new ModuleRequest(
-          this.currentModule().title,
-          this.currentModule().description,
-          this.currentModule().isTemplate,
-          this.currentModule().type,
-          user
-        );
-        console.log(this.currentModule());
-        await this.moduleHttpService.updateModule(
-          existingModuleId,
-          moduleToUpdate
-        );
-        const moduleVersionId = this.currentModuleVersion().id;
-        if (moduleVersionId)
-          await this.moduleVersionHttpService.updateModuleVersion(
-            moduleVersionId,
-            this.currentModuleVersion()
-          );
-      } else {
-        // --- CREATE PATH ---
-        const moduleToCreate = new ModuleRequest(
-          this.currentModule().title,
-          this.currentModule().description,
-          this.currentModule().isTemplate,
-          this.currentModule().type,
-          user
-        );
-        this.currentModule.set(
-          await this.moduleHttpService.createModule(moduleToCreate)
-        );
-        // Extract the first version created by the backend
-        if (
-          this.currentModule().versions &&
-          this.currentModule().versions.length > 0
-        ) {
-          this.currentModuleVersion.set(this.currentModule().versions[0]);
-        } else {
-          console.error(
-            'Backend did not return any module versions after creation.'
-          );
-          // TODO: Handle error
-          return; // Stop the process
-        }
-      }
-
-      // --- BLOCK HANDLING ---
-      const currentVersionId = this.currentModuleVersion().id;
-      if (currentVersionId && currentVersionId > 0) {
-        const currentBlocks = this.blocks();
-
-        // Separate blocks into new and existing based on ID presence/validity
-        const blocksToCreate: Block[] = [];
-        const blocksToUpdate: Block[] = [];
-
-        currentBlocks.forEach((block) => {
-          block.moduleVersionId = currentVersionId; // Assign correct version ID first
-          // Refined check: Assumes backend IDs are numbers > 0. Temporary IDs might be different.
-          console.log('block', block);
-          if (block.id && block.id > 0) {
-            blocksToUpdate.push(block);
-          } else {
-            // It's a new block or has a temporary ID
-            // Prepare for creation (remove temporary ID if necessary for backend)
-            const createData = { ...block };
-            // delete createData.id; // Uncomment if backend POST expects no ID
-            blocksToCreate.push(createData as Block);
-          }
-        });
-
-        console.log(
-          `Blocks to create: ${blocksToCreate.length}, Blocks to update: ${blocksToUpdate.length}`
-        );
-
-        // Create promises for all operations
-        const createPromises = blocksToCreate.map((block) => {
-          console.log(`Creating block: ${block.title}`);
-          return this.blockHttpService.createBlock(block);
-        });
-        const updatePromises = blocksToUpdate.map((block) => {
-          console.log(`Updating block ID: ${block.id}`);
-          return this.blockHttpService.updateBlock(block.id!, block); // Use non-null assertion for ID
-        });
-
-        // Execute all promises
-        const createdBlocks = await Promise.all(createPromises);
-        const updatedBlocks = await Promise.all(updatePromises);
-
-        // Combine results - careful about order if it matters
-        // A safer approach might be to map results back based on temp ID or original index if needed
-        // For now, assume concatenation works for updating the signal
-        const finalBlocks = [...updatedBlocks, ...createdBlocks].filter(
-          (b) => b
-        ); // Filter out potential nulls/errors
-
-        // Update the local blocks signal with the results
-        this.blocks.set(finalBlocks);
-
-        console.log(
-          'Blocks successfully saved/updated. Final blocks:',
-          this.blocks()
-        );
-        // TODO: Add success message (e.g., using messageService)
-      } else {
-        console.error(
-          'Cannot save blocks, module version ID is missing or invalid after module save/update.'
-        );
-        // TODO: Add user feedback
-      }
-    } catch (error) {
-      console.error('Error during save process:', error);
-      // TODO: Add user feedback (e.g., messageService.add for error)
-    }
-  }
-  // --- Fin save ---
-
-  // --- Game System Change Handler ---
-  onGameSystemChange(event: SelectChangeEvent) {
-    const selectedGameSystem = event.value;
-    console.log('Game System Selection Changed:', selectedGameSystem);
-    this.currentGameSystem.set(selectedGameSystem); // Update the signal directly
-    // Update the gameSystemId in the currentModuleVersion signal
+  onGameSystemChange(system: GameSystem) {
+    this.currentGameSystem.set(system);
     this.currentModuleVersion.update((version) => {
-      // Use selected ID, fallback to existing ID, then fallback to null/undefined
-      version.gameSystemId =
-        selectedGameSystem?.id ?? version.gameSystemId ?? undefined;
-      console.log(
-        'Module Version Game System ID updated to:',
-        version.gameSystemId
-      );
-      return { ...version }; // Return new object reference for signal update
+      version.gameSystemId = system?.id ?? version.gameSystemId ?? undefined;
+      return { ...version };
     });
   }
 
-  // Mise à jour de la méthode show() dans NewProjectComponent pour gérer les réponses de l'IA
-  show(type: string, blockId: number) {
-    this.ref = this.dialogService.open(AiConfigComponent, {
-      header: "Générer avec l'IA",
-      width: '60rem',
-      modal: true,
-      inputValues: {
-        type: type,
-      },
-    });
+  // Méthodes pour sauvegarder le projet
+  async save() {
+    // Logique de sauvegarde du projet
+  }
 
-    this.ref.onClose.subscribe((response: string) => {
-      if (!response || response.length === 0) return;
+  // Méthode pour générer avec l'IA
+  generateAIContent(data: { blockId: number; blockType: string }) {
+    this.dialogService
+      .open(AiConfigComponent, {
+        header: "Générer avec l'IA",
+        width: '60rem',
+        modal: true,
+        inputValues: {
+          type: data.blockType,
+        },
+      })
+      .onClose.subscribe((response: string) => {
+        if (!response || response.length === 0) return;
 
-      switch (type) {
-        case EBlockType.paragraph:
-          (
-            this.blocks().find((bl) => bl.id == blockId) as ParagraphBlock
-          ).paragraph = response;
-          break;
-        case EBlockType.music:
-          try {
-            const musicData = JSON.parse(response);
-            const musicBlock = this.blocks().find(
-              (bl) => bl.id == blockId
-            ) as MusicBlock;
-            musicBlock.label = musicData.label || 'Musique générée';
-            musicBlock.src = musicData.src || '';
-            // Si on a une description dans la réponse, on peut l'ajouter comme attribut supplémentaire
-            if (musicData.description) {
-              // Note: Vous devrez peut-être ajouter cette propriété au modèle MusicBlock
-              // musicBlock.description = musicData.description;
-              console.log(
-                'Description musicale générée:',
-                musicData.description
-              );
-            }
-          } catch (e) {
-            console.error('Erreur lors du parsing des données de musique:', e);
-          }
-          break;
-        case EBlockType.stat:
-          try {
-            const statData = JSON.parse(response);
-            const statBlock = this.blocks().find(
-              (bl) => bl.id == blockId
-            ) as StatBlock;
-            statBlock.statRules = statData.statRules || '';
-            statBlock.statValues = statData.statValues || '';
-          } catch (e) {
-            console.error(
-              'Erreur lors du parsing des données de statistiques:',
-              e
-            );
-          }
-          break;
-      }
-    });
+        // Traitement de la réponse selon le type de bloc
+        this.processAIResponse(data.blockId, data.blockType, response);
+      });
+  }
+
+  processAIResponse(blockId: number, blockType: string, response: string) {
+    // Logique de traitement de la réponse IA selon le type de bloc
   }
 
   generateCompleteModule() {
@@ -748,14 +452,16 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         // Update game system if provided
         if (moduleData.gameSystemId) {
           const gameSystemId = parseInt(moduleData.gameSystemId);
-          const gameSystem = this.gameSystems().find(gs => gs.id === gameSystemId);
+          const gameSystem = this.gameSystems().find(
+            (gs) => gs.id === gameSystemId
+          );
           if (gameSystem) {
             this.currentGameSystem.set(gameSystem);
 
             // Update the moduleVersion
-            this.currentModuleVersion.update(version => ({
+            this.currentModuleVersion.update((version) => ({
               ...version,
-              gameSystemId: gameSystemId
+              gameSystemId: gameSystemId,
             }));
           }
         }
@@ -778,7 +484,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                     index,
                     this.currentUser()!,
                     block.content || '',
-                    block.style || 'narrative',
+                    block.style || 'narrative'
                   );
                   break;
 
@@ -789,7 +495,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                     index,
                     this.currentUser()!,
                     block.label || block.title || 'Ambiance musicale',
-                    block.src || '',
+                    block.src || ''
                   );
                   break;
 
@@ -800,7 +506,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                     index,
                     this.currentUser()!,
                     block.statRules || '',
-                    block.statValues || block.content || '',
+                    block.statValues || block.content || ''
                   );
                   break;
               }
@@ -821,29 +527,16 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'success',
           summary: 'Génération réussie',
-          detail: 'Le module a été généré avec succès!'
+          detail: 'Le module a été généré avec succès!',
         });
       } catch (e) {
         console.error('Erreur lors du traitement de la réponse:', e);
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de traiter la réponse de l\'IA.'
+          detail: "Impossible de traiter la réponse de l'IA.",
         });
       }
     });
-  }
-
-  blockIsParagraphe(block: Block): ParagraphBlock | undefined {
-    if(block instanceof ParagraphBlock) return (Block as any) as ParagraphBlock
-    return undefined
-  }
-  blockIsMusic(block: Block): MusicBlock | undefined {
-    if(block instanceof MusicBlock) return (Block as any) as MusicBlock
-    return undefined
-  }
-  blockIsStat(block: Block): StatBlock | undefined {
-    if(block instanceof StatBlock) return (Block as any) as StatBlock
-    return undefined
   }
 }

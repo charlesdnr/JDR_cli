@@ -1,0 +1,10 @@
+<div class="stat-block">
+  @if(statBlock() && statBlock().statValues) {
+  <pre class="stat-values">{{ statBlock().statValues }}</pre>
+  } @else {
+  <div class="stat-placeholder">
+    <i class="pi pi-folder" aria-hidden="true"></i>
+    <span>Statistique</span>
+  </div>
+  }
+</div>

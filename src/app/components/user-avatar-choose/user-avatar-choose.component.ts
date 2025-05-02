@@ -28,6 +28,8 @@ export class UserAvatarChooseComponent implements OnInit {
   }
 
   getImageForUser(userId: number): string | undefined {
+    // const us = userId;
+    // console.log(us);
     return ''
   }
 }

@@ -1,0 +1,33 @@
+.stat-block {
+  padding: 15px;
+  min-height: 120px !important;
+  height: calc(100% - 50px);
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-values {
+  width: 100%;
+  min-height: 120px;
+  max-height: 400px;
+  overflow: auto;
+  background-color: var(--background-color);
+  padding: 10px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  color: var(--font-color);
+}
+
+.stat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  gap: 10px;
+
+  i {
+    font-size: 2rem;
+  }
+}

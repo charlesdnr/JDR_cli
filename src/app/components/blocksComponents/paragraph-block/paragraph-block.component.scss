@@ -1,0 +1,14 @@
+.text-block {
+  padding: 15px;
+  min-height: 120px !important;
+  height: calc(100% - 50px);
+  display: flex;
+  flex-direction: column;
+
+  textarea {
+    width: 100%;
+    min-height: 120px !important;
+    height: 100%;
+    resize: vertical;
+  }
+}
