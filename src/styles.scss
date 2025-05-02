@@ -1,142 +1,262 @@
-@use "./assets/sass/themes/dark.scss";
-//@use './assets/sass/themes/light.scss';
-@use "./assets/sass/common.scss";
-@import "primeicons/primeicons.css";
+@use 'assets/sass/core';
 
-:root {
-  --p-button-secondary-background: var(--background-color);
-  --p-button-primary-hover-color: var(--text-color);
+:root{
+  --p-button-primary-background: var(--primary-color);
+  --p-button-primary-border-color: var(--primary-color);
+  --p-inputtext-focus-border-color: var(--primary-color);
+  --p-button-primary-hover-background: var(--primary-color);
+  --p-button-primary-hover-border-color: var(--primary-color);
+  --p-button-primary-active-background: var(--neutral-color);
+  --p-button-primary-active-border-color: var(--neutral-color);
+  --p-dialog-color: var(--font-color);
+  --p-button-outlined-secondary-color: var(--font-color);
+  --p-dialog-background: var(--background-color);
 
-  //   --p-button-padding-y: 10px;
+  --scrollbar-bg: rgba(0, 0, 0, 0);
+  --scrollbar-thumb-bg: var(--primary-color);
+  --scrollbar-thumb-hover: #2980b9;
+  --scrollbar-width: 8px;
+  --scrollbar-border-radius: 4px;
+  --scrollbar-active-shadow: 0 0 6px rgba(52, 152, 219, 0.5);
 
-  // p-tree
-  --p-tree-background: var(--background-color);
-  --p-surface-900: var(--background-color);
-  --p-tree-node-toggle-button-color: white;
-  --p-tree-node-toggle-button-hover-background: var(--background-color);
-  --p-tree-node-toggle-button-selected-hover-background: var(--secondary-color);
-  --p-tree-node-selected-background: var(--primary-color);
-  --p-tree-node-selected-color: var(--background-color);
-  --p-tree-node-icon-selected-color: var(--background-color);
-  --p-tree-node-hover-background: var(--secondary-color);
-  --p-tree-node-toggle-button-selected-hover-color: white;
+  // accordéon primeng
+  --p-accordion-panel-border-color: var(--neutral-color);
+  --p-accordion-header-active-background: var(--background-color);
+  --p-accordion-header-active-color: var(--font-color);
+  --p-accordion-content-border-color: var(--neutral-color);
+  --p-accordion-content-background: var(--background-color);
+  --p-accordion-content-color: var(--font-color);
+  --p-accordion-content-padding: var(--padding);
+  --p-accordion-panel-border-color: var(--neutral-color);
+  --p-accordion-header-color: var(--font-color);
+  --p-accordion-header-border-color: var(--neutral-color);
+  --p-accordion-header-background: var(--background-color);
+  --p-accordion-header-hover-color: var(--font-color);
+  --p-accordion-header-hover-background: var(--background-color);
+  --p-accordion-header-active-hover-background: var(--background-color);
+  --p-accordion-content-padding: var(--padding);
+  --p-accordion-header-padding: var(--padding);
 
-  //contextmenu
-  --p-contextmenu-item-focus-background: var(--secondary-color);
+  // p-float label
+  --p-floatlabel-focus-color: var(--font-color);
+  --p-floatlabel-color: var(--neutral-color);
+  --p-floatlabel-active-font-size: 1rem;
+  // input text
+  --p-inputtext-color: var(--font-color);
+  --p-inputtext-border-color: var(--neutral-color);
 
-  //toolbar
-  --p-toolbar-border-color: white;
+  // TreeTable
+  --p-treetable-header-cell-border-color: var(--neutral-color);
+  --p-treetable-row-selected-color: var(--font-color-invert);
+  --p-treetable-body-cell-border-color: var(--neutral-color);
+  --p-treetable-row-selected-color: var(--font-color);
+  --p-treetable-row-selected-background: var(--background-color-lighter);
+  --p-treetable-header-cell-selected-background: var(--background-color-lighter);
+  --p-treetable-header-cell-selected-color: var(--font-color);
+  --p-treetable-header-cell-color: var(--font-color);
+  --p-treetable-sort-icon-color: var(--primary-color);
+  --p-treetable-sort-icon-hover-color: var(--primary-color);
 
-  //danger button
-  --p-button-danger-color: white;
+  // tabs
+  --p-tabs-tab-background: var(--background-color);
+  --p-tabs-tab-hover-background: var(--background-color);
+  --p-tabs-tab-active-background: var(--background-color);
 
-  // textearea
-  --p-textarea-background: var(--background-color);
+  --p-tabs-tab-gap: calc(var(--padding) / 2);
+  --p-tabs-tab-border-color: var(--background-color);
+  // --p-tabs-tab-active-border-color: var(--primary-color);
+  --p-tabs-tab-active-color:var(--primary-color);
+  // --p-tabs-tab-color: var(--font-color);
+  --p-tabs-tab-focus-ring-color: var(--primary-color);
+  --p-tabs-tablist-background: var(--background-color);
+  --scrollbar-bg: var(--primary-color);
+
+  --p-tabs-tabpanel-background: var(--background-color);
+  --p-tabs-tabpanel-border-color: var(--background-color);
+  --p-tabs-tabpanel-color: var(--font-color);
+  --p-tabs-tabpanel-focus-ring-color: var(--primary-color);
+  --p-tabs-active-bar-background: var(--primary-color);
+  --p-tabs-tab-active-border-color: var(--background-color);
+  --p-tabs-tab-hover-border-color: var(--background-color);
+  --p-tabs-tab-padding: calc(var(--padding) / 2);
+
+  // textarea
   --p-textarea-focus-border-color: var(--primary-color);
 
-  //tabs panel
-  --p-tabs-tab-active-border-color: var(--text-color);
-  --p-tabs-tab-active-color: var(--background-color);
-  --p-tabs-tablist-border-color:var(--text-color);
-  --p-tabs-tab-border-color:var(--text-color);
-  --p-tabs-tab-color:var(--text-color);
-  --p-tabs-active-bar-background: var(--background-color);
-  --p-tabs-tab-hover-border-color: var(--text-color);
-  --p-tabs-tab-hover-color: var(--text-color);
+  --p-button-text-primary-color: var(--primary-color);
+
+
+  //tab
+  --p-datatable-body-cell-selected-border-color: var(--neutral-color);
+  --p-datatable-row-selected-color: var(--primary-color);
+  --p-datatable-row-selected-background: var(--primary-color-transparent-50);
+  --p-datatable-row-focus-ring-color: var(--primary-color);
+
+  //button
+  --p-button-primary-focus-ring-color: var(--primary-color);
+  --p-button-text-primary-hover-background: var(--primary-color-transparent-50);
+  --p-button-text-primary-active-background: var(--primary-color-transparent-50);
+
+  --p-button-success-background: var(--success-color);
+  --p-button-success-border-color: var(--success-color);
 
   //select
-  --p-select-background: var(--background-color);
   --p-select-focus-border-color: var(--primary-color);
-  --p-select-option-selected-focus-background: var(--primary-color);
-  --p-select-option-selected-focus-color: black;
-}
-h1 {
-  margin-block-start: 0;
-  margin-block-end: 0;
-  margin-inline-start: 0px;
-}
-p {
-  margin-block-start: 0;
-  margin-block-end: 0;
+  --p-select-option-selected-focus-background: var(--primary-color-transparent-50);
+  --p-select-option-selected-background: var(--primary-color-transparent-50);
+  --p-select-option-selected-color: var(--primary-color);
+  --p-select-option-hover-background: var(--primary-color-transparent-50);
+  --p-select-option-selected-focus-color: var(--primary-color);
+
+  //checkbox
+  --p-checkbox-checked-background: var(--primary-color);
+  --p-checkbox-checked-border-color: var(--primary-color);
+  --p-checkbox-checked-hover-background: var(--neutral-color);
+  --p-checkbox-checked-hover-border-color: var(--neutral-color);
+
+  --p-surface-900: var(--background-color);
+  --p-surface-950: var(--background-color-lighter);
+  --p-transition-duration: 0.1s;
+
+  //fieldset
+  --p-fieldset-background: var(--background-color);
+  --p-fieldset-border-color: var(--neutral-color);
+  --p-fieldset-color: var(--font-color);
+  --p-fieldset-padding: 10px;
+  --p-fieldset-legend-padding: 5px;
+  --p-fieldset-legend-background: var(--background-color-lighter);
+
+  //multi-select
+  --p-multiselect-border-color: var(--neutral-color);
+  --p-multiselect-focus-border-color: var(--primary-color);
+
+  //p-tree
+  --p-tree-background: var(--background-color);
+  --p-tree-node-selected-background: var(--primary-color-transparent-50);
+  --p-tree-node-selected-color: var(--primary-color);
+  --p-tree-node-icon-selected-color: var(--neutral-color);
+
+  //danger button
+  --p-button-danger-background: var(--danger-color);
+  --p-button-danger-border-color: var(--danger-color);
+  --p-button-text-danger-color: var(--danger-color);
 }
 
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+body.resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+body.resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.resizing a,
+body.resizing button,
+body.resizing [role="button"],
+body.resizing input,
+body.resizing select,
+body.resizing [contenteditable="true"] {
+  pointer-events: none !important;
+}
+
+
+/* Pour Firefox */
 * {
-  /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) transparent;
-
-  /* IE/Edge legacy */
-  -ms-overflow-style: none;
+  scrollbar-color: var(--scrollbar-thumb-bg) transparent;
 }
 
-/* Pour webkit (Chrome, Safari, nouveau Edge) */
+/* Pour Chrome, Edge, et Safari */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px; /* Pour les scrollbars horizontales */
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent !important;
+  background: var(--scrollbar-bg);
+  border-radius: var(--scrollbar-border-radius);
+  margin: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--primary-color) !important;
-  border-radius: 4px;
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-border-radius);
+  transition: background 0.2s ease;
 }
 
-::-webkit-scrollbar-corner {
-  background: transparent !important;
-}
-
-/* Effet hover optionnel */
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary-color) !important;
-}
-.p-inputtext{
-  width: 100%;
-  padding-block: 5px;
+  background: var(--scrollbar-thumb-hover);
 }
 
-.p-button{
-  width: 100%;
-  padding-block: 5px;
-}
-/* Styles supplémentaires pour les composants AI */
-:root {
-  /* Variable pour les animations liées à l'IA */
-  --ai-animation-duration: 0.8s;
-  --ai-animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
-  --ai-highlight-color: rgba(var(--primary-color-rgb), 0.2);
+::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-hover);
+  box-shadow: var(--scrollbar-active-shadow);
 }
 
-/* Animation de pulse pour éléments générés par IA */
-.ai-pulse {
-  animation: aiPulse 2s var(--ai-animation-timing) infinite;
+::-webkit-scrollbar-button {
+  display: none;
 }
 
-@keyframes aiPulse {
-  0% { box-shadow: 0 0 0 0 var(--ai-highlight-color); }
-  70% { box-shadow: 0 0 0 10px rgba(var(--primary-color-rgb), 0); }
-  100% { box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0); }
+.biblioteque-wrapper .container_biblio,
+.scrollable-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) transparent;
+  overflow-y: auto;
 }
 
-/* Adaptations pour les formulaires avec génération IA */
-.p-button.p-button-ai {
-  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  border: none;
-  transition: all 0.3s ease;
+@keyframes scrollbarFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-.p-button.p-button-ai:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+::-webkit-scrollbar-thumb {
+  animation: scrollbarFadeIn 0.3s ease;
 }
 
-.p-button.p-button-ai .p-button-icon {
-  animation: rotate 1.5s linear infinite;
+@media (pointer: coarse) {
+  :root {
+    --scrollbar-width: 12px;
+  }
 }
 
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.dark-theme {
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb-bg: #2c3e50;
+  --scrollbar-thumb-hover: #34495e;
+  --scrollbar-active-shadow: 0 0 6px rgba(52, 73, 94, 0.5);
+}
+
+.custom-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) transparent;
+}
+
+.horizontal-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
 }

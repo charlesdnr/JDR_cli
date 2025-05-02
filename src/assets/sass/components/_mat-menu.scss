@@ -1,0 +1,11 @@
+@use "../core";
+
+[cdkMenu]{
+    background-color: core.$input-color;
+}
+
+[cdkMenuItem]{
+    margin: 8px 12px;
+    padding: 0;
+    outline: none;
+}

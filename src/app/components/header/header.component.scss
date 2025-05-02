@@ -35,7 +35,7 @@ header {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    padding-right: 25px;
+    // padding-right: 25px;
 
     @media (max-width: 768px) {
       padding-right: 10px;
@@ -131,7 +131,7 @@ header {
         height: 40px;
         padding: 2px !important;
         background-color: transparent !important;
-        color: var(--text-color);
+        color: var(--font-color);
 
         @media (max-width: 480px) {
           width: 40px;

@@ -1,10 +1,11 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { HeaderComponent } from './components/header/header.component';
 import { filter } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -14,14 +15,11 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
+  private _ = inject(ThemeService);
+  private router = inject(Router);
+
   onAuth = false;
   url = '';
-
-  constructor(private translate: TranslateService, private router: Router) {
-    translate.addLangs(['fr-FR', 'en-EN']);
-    translate.setDefaultLang('fr-FR');
-    translate.use('fr-FR');
-  }
 
   ngAfterViewInit(): void {
     this.router.events

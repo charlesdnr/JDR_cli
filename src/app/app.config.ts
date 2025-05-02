@@ -1,6 +1,8 @@
 import {
   ApplicationConfig,
   importProvidersFrom,
+  inject,
+  provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -14,7 +16,11 @@ import {
 import { providePrimeNG } from 'primeng/config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import {
+  TranslateLoader,
+  TranslateModule,
+  TranslateService,
+} from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import Aura from '@primeng/themes/aura';
@@ -24,11 +30,20 @@ import { firebaseConfig } from '../environments/environment.secret';
 import { provideLottieOptions } from 'ngx-lottie';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { firstValueFrom } from 'rxjs';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
 ) => new TranslateHttpLoader(http, '/assets/i18n/', '.json');
 
+// Fonction d'initialisation pour TranslateService
+export function initializeTranslateFactory(translate: TranslateService) {
+  return () => {
+    translate.addLangs(['en-US', 'fr-FR']);
+    translate.setDefaultLang('fr-FR');
+    return firstValueFrom(translate.use('fr-FR'));
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,15 +53,12 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-          preset: Aura,
-          options: {
-            cssLayer: {
-                name: 'primeng',
-                order: 'styles.scss, assets/sass/, primeng'
-            }
-        }
-      }
-  }),
+        preset: Aura,
+        options: {
+          cssLayer: 'styles.scss,assets/sass/*,primeng',
+        },
+      },
+    }),
     importProvidersFrom([
       TranslateModule.forRoot({
         loader: {
@@ -61,8 +73,11 @@ export const appConfig: ApplicationConfig = {
     provideLottieOptions({
       player: () => import('lottie-web'),
     }),
+    provideAppInitializer(() =>
+      initializeTranslateFactory(inject(TranslateService))()
+    ),
     DialogService,
     MessageService,
-    ConfirmationService
+    ConfirmationService,
   ],
 };

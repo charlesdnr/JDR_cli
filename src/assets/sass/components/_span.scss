@@ -1,0 +1,25 @@
+@use "../core";
+
+$pill-types: (
+   primary: core.$primary-color,
+   danger: core.$danger-color,
+   success: core.$success-color,
+   warn: core.$warn-color,
+   info: core.$info-color,
+   neutral: core.$neutral-color,
+);
+
+span.x {
+   &.pill {
+      border-radius: core.$inner-radius;
+      padding: 0 0.3rem;
+      font-weight: 500;
+      color: white;
+
+      @each $type, $color in $pill-types {
+         &.#{$type} {
+            background-color: $color;
+         }
+      }
+   }
+}

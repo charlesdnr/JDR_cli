@@ -1,10 +1,5 @@
 <div class="container-login">
   <div class="container-left">
-    <div class="container-head">
-      <img src="/assets/images/logo.png" alt="" />
-      <h1>{{ "Lore Tavern" | translate }}</h1>
-    </div>
-
     <form
       class="container-form"
       [formGroup]="formgroup()"
@@ -12,55 +7,64 @@
     >
       <h1 class="h1">{{ labelh2() | translate }}</h1>
       @if(!isLogin()){
-      <p-float-label variant="on">
+      <div class="container-label-button">
+        <label for="login">{{ "Nom d'utilisateur" | translate }}</label>
         <input
           class="input"
           id="login"
           required="true"
           type="text"
           pInputText
+          placeholder="Nom d'utilisateur"
           formControlName="login"
           autocomplete="false"
         />
-        <label for="login">{{ "Nom d'utilisateur" | translate }}</label>
-      </p-float-label>
+      </div>
       }
-
-      <p-float-label variant="on">
-        <input type="text" id="email" pInputText formControlName="email" />
+      <div class="container-label-button">
         <label for="email">{{ "Adresse Mail" | translate }}</label>
-      </p-float-label>
+        <input
+          type="text"
+          placehold
+          id="email"
+          placeholder="example@gmail.com"
+          pInputText
+          formControlName="email"
+        />
+      </div>
 
-      <p-float-label [ngClass]="{ 'last-label': isLogin() }" variant="on">
+      <div class="container-label-button">
+        <label for="password">{{ "Mot de passe" | translate }}</label>
         <p-password
           label="Password"
           id="password"
           required="true"
+          [toggleMask]="true"
           class="input"
           formControlName="password"
           [feedback]="false"
         />
-        <label for="password">{{ "Mot de passe" | translate }}</label>
-      </p-float-label>
+      </div>
+
       @if(!isLogin()){
-      <p-float-label [ngClass]="{ 'last-label': !isLogin() }" variant="on">
+      <div class="container-label-button">
+        <label for="confirm">{{
+          "Confirmez le mot de passe" | translate
+        }}</label>
         <p-password
           id="confirm"
           required="true"
+          [toggleMask]="true"
           class="input"
           formControlName="confirm"
           [feedback]="false"
         />
-        <label for="confirm">{{
-          "Confirmez le mot de passe" | translate
-        }}</label>
-      </p-float-label>
+      </div>
       }
       <p-button
         class="input button"
         [label]="labelButton() | translate"
         [disabled]="!formgroup().valid"
-        severity="secondary"
         type="submit"
       />
     </form>
@@ -76,7 +80,7 @@
       <button (click)="loginGithub()">
         <img src="assets/images/github.png" alt="logo google" />
         <p>
-          {{ labelButton()  === "Connexion" ? "Se Connecter" : "S'enregistrer" }}
+          {{ labelButton() === "Connexion" ? "Se Connecter" : "S'enregistrer" }}
           avec Github
         </p>
       </button>
@@ -86,7 +90,6 @@
       <p-button
         [routerLink]="isLogin() ? ['/auth', 'register'] : ['/auth', 'login']"
         class="button"
-        severity="secondary"
         [label]="labelButton2() | translate"
       />
     </div>

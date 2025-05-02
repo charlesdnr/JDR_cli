@@ -1,0 +1,13 @@
+@use "../core";
+
+ngx-extended-pdf-viewer {
+
+   // Fix pour le canva du pdf
+   .hiddenCanvasElement {
+      display: none !important;
+   }
+
+   #viewerContainer {
+      background-color: core.$background-color !important;
+   }
+}

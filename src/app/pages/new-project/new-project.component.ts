@@ -45,7 +45,6 @@ import { GameSystemHttpService } from '../../services/https/game-system-http.ser
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import aleaRNGFactory from 'number-generator/lib/aleaRNGFactory';
 import { TabsModule } from 'primeng/tabs';
 import { SelectChangeEvent, SelectModule } from 'primeng/select';
 import { StatBlock } from '../../classes/StatBlock';
@@ -56,6 +55,9 @@ import {
   DynamicDialogRef,
 } from 'primeng/dynamicdialog';
 import { AiConfigComponent } from '../../components/ai-config/ai-config.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { UserAvatarChooseComponent } from '../../components/user-avatar-choose/user-avatar-choose.component';
+
 
 // --- Interface Position ---
 interface Position {
@@ -80,6 +82,8 @@ interface Position {
     TranslateModule,
     SelectModule,
     DynamicDialogModule,
+    TooltipModule,
+    UserAvatarChooseComponent
   ],
   templateUrl: './new-project.component.html',
   styleUrl: './new-project.component.scss',
@@ -376,6 +380,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         return 'pi pi-book';
       case EBlockType.stat:
         return 'pi pi-chart-bar';
+      case EBlockType.picture:
+        return 'pi pi-image';
       default:
         return 'pi pi-question-circle'; // Default icon
     }
@@ -487,13 +493,15 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   getBlockPreview(type: EBlockType): string | undefined {
     switch (type) {
       case EBlockType.paragraph:
-        return 'Bloc Paragraphe';
+        return 'Paragraphe';
       case EBlockType.music:
-        return 'Bloc Audio';
+        return 'Audio';
       case EBlockType.module:
-        return 'Bloc Module';
+        return 'Module';
       case EBlockType.stat:
-        return 'Bloc Statistique'; // Corrected typo
+        return 'Statistique';
+      case EBlockType.picture:
+        return 'Image';
       default:
         return undefined;
     }

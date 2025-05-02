@@ -24,7 +24,7 @@
   }
 }
 
-.container{
+.container-folder{
   height: 100%;
   width: 100%;
   display: flex;
@@ -42,7 +42,7 @@
   .folders{
     flex-shrink: 0;
     padding: 10px;
-    border-left: 1px solid var(--primary-color);
+    border-left: 1px solid var(--neutral-color);
   }
 }
 
