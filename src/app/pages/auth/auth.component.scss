@@ -24,7 +24,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: blur(2px);
+    // filter: blur(2px);
     z-index: 0;
   }
 
@@ -45,7 +45,9 @@
     padding: var(--padding);
     border-radius: var(--padding);
     z-index: 1;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+      rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+      rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 
     @media (max-width: 1024px) {
       width: 60%;
@@ -105,7 +107,7 @@
     }
 
     .no-account {
-      flex: 2;
+      // flex: 2;
       width: 100%;
       height: 100%;
       display: flex;
@@ -150,51 +152,10 @@
   }
 }
 
-button {
-  width: 20rem;
-  height: 3rem;
-  font-size: 1rem;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--font-color-invert);
-  border-radius: 5px;
-  border: 1px solid var(--font-color-invert);
-  color: var(--font-color);
-  cursor: pointer;
-
-  @media (max-width: 768px) {
-    width: 15rem;
-    height: 2.75rem;
-  }
-
-  @media (max-width: 480px) {
-    width: 90%;
-    height: 2.5rem;
-    font-size: 0.9rem;
-  }
-
-  img {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  p {
-    flex: 9;
-
-    @media (max-width: 480px) {
-      font-size: 0.9rem;
-    }
-  }
-}
-
 .separator {
   width: 50%;
   height: 1px;
-  background-color: var(--font-color);
+  background-color: var(--neutral-color);
   margin-bottom: 20px;
 
   @media (max-width: 768px) {
@@ -224,4 +185,18 @@ button {
   display: flex;
   flex-direction: column;
   text-align: left;
+}
+::ng-deep {
+  .p-button {
+    width: 100% !important;
+    min-width: 250px !important; // Largeur minimale pour tous les boutons
+    min-height: 40px !important;
+  }
+  
+  // Pour assurer que le bouton de connexion standard a aussi la même largeur
+  .input.button .p-button,
+  .button.p-button {
+    width: 100% !important;
+    min-width: 250px !important;
+  }
 }

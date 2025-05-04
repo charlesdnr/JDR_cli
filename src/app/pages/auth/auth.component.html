@@ -70,28 +70,50 @@
     </form>
     <div class="separator"></div>
     <div class="providers">
-      <button (click)="loginGoogle()">
-        <img src="assets/images/google.png" alt="logo google" />
-        <p>
-          {{ labelButton() === "Connexion" ? "Se Connecter" : "S'enregistrer" }}
-          avec Google
-        </p>
-      </button>
-      <button (click)="loginGithub()">
-        <img src="assets/images/github.png" alt="logo google" />
-        <p>
-          {{ labelButton() === "Connexion" ? "Se Connecter" : "S'enregistrer" }}
-          avec Github
-        </p>
-      </button>
+      <p-button
+        (click)="loginGoogle()"
+        severity="secondary"
+        [label]="
+          labelButton() === 'Connexion'
+            ? 'Se Connecter avec Google'
+            : 'S\'enregistrer avec Google'
+        "
+      >
+        <ng-template pTemplate="icon">
+          <img
+            src="assets/images/google.png"
+            alt="Google"
+            style="width: 20px; height: 20px"
+          />
+        </ng-template>
+      </p-button>
+      <p-button
+        (click)="loginGoogle()"
+        severity="secondary"
+        [label]="
+          labelButton() === 'Connexion'
+            ? 'Se Connecter avec Github'
+            : 'S\'enregistrer avec Github'
+        "
+      >
+        <ng-template pTemplate="icon">
+          <img
+            src="assets/images/github.png"
+            alt="Github"
+            style="width: 20px; height: 20px"
+          />
+        </ng-template>
+      </p-button>
     </div>
     <div class="no-account">
-      <p>{{ noAccountLabel() | translate }}</p>
-      <p-button
+      <p>{{ noAccountLabel() | translate }}
+        <p-button
+        [link]="true"
         [routerLink]="isLogin() ? ['/auth', 'register'] : ['/auth', 'login']"
         class="button"
         [label]="labelButton2() | translate"
       />
+      </p>
     </div>
   </div>
 </div>
