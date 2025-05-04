@@ -6,13 +6,17 @@ import { EBlockType } from '../../../enum/BlockType';
 import {
   DragDropModule
 } from '@angular/cdk/drag-drop';
+import { InputTextModule } from 'primeng/inputtext';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-block-item',
   imports: [
     ButtonModule,
     TooltipModule,
-    DragDropModule
+    DragDropModule,
+    InputTextModule,
+    TranslateModule
   ],
   templateUrl: './block-item.component.html',
   styleUrl: './block-item.component.scss'

@@ -3,10 +3,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  // gap: 20px;
   height: 100%;
   width: 100%;
-  padding: 2rem;
 }
 
 .header-project{
@@ -14,16 +13,27 @@
   width: 100%;
   display: flex;
   max-height: 50px;
-  gap: 10px;
+  gap: var(--padding);
+  margin: calc(var(--padding));
+  margin-top: 20px;
 
   .searchbar{
-    flex: 3;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--padding) / 2);
+    width: auto;
+    flex-shrink: 0;
   }
   .filtres{
-    flex: 7;
+    flex: 1;
   }
 }
-
+.modules-container{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1rem;
+}
 .container-folder{
   height: 100%;
   width: 100%;
@@ -34,15 +44,23 @@
     flex-grow: 1;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+    gap: var(--padding);
     align-items: start;
     justify-content: flex-start;
+    padding: var(--padding);
   }
 
   .folders{
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
-    border-left: 1px solid var(--neutral-color);
+    border-right: 1px solid var(--neutral-color);
+  box-shadow: 5px 0 5px -5px var(--neutral-color);
+
+    ::ng-deep .p-button {
+      width: 100%;
+    }
   }
 }
 
@@ -52,8 +70,6 @@
 }
 
 .container-dialog {
-  padding: 10px;
-  padding-top: 30px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -63,4 +79,8 @@
 }
 ::ng-deep .p-tree-node-icon {
   margin-right: 3px;
+}
+.container-label{
+  display: flex;
+  flex-direction: column;
 }

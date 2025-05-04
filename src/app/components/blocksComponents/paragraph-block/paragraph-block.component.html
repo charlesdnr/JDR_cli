@@ -1,8 +1,21 @@
 <div class="text-block">
-  <textarea
-    pTextarea
-    placeholder="Mon Histoire commence maintenant..."
-    [(ngModel)]="content"
-    (ngModelChange)="onContentChange($event)"
-  ></textarea>
+  <div class="basic-block">
+    <div class="container-label">
+      <label for="title"> {{ "Titre" | translate }} </label>
+      <input type="text" pInputText />
+    </div>
+    <div class="container-label">
+      <p-select  />
+    </div>
+  </div>
+  <div class="container-label">
+    <label for="paragraph"> {{ "Pararagraphe" | translate }} </label>
+    <textarea
+      pTextarea
+      id="paragraph"
+      placeholder="Mon Histoire commence maintenant..."
+      [(ngModel)]="content"
+      (ngModelChange)="onContentChange($event)"
+    ></textarea>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,6 +37,7 @@ export class AccountComponent {
   });
 
   currentUser = computed(() => this.userService.currentJdrUser())
+  // loading = signal(false)
 
   saveUser() {
     const user = this.currentUser()

@@ -82,6 +82,10 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.isLogin() ? 'Pas de compte ?' : 'Déjà un compte ?'
   );
 
+  loading = signal(false);
+  loadingGoogle = signal(false);
+  loadingGithub = signal(false);
+
   private routeSubscription!: Subscription;
 
   ngOnDestroy(): void {
@@ -103,50 +107,64 @@ export class AuthComponent implements OnInit, OnDestroy {
       if (this.isLogin()) {
         this.loginUser(user);
       } else {
+        this.loading.set(true);
         this.httpAuth
           .signup(user.email, user.password, {})
           .then(() => {
             this.loginUser(user);
           })
-          .catch((err) => console.error(err));
+          .catch((err) => {
+            console.error(err);
+            this.loading.set(false);
+          });
       }
     }
   }
 
   loginUser(user: User) {
+    this.loading.set(true);
     this.httpAuth
       .login(user.email, user.password)
       .then(async (value) => {
-        await this.checkOurLogin(value)
+        await this.checkOurLogin(value);
       })
-      .catch((err: HttpErrorResponse) =>
+      .catch((err: HttpErrorResponse) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
           detail: `Error : ${err.message}`,
-        })
-      );
+        });
+        this.loading.set(false);
+      });
   }
 
   loginGoogle() {
+    this.loadingGoogle.set(true);
     this.httpAuth
       .loginGoogle()
       .then(async (value) => {
-        await this.checkOurLogin(value)
+        await this.checkOurLogin(value);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        this.loadingGoogle.set(false);
+      });
   }
 
   loginGithub() {
+    this.loadingGithub.set(true);
     this.httpAuth
       .loginGithub()
       .then(async (value) => {
-        await this.checkOurLogin(value)
+        await this.checkOurLogin(value);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        this.loadingGithub.set(false);
+      });
   }
 
-  async checkOurLogin(value: UserCredential){
+  async checkOurLogin(value: UserCredential) {
     if (this.isLogin() && value.user.email) {
       try {
         const email = value.user.email;
@@ -159,15 +177,20 @@ export class AuthComponent implements OnInit, OnDestroy {
           detail: 'Connecté en tant que ' + value.user.email,
         });
       } catch (err) {
-        console.log('erreur : ', err)
+        console.log('erreur : ', err);
+      } finally {
+        // Réinitialiser tous les loading
+        this.loading.set(false);
+        this.loadingGoogle.set(false);
+        this.loadingGithub.set(false);
       }
-    } else if (!this.isLogin()){
+    } else if (!this.isLogin()) {
       try {
         const email = value.user.email;
         const username = (this.formgroup().value as any).login;
         const resp: User = await this.httpUser.post({ email: email, username: username });
         this.httpUser.currentJdrUser.set(resp);
-        console.log(resp)
+        console.log(resp);
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
@@ -175,7 +198,12 @@ export class AuthComponent implements OnInit, OnDestroy {
           detail: 'Connecté en tant que ' + value.user.email,
         });
       } catch (err) {
-        console.log('erreur : ', err)
+        console.log('erreur : ', err);
+      } finally {
+        // Réinitialiser tous les loading
+        this.loading.set(false);
+        this.loadingGoogle.set(false);
+        this.loadingGithub.set(false);
       }
     }
   }

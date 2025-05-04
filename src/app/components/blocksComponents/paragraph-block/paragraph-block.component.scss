@@ -4,11 +4,20 @@
   height: calc(100% - 50px);
   display: flex;
   flex-direction: column;
+  gap: var(--padding);
 
   textarea {
     width: 100%;
     min-height: 120px !important;
     height: 100%;
     resize: vertical;
+  }
+  .container-label {
+    // padding: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+  .basic-block {
+    display: flex;
   }
 }

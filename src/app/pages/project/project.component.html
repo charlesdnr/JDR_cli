@@ -1,25 +1,4 @@
-<div class="header-project">
-  <div class="searchbar">
-    <p-iconfield>
-      <p-inputicon styleClass="pi pi-search" />
-      <input type="text" pInputText placeholder="Search" />
-    </p-iconfield>
-  </div>
-  <div class="container-button">
-    <p-button icon="pi pi-plus" label="Nouveau module" routerLink="/new-project" />
-  </div>
-  <div class="filtres"></div>
-</div>
 <div class="container-folder">
-  <div class="modules-list">
-    @for(module of displayedModules(); track module){
-    <app-module-viewer [moduleId]="module.moduleId" />
-    }
-    <h2> Aucun Dossier Lié </h2>
-    @for(module of moduleWithoutFolder(); track module){
-      <app-module-viewer [moduleId]="module.moduleId" />
-    }
-  </div>
   <div class="folders">
     <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
     <p-tree
@@ -37,6 +16,27 @@
       (onClick)="showNewFolderDialog(null)"
     />
   </div>
+  <div class="modules-container">
+    <div class="header-project">
+      <div class="searchbar">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input type="text" pInputText placeholder="Search" />
+        </p-iconfield>
+        <p-button icon="pi pi-plus" label="Nouveau module" routerLink="/new-project" />
+      </div>
+      <div class="filtres"></div>
+    </div>
+    <div class="modules-list">
+      @for(module of displayedModules(); track module){
+        <app-module-viewer [moduleId]="module.moduleId" />
+        }
+        <h2> Aucun Dossier Lié </h2>
+        @for(module of moduleWithoutFolder(); track module){
+          <app-module-viewer [moduleId]="module.moduleId" />
+        }
+    </div>
+  </div>
 </div>
 
 <p-dialog
@@ -46,10 +46,10 @@
   [style]="{ width: '25rem' }"
 >
   <div class="container-dialog">
-    <p-floatlabel variant="on">
-      <input id="username" pInputText [(ngModel)]="folderName" />
+    <div class="container-label">
       <label for="username">Nom du dossier</label>
-    </p-floatlabel>
+      <input id="username" pInputText [(ngModel)]="folderName" />
+    </div>
     <div class="container-button">
       <p-button
         label="Annuler"

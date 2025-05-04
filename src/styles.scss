@@ -144,18 +144,23 @@
   //danger button
   --p-button-danger-background: var(--danger-color);
   --p-button-danger-border-color: var(--danger-color);
+  --p-button-danger-color: var(--font-color);
   --p-button-text-danger-color: var(--danger-color);
 
   // secondary button
   --p-button-secondary-background: transparent;
   --p-button-secondary-border-color: var(--neutral-color);
   --p-button-secondary-color: var(--font-color);
+  --p-button-secondary-hover-background: transparent;
 
   //button link
   --p-button-link-color: var(--primary-color);
   --p-button-link-hover-color: var(--primary-color);
 
   --p-button-success-color: var(--font-color-invert);
+
+  // p-avatar
+  --p-avatar-background: var(--background-color-lighter);
 }
 
 

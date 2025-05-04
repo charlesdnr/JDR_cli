@@ -66,6 +66,7 @@
         [label]="labelButton() | translate"
         [disabled]="!formgroup().valid"
         type="submit"
+        [loading]="loading()"
       />
     </form>
     <div class="separator"></div>
@@ -73,6 +74,7 @@
       <p-button
         (click)="loginGoogle()"
         severity="secondary"
+        [loading]="loadingGoogle()"
         [label]="
           labelButton() === 'Connexion'
             ? 'Se Connecter avec Google'
@@ -88,8 +90,9 @@
         </ng-template>
       </p-button>
       <p-button
-        (click)="loginGoogle()"
+        (click)="loginGithub()"
         severity="secondary"
+        [loading]="loadingGithub()"
         [label]="
           labelButton() === 'Connexion'
             ? 'Se Connecter avec Github'
@@ -106,13 +109,14 @@
       </p-button>
     </div>
     <div class="no-account">
-      <p>{{ noAccountLabel() | translate }}
+      <p>
+        {{ noAccountLabel() | translate }}
         <p-button
-        [link]="true"
-        [routerLink]="isLogin() ? ['/auth', 'register'] : ['/auth', 'login']"
-        class="button"
-        [label]="labelButton2() | translate"
-      />
+          [link]="true"
+          [routerLink]="isLogin() ? ['/auth', 'register'] : ['/auth', 'login']"
+          class="button"
+          [label]="labelButton2() | translate"
+        />
       </p>
     </div>
   </div>
