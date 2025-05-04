@@ -1,6 +1,6 @@
-@use 'assets/sass/core';
+@use "assets/sass/core";
 
-:root{
+:root {
   --p-button-primary-background: var(--primary-color);
   --p-button-primary-border-color: var(--primary-color);
   --p-inputtext-focus-border-color: var(--primary-color);
@@ -51,7 +51,9 @@
   --p-treetable-body-cell-border-color: var(--neutral-color);
   --p-treetable-row-selected-color: var(--font-color);
   --p-treetable-row-selected-background: var(--background-color-lighter);
-  --p-treetable-header-cell-selected-background: var(--background-color-lighter);
+  --p-treetable-header-cell-selected-background: var(
+    --background-color-lighter
+  );
   --p-treetable-header-cell-selected-color: var(--font-color);
   --p-treetable-header-cell-color: var(--font-color);
   --p-treetable-sort-icon-color: var(--primary-color);
@@ -65,7 +67,7 @@
   --p-tabs-tab-gap: calc(var(--padding) / 2);
   --p-tabs-tab-border-color: var(--background-color);
   // --p-tabs-tab-active-border-color: var(--primary-color);
-  --p-tabs-tab-active-color:var(--primary-color);
+  --p-tabs-tab-active-color: var(--primary-color);
   // --p-tabs-tab-color: var(--font-color);
   --p-tabs-tab-focus-ring-color: var(--primary-color);
   --p-tabs-tablist-background: var(--background-color);
@@ -85,7 +87,6 @@
 
   --p-button-text-primary-color: var(--primary-color);
 
-
   //tab
   --p-datatable-body-cell-selected-border-color: var(--neutral-color);
   --p-datatable-row-selected-color: var(--primary-color);
@@ -95,14 +96,18 @@
   //button
   --p-button-primary-focus-ring-color: var(--primary-color);
   --p-button-text-primary-hover-background: var(--primary-color-transparent-50);
-  --p-button-text-primary-active-background: var(--primary-color-transparent-50);
+  --p-button-text-primary-active-background: var(
+    --primary-color-transparent-50
+  );
 
   --p-button-success-background: var(--success-color);
   --p-button-success-border-color: var(--success-color);
 
   //select
   --p-select-focus-border-color: var(--primary-color);
-  --p-select-option-selected-focus-background: var(--primary-color-transparent-50);
+  --p-select-option-selected-focus-background: var(
+    --primary-color-transparent-50
+  );
   --p-select-option-selected-background: var(--primary-color-transparent-50);
   --p-select-option-selected-color: var(--primary-color);
   --p-select-option-hover-background: var(--primary-color-transparent-50);
@@ -141,6 +146,15 @@
   --p-button-danger-border-color: var(--danger-color);
   --p-button-text-danger-color: var(--danger-color);
 
+  // secondary button
+  --p-button-secondary-background: transparent;
+  --p-button-secondary-border-color: var(--neutral-color);
+  --p-button-secondary-color: var(--font-color);
+
+  //button link
+  --p-button-link-color: var(--primary-color);
+  --p-button-link-hover-color: var(--primary-color);
+
   --p-button-success-color: var(--font-color-invert);
 }
 
@@ -177,7 +191,6 @@ body.resizing select,
 body.resizing [contenteditable="true"] {
   pointer-events: none !important;
 }
-
 
 /* Pour Firefox */
 * {
