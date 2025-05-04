@@ -1,6 +1,8 @@
 header {
   display: flex;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px var(--neutral-color);
+  border-bottom: var(--neutral-color);
   padding: 0 10px;
   flex-wrap: nowrap;
   align-items: center;
@@ -182,7 +184,10 @@ header {
     top: 64px; /* Position juste en dessous du header */
     left: 0;
     right: 0;
-    background-color: var(--surface-card, #fff); /* Couleur de fond ou blanc par défaut */
+    background-color: var(
+      --surface-card,
+      #fff
+    ); /* Couleur de fond ou blanc par défaut */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 
@@ -197,7 +202,8 @@ header {
       justify-content: center;
       padding: 15px 0;
 
-      span, i {
+      span,
+      i {
         margin: 0 15px;
       }
     }

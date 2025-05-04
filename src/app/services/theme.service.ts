@@ -5,7 +5,7 @@ import { Injectable, signal, WritableSignal, computed, effect, DestroyRef, injec
 })
 export class ThemeService {
   // Signal pour le mode de thème (follow, light, dark)
-  public themeMode: WritableSignal<string> = signal('follow');
+  public themeMode: WritableSignal<string> = signal('dark');
 
   // Signal pour tracker les préférences système (initialisé dans le constructeur)
   private systemPreference: WritableSignal<string>;
