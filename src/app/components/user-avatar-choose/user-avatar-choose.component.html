@@ -1,0 +1,15 @@
+<label for="multi"> {{ label() }} </label>
+<p-multi-select [options]="users()" [(ngModel)]="selectedUsers" optionLabel="email" display="comma" placeholder="" />
+<p-avatar-group>
+  @for(user of fourUsers(); track user){
+    @if(getImageForUser(user.id)){
+      <p-avatar [image]="getImageForUser(user.id)"  size="normal" shape="circle" />
+    } @else {
+      <p-avatar icon="pi pi-user" size="normal" shape="circle" />
+    }
+  }
+  @if(moreThanFourUser()){
+    <p-avatar [label]="'+' + (selectedUsers().length - 4).toString()" size="normal" shape="circle" />
+  }
+
+</p-avatar-group>

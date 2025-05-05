@@ -1,0 +1,81 @@
+<div class="audio-player-container">
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <p-fileUpload
+      mode="basic"
+      chooseLabel="Importer un audio"
+      accept="audio/*"
+      (onSelect)="onFileSelect($event)"
+      [showUploadButton]="false"
+      maxFileSize="10000000"
+    >
+    </p-fileUpload>
+  </div>
+
+  <!-- Audio Player Section -->
+  @if (currentAudio()) {
+  <div class="player-section">
+    <p-card [header]="currentAudio()!.name">
+      <audio
+        #audioPlayer
+        [src]="currentAudio()!.url"
+        (loadedmetadata)="onMetadataLoaded()"
+        (timeupdate)="onTimeUpdate()"
+        (ended)="onAudioEnded()"
+      ></audio>
+
+      <div class="controls">
+        <p-button
+          (click)="togglePlay()"
+          [icon]="isPlaying() ? 'pi pi-pause' : 'pi pi-play'"
+          [label]="isPlaying() ? 'Pause' : 'Lecture'"
+        >
+        </p-button>
+
+        <p-button
+          (click)="stopAudio()"
+          icon="pi pi-stop"
+          label="Stop"
+          severity="secondary"
+        >
+        </p-button>
+        <p-button
+          (onClick)="removeAudio(0)"
+          pTooltip="Supprimer"
+          tooltipPosition="top"
+          [rounded]="true"
+          [text]="true"
+          severity="danger"
+          icon="pi pi-times"
+        />
+      </div>
+
+      <div class="progress-section">
+        <p-slider
+          [(ngModel)]="currentTime"
+          [min]="0"
+          [max]="duration()"
+          (onChange)="onSeek($event)"
+          styleClass="slider"
+        >
+        </p-slider>
+        <div class="time-display">
+          <span>{{ formatTime(currentTime()) }}</span>
+          <span>{{ formatTime(duration()) }}</span>
+        </div>
+      </div>
+
+      <div class="volume-section">
+        <i class="pi pi-volume-up"></i>
+        <p-slider
+          [(ngModel)]="volume"
+          [min]="0"
+          [max]="100"
+          (onChange)="onVolumeChange($event)"
+        >
+        </p-slider>
+      </div>
+    </p-card>
+  </div>
+  }
+</div>

@@ -37,9 +37,12 @@ export class AccountComponent {
   });
 
   currentUser = computed(() => this.userService.currentJdrUser())
+  // loading = signal(false)
 
   saveUser() {
-    this.userService.put(this.currentUser(), this.currentUser()?.id).then(() => {
+    const user = this.currentUser()
+    if(!user?.id) return
+    this.userService.put(this.currentUser(), user.id).then(() => {
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
@@ -70,8 +73,9 @@ export class AccountComponent {
     const currentUser = this.auth.currentUser;
     if (currentUser) {
       try {
-
-        await this.userService.delete(this.currentUser()?.id)
+        const user = this.currentUser()
+        if(!user?.id) return
+        await this.userService.delete(user.id)
         await deleteUser(currentUser)
         this.userService.currentJdrUser.set(null);
         this.router.navigateByUrl('/home');
@@ -80,11 +84,11 @@ export class AccountComponent {
           summary: 'Success',
           detail: 'Supprimer avec succés',
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: `Error : ${error.message}`,
+          detail: `Error : ${error}`,
         })
       }
 

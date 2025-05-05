@@ -1,0 +1,27 @@
+html[data-theme="light"] {
+   @import "../core";
+   $color-sheme: light;
+   $primary-color: hsl(205, 100%, 50%);
+   $primary-color-transparent-50: hsla(205, 100%, 50%, 0.1);
+
+   $background-color: hsl(210, 3%, 87%);
+   $background-color-lighter: hsl(0, 0%, 92%);
+   $background-color-transparent: hsla(210, 3%, 87%, 0.219);
+   $container-color: mix(white, $background-color, 40%);
+   $input-color: white;
+
+   $danger-color: hsl(5, 100%, 58%);
+   $success-color: hsl(103, 100%, 33%);
+   $warn-color: hsl(36, 100%, 50%);
+   $info-color: hsl(231, 48%, 48%);
+   $neutral-color: hsl(200, 18%, 46%);
+   $disabled-color: hsla(0, 0%, 0%, 0.12);
+
+   $font-color: hsl(250, 24%, 15%);
+   $font-color-invert: white;
+   $font-disabled-color: hsla(0, 0%, 0%, 0.60);
+   $placeholder-color: hsl(0, 0%, 50%);
+
+   @import "../components";
+   @include export-vars();
+}

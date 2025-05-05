@@ -1,0 +1,49 @@
+<div class="container-parametres">
+  <div class="container-label">
+    <label for="moduleName">{{ "Titre" | translate }}</label>
+    <input
+      class="input"
+      id="moduleName"
+      type="text"
+      pInputText
+      [(ngModel)]="currentModule().title"
+      autocomplete="false"
+    />
+  </div>
+  <div class="container-label">
+    <label for="moduleDescription">{{
+      "Description" | translate
+    }}</label>
+    <textarea
+      class="input"
+      id="moduleDescription"
+      type="text"
+      pTextarea
+      [(ngModel)]="currentModule().description"
+      autocomplete="false"
+    ></textarea>
+  </div>
+  <div class="container-label">
+    <label for="gameSystem">{{ "Jeux" | translate }}</label>
+    <p-select
+      [options]="gameSystems()"
+      [(ngModel)]="currentGameSystem"
+      optionLabel="name"
+      placeholder="Selectionner un jeux"
+      inputId="gameSystem"
+    ></p-select>
+  </div>
+  <div class="container-label">
+    <app-user-avatar-choose></app-user-avatar-choose>
+  </div>
+  <p-button label="Save" icon="pi pi-save" (onClick)="save()" severity="success" />
+  <p-button
+    label="Générer avec l'IA"
+    icon="pi pi-sparkles"
+    styleClass="p-button-help p-button-raised"
+    (onClick)="generateCompleteModule()"
+    [disabled]="true"
+    pTooltip="Bientot disponible !"
+    tooltipPosition="top"
+  ></p-button>
+</div>

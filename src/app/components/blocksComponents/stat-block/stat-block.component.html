@@ -1,0 +1,14 @@
+<div class="stat-block">
+  <div class="container-label">
+    <label for="title">{{'Titre'|translate}}</label>
+    <input pInputText type="text" id="title"  [(ngModel)]="statBlock().title" placeholder="Statistique du dragon" />
+  </div>
+  <div class="container-label">
+    <label for="rules">{{'Règles'|translate}}</label>
+    <input pInputText type="text" id="rules"  [(ngModel)]="statBlock().statRules" placeholder="Force" />
+  </div>
+  <div class="container-label">
+    <label for="value">{{'Valeur'|translate}}</label>
+    <p-inputNumber [showButtons]="true" mode="decimal" type="number"  id="value" placeholder="50"  [(ngModel)]="statBlock().statValues" />
+  </div>
+</div>

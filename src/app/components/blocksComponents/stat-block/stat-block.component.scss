@@ -1,0 +1,28 @@
+.stat-block {
+  padding: var(--padding);
+  gap: var(--padding);
+  display: flex;
+}
+
+.stat-values {
+  width: 100%;
+  overflow: auto;
+  background-color: var(--background-color);
+  font-family: monospace;
+  white-space: pre-wrap;
+  color: var(--font-color);
+}
+
+.stat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  gap: 10px;
+
+  i {
+    font-size: 2rem;
+  }
+}

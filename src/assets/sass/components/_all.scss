@@ -1,0 +1,13 @@
+@use "../core";
+
+.rounded {
+   @include core.border-radius(core.$inner-radius);
+}
+
+.circle {
+   @include core.border-radius(9999px);
+}
+
+.shadow {
+   @include core.box-shadow(core.$box-shadow);
+}

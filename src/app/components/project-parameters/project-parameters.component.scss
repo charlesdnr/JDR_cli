@@ -1,0 +1,14 @@
+.container-parametres {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    ::ng-deep .p-button {
+      width: 100%;
+    }
+  }
+
+  .container-label {
+    display: flex;
+    flex-direction: column;
+  }

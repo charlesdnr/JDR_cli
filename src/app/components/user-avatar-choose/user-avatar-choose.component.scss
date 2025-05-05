@@ -1,0 +1,10 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--padding) / 4);
+}
+
+::ng-deep .p-multiselect {
+  width: 100%;
+  max-width: 228px;
+}

@@ -1,0 +1,17 @@
+@use "../core";
+
+$strong-types: (
+   primary: core.$primary-color,
+   danger: core.$danger-color,
+   success: core.$success-color,
+   warn: core.$warn-color,
+   info: core.$info-color
+);
+
+strong {
+   @each $type, $color in $strong-types {
+      &.#{$type} {
+         color: $color;
+      }
+   }
+}

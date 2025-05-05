@@ -1,11 +1,14 @@
 header {
   display: flex;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px var(--neutral-color);
+  border-bottom: var(--neutral-color);
   padding: 0 10px;
   flex-wrap: nowrap;
   align-items: center;
   height: 80px;
   position: relative;
+  z-index: 10;
 
   .title {
     display: flex;
@@ -35,7 +38,7 @@ header {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    padding-right: 25px;
+    // padding-right: 25px;
 
     @media (max-width: 768px) {
       padding-right: 10px;
@@ -117,6 +120,7 @@ header {
     flex: 1;
     padding: 0 10px;
     align-items: center;
+    justify-content: center;
 
     @media (max-width: 600px) {
       flex: 1;
@@ -130,7 +134,7 @@ header {
         height: 40px;
         padding: 2px !important;
         background-color: transparent !important;
-        color: var(--text-color);
+        color: var(--font-color);
 
         @media (max-width: 480px) {
           width: 40px;
@@ -177,11 +181,11 @@ header {
   .mobile-nav {
     display: none;
     width: 100%;
-    position: fixed; /* Position fixe par rapport à la fenêtre */
-    top: 64px; /* Position juste en dessous du header */
+    position: fixed;
+    top: 64px;
     left: 0;
     right: 0;
-    background-color: var(--surface-card, #fff); /* Couleur de fond ou blanc par défaut */
+    background-color: var(--background-color);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 
@@ -196,7 +200,8 @@ header {
       justify-content: center;
       padding: 15px 0;
 
-      span, i {
+      span,
+      i {
         margin: 0 15px;
       }
     }

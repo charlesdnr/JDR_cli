@@ -1,0 +1,4 @@
+<div class="module-card">
+  <img [src]="picture.length === 0 ? baseUrlImage : picture" alt="image du module">
+  <span> {{ currentModule()?.alias || 'Module sans nom' }} </span>
+</div>

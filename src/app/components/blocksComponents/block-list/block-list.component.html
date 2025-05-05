@@ -1,0 +1,44 @@
+<div
+  #blocksContainer
+  class="blocks-container"
+  cdkDropList
+  [cdkDropListData]="blocks()"
+  (cdkDropListDropped)="onDrop($event)"
+  cdkDropListOrientation="vertical"
+  [class.highlight-drop-zone]="isDraggingIcon()"
+>
+  <!-- Les blocs existants -->
+  @for(block of blocks(); track block; let i = $index) {
+    @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {
+      <div class="block-placeholder">
+        <div class="placeholder-content">
+          {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
+        </div>
+      </div>
+    }
+    <app-block-item
+      [block]="block"
+      [enum]="EBlockType"
+      (removeBlock)="onRemoveBlock($event)"
+      (generateAIContent)="onGenerateAI($event)"
+    >
+      @if(isParagraphBlock(block)) {
+        <app-paragraph-block [paragraphBlock]="asParagraphBlock(block)"></app-paragraph-block>
+      } @else if(isMusicBlock(block)) {
+        <app-music-block [musicBlock]="asMusicBlock(block)"></app-music-block>
+      } @else if(isStatBlock(block)) {
+        <app-stat-block [statBlock]="asStatBlock(block)"></app-stat-block>
+      } @else if(isModuleBlock(block)) {
+        <div class="module-block"></div>
+      }
+    </app-block-item>
+  }
+
+  @if(isDraggingIcon() && isOverDropZone() && insertPosition() === blocks().length) {
+    <div class="block-placeholder">
+      <div class="placeholder-content">
+        {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,19 @@
+<div class="text-block">
+  <div class="basic-block">
+    <div class="container-label">
+      <label for="title"> {{ "Titre" | translate }} </label>
+      <input type="text" pInputText placeholder="La folle aventure..." />
+    </div>
+    <div class="container-label">
+      <label for="style">Style</label>
+      <p-select id="style" [options]="options" optionLabel="label" />
+    </div>
+  </div>
+  <div class="container-label">
+    <label for="paragraph"> {{ "Pararagraphe" | translate }} </label>
+    <p-editor
+      id="paragraph"
+      [(ngModel)]="paragraphBlock().paragraph"
+    ></p-editor>
+  </div>
+</div>

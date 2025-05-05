@@ -6,55 +6,75 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export abstract class BaseHttpService {
   protected httpClient = inject(HttpClient);
-  protected apiUrl = environment.apiUrl;
+  protected baseApiUrl: string;
 
-  /**
-   * Le constructeur est protégé. Les classes filles doivent l'appeler via super().
-   * @param resourceBasePath Le chemin relatif vers la ressource API (ex: 'api/block').
-   */
   constructor(resourceBasePath: string) {
-    this.apiUrl = this.apiUrl + resourceBasePath;
+    // Assure que le chemin commence par / s'il n'est pas vide
+    const normalizedPath = resourceBasePath && !resourceBasePath.startsWith('/')
+      ? `/${resourceBasePath}`
+      : resourceBasePath;
+    // Supprime un éventuel / à la fin pour éviter les doubles //
+    const cleanPath = normalizedPath.endsWith('/') ? normalizedPath.slice(0, -1) : normalizedPath;
+    this.baseApiUrl = `${environment.apiUrl.replace(/\/$/, '')}${cleanPath}`; // Construit l'URL de base complète
   }
 
   /**
-   * Effectue une requête GET.
-   * @param params Paramètres de requête.
+   * Construit l'URL pour une ressource spécifique par ID.
+   * @param id - ID (chaîne ou nombre) à ajouter après l'URL de base.
    */
-  get<T>(id?: any): Promise<T> {
-    return firstValueFrom(this.httpClient.get<T>(this.apiUrl + id ? `/${id}` : ''));
+  protected buildUrlWithId(id: string | number): string {
+    return `${this.baseApiUrl}/${id}`;
   }
 
   /**
-   * Effectue une requête POST sur le chemin de base.
+   * Effectue une requête GET (soit sur la base, soit sur un ID).
+   * @template T Le type de la réponse attendue.
+   * @param id ID optionnel (chaîne ou nombre) pour récupérer une ressource spécifique.
+   */
+  get<T>(id?: string | number): Promise<T> {
+    const url = id !== undefined ? this.buildUrlWithId(id) : this.baseApiUrl;
+    return firstValueFrom(this.httpClient.get<T>(url));
+  }
+
+  /**
+   * Effectue une requête POST sur l'URL de base.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé.
    * @param body Corps de la requête.
    */
-  post<T>(body: any): Promise<T> {
-    return firstValueFrom(this.httpClient.post<T>(this.apiUrl, body));
+  post<T, B>(body: B): Promise<T> {
+    // POST se fait généralement sur l'URL de base de la collection
+    return firstValueFrom(this.httpClient.post<T>(this.baseApiUrl, body));
   }
 
   /**
-   * Effectue une requête PUT.
+   * Effectue une requête PUT sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé.
    * @param body Corps de la requête.
+   * @param id ID (chaîne ou nombre) de la ressource à mettre à jour.
    */
-  put<T>(body: any, id: any): Promise<T> {
-    const formatid = id ? `/${id}` : ''
-    return firstValueFrom(this.httpClient.put<T>(this.apiUrl + formatid, body));
+  put<T, B>(body: B, id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.put<T>(this.buildUrlWithId(id), body));
   }
 
   /**
-   * Effectue une requête PATCH
-   * @param body Corps de la requête.
+   * Effectue une requête PATCH sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue.
+   * @template B Le type du corps de la requête envoyé (peut être Partial<...>).
+   * @param body Corps de la requête (partiel).
+   * @param id ID (chaîne ou nombre) de la ressource à mettre à jour partiellement.
    */
-  patch<T>(body: any): Promise<T> {
-    return firstValueFrom(this.httpClient.patch<T>(this.apiUrl, body));
+  patch<T, B>(body: B, id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.patch<T>(this.buildUrlWithId(id), body));
   }
 
   /**
-   * Effectue une requête DELETE sur un élément spécifique (base + ID).
-   * @param params Paramètres de requête.
+   * Effectue une requête DELETE sur une ressource spécifique par ID.
+   * @template T Le type de la réponse attendue (souvent void ou l'objet supprimé).
+   * @param id ID (chaîne ou nombre) de la ressource à supprimer.
    */
-  delete<T>(id: any): Promise<T> {
-    const formatid = id ? `/${id}` : ''
-    return firstValueFrom(this.httpClient.delete<T>(this.apiUrl + formatid));
+  delete<T>(id: string | number): Promise<T> {
+    return firstValueFrom(this.httpClient.delete<T>(this.buildUrlWithId(id)));
   }
 }

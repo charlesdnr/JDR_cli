@@ -1,0 +1,37 @@
+<div class="icone-grab">
+  @for(block of availableBlocks(); track block.type) {
+  <div
+    class="icon-item"
+    (mousedown)="startIconDrag($event, block.type)"
+    tabindex="0"
+    role="button"
+    (keydown.enter)="startIconDrag($event, block.type)"
+  >
+    <i
+      [class]="getIconByType(block.type)"
+      [attr.data-type]="block.type"
+      aria-hidden="true"
+    ></i>
+    <span> {{ getBlockPreview(block.type) }} </span>
+  </div>
+  }
+</div>
+
+<!-- Élément de preview qui suit le curseur -->
+@if(isDraggingIcon()){
+<div
+  class="icon-drag-preview"
+  [style.left.px]="dragPosition().x"
+  [style.top.px]="dragPosition().y"
+>
+  <i
+    [class]="
+      'pi ' + getIconByType(draggedIconType() || EBlockType.paragraph)
+    "
+    aria-hidden="true"
+  ></i>
+  <span>{{
+    getBlockPreview(draggedIconType() || EBlockType.paragraph)
+  }}</span>
+</div>
+}

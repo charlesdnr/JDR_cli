@@ -1,29 +1,25 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
 import { HeaderComponent } from './components/header/header.component';
 import { filter } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, TranslateModule, ToastModule, HeaderComponent, ConfirmDialogModule],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
+  private _ = inject(ThemeService);
+  private router = inject(Router);
+
   onAuth = false;
   url = '';
-
-  constructor(private translate: TranslateService, private router: Router) {
-    translate.addLangs(['fr-FR', 'en-EN']);
-    translate.setDefaultLang('fr-FR');
-    translate.use('fr-FR');
-  }
 
   ngAfterViewInit(): void {
     this.router.events

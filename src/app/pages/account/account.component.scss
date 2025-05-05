@@ -10,11 +10,14 @@
 
   ::ng-deep {
     .p-inputtext {
-      // background-color: var(--text-color);
+      // background-color: var(--font-color);
       // color: var(--background-color);
       // box-shadow: var(--background-color);
       height: 40px;
     }
+}
+::ng-deep .p-inputtext{
+  background-color: var(--background-color);
 }
 }
 
@@ -29,8 +32,8 @@
 }
 
 .card {
-  background-color: var(--secondary-color);
-  border-radius: 15px;
+  background-color: var(--background-color-lighter);
+  // border-radius: 15px;
   padding: 1.5rem;
   box-shadow: var(--shadow-1);
   overflow: hidden;
@@ -43,13 +46,13 @@
   flex: 3;
   padding: 0;
   align-items: center;
-  background-color: var(--secondary-color);
-  border-radius: 15px;
+  background-color: var(--background-color-lighter);
+  // border-radius: 15px;
 
   .upsquare {
     height: 100px;
     width: 100%;
-    background-color: var(--text-color);
+    background-color: var(--font-color);
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
   }
@@ -61,7 +64,7 @@
       width: 150px;
       height: 150px;
       border-radius: 50%; // Rond
-      border: 4px solid var(--secondary-color);
+      border: 4px solid var(--background-color-lighter);
       background-color: var(--surface-200);
       overflow: hidden;
 
@@ -75,7 +78,7 @@
   .downsquare {
     flex-grow: 1;
     width: 100%;
-    background-color: var(--secondary-color);
+    background-color: var(--background-color-lighter);
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
     display: flex;
@@ -91,7 +94,7 @@
 
     .subtitle {
         font-size: 0.9rem;
-        color: var(--text-color-secondary);
+        color: var(--font-color-secondary);
         margin-bottom: 1.5rem;
     }
 

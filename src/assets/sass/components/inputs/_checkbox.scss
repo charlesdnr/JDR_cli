@@ -1,0 +1,79 @@
+@use "../../core";
+
+input {
+   &[type="checkbox"] {
+      /* Styles spécifiques pour les inputs de type checkbox */
+      // $checkbox-size: calc(core.$inputs-size / 1.5);
+      position: relative;
+      cursor: pointer;
+      background-color: core.$neutral-color;
+      @include core.size(calc(core.$inputs-size / 1.5));
+      @include core.box-shadow(core.$box-shadow);
+
+      &.outlined {
+         @include core.outline(1px, solid, core.$font-color);
+         background-color: transparent;
+      }
+
+      &:not(.toggle):checked {
+         background-color: core.$primary-color;
+
+         &::after {
+            position: absolute;
+            content: "";
+
+            width: calc(core.$inputs-size / 3);
+            height: calc(core.$inputs-size / 6);
+            top: 45%;
+            left: 50%;
+
+            @include core.add-vendor-prefixes(border-left, 2px solid white);
+            @include core.add-vendor-prefixes(border-bottom, 2px solid white);
+            @include core.transform(translate(-50%, -50%) rotateZ(-50deg));
+         }
+      }
+
+      &.toggle {
+         position: relative;
+         aspect-ratio: 2 / 1;
+         width: calc(core.$inputs-size / 1.5) * 2;
+         @include core.transition(background-color, core.$transition-duration);
+
+         &::after {
+            position: absolute;
+            content: "";
+            background-color: white;
+            aspect-ratio: 1 / 1;
+
+            height: calc(core.$inputs-size / 1.5 - core.$padding / 4);
+            top: calc(core.$padding / 8);
+            left: calc(core.$padding / 8);
+
+            @include core.transition(all, core.$transition-duration);
+         }
+
+         &.rounded::after {
+            @include core.border-radius(core.$inner-radius);
+         }
+
+         &.circle::after {
+            @include core.border-radius(9999px);
+         }
+
+         &:active::after {
+            aspect-ratio: 1.5 / 1;
+         }
+
+         &:checked {
+            background-color: core.$primary-color;
+            @include core.transition(background-color);
+
+            &::after {
+               left: calc(100% - core.$padding / 8);
+               @include core.transform(translateX(-100%));
+               @include core.transition(all, core.$transition-duration);
+            }
+         }
+      }
+   }
+}
