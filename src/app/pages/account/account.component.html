@@ -33,9 +33,6 @@
       </div>
     </div>
     <div class="right card rounded">
-      <!-- <div class="personal">
-        <h2>{{ "Personal Information" | translate }}</h2>
-      </div> -->
       <div class="info-form">
         <div class="form-grid">
           <div class="form-field">
@@ -64,7 +61,7 @@
           />
             <p-button
             (onClick)="changePassword()"
-            icon="pi pi-pencil"
+            icon="pi pi-key"
             [label]="'Change Password' | translate"
             severity="secondary"
           />
@@ -82,3 +79,48 @@
   </div>
 </div>
 }
+
+<!-- Dialog de reset password -->
+<p-dialog
+  [header]="'Reset Password' | translate"
+  [modal]="true"
+  [(visible)]="showPasswordResetDialog"
+  [style]="{width: '450px'}"
+  class="reset-password-dialog"
+>
+  <div class="reset-password-content">
+    <p class="reset-description">
+      Un email de réinitialisation sera envoyé à votre adresse email.
+    </p>
+
+    <div class="container-label">
+      <label for="resetEmail">Email</label>
+      <input
+        id="resetEmail"
+        pInputText
+        type="email"
+        [(ngModel)]="resetPasswordEmail"
+        [disabled]="true"
+        styleClass="reset-email-input"
+      />
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer">
+        <p-button
+          label="Annuler"
+          icon="pi pi-times"
+          severity="secondary"
+          (onClick)="showPasswordResetDialog.set(false)"
+          [disabled]="sendingEmail()"
+        />
+        <p-button
+          label="Envoyer Email"
+          icon="pi pi-envelope"
+          (onClick)="sendPasswordResetEmail()"
+          [loading]="sendingEmail()"
+        />
+      </div>
+    </ng-template>
+  </div>
+</p-dialog>

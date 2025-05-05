@@ -9,7 +9,7 @@ import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { MenuItem, TreeNode } from 'primeng/api'; // Pour Listbox
+import { MenuItem, TreeDragDropService, TreeNode } from 'primeng/api'; // Pour Listbox
 import { UserFolderHttpService } from '../../services/https/user-folder-http.service';
 import { ModuleHttpService } from '../../services/https/module-http.service'; // Pour récupérer les détails des modules
 import { MessageService } from 'primeng/api';
@@ -53,6 +53,7 @@ interface DisplayableSavedModule extends UserSavedModule {
     ContextMenuModule,
     RouterLink
   ],
+  providers: [TreeDragDropService],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })

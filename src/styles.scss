@@ -152,6 +152,9 @@
   --p-tree-node-selected-background: var(--primary-color-transparent-50);
   --p-tree-node-selected-color: var(--primary-color);
   --p-tree-node-icon-selected-color: var(--neutral-color);
+  --p-tree-node-color: var(--font-color);
+  --p-tree-node-hover-background: transparent;
+  --p-tree-node-hover-color: var(--font-color);
 
   //danger button
   --p-button-danger-background: var(--danger-color);

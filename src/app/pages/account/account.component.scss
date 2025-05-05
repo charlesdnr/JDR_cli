@@ -160,3 +160,47 @@
   display: flex;
   gap: 10px;
 }
+
+
+::ng-deep .reset-password-dialog {
+  .p-dialog-header {
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .p-dialog-header-icon {
+    color: white;
+  }
+
+  .p-dialog-title {
+    color: white;
+  }
+}
+
+.reset-password-content {
+  padding: 1rem 0;
+
+  .reset-description {
+    margin-bottom: 1.5rem;
+    color: var(--font-color-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .container-label {
+    margin-bottom: 1.5rem;
+  }
+
+  .reset-email-input {
+    background-color: var(--disabled-color) !important;
+    color: var(--font-disabled-color) !important;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+}
