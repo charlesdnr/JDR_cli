@@ -103,7 +103,7 @@
         flex-direction: column; // Boutons l'un sous l'autre
         gap: 0.75rem; // Espace entre les boutons
         width: 100%;
-        max-width: 200px; // Limite la largeur des boutons
+        max-width: 250px; // Limite la largeur des boutons
 
         ::ng-deep .p-button {
            width: 100%; // Boutons pleine largeur
@@ -159,4 +159,12 @@
 .first {
   display: flex;
   gap: 10px;
+}
+
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 100%;
 }

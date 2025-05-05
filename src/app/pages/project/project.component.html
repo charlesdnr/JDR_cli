@@ -9,6 +9,7 @@
       (onNodeSelect)="onNodeSelect($event)"
       (onNodeContextMenuSelect)="onNodeRightClick($event)"
       [contextMenu]="cm"
+      [draggableNodes]="true" [droppableNodes]="true" draggableScope="self" droppableScope="self"
     />
     <p-button
       label="Nouveau dossier"

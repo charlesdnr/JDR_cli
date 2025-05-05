@@ -5,6 +5,7 @@ import { authGuard } from './guard/auth.guard';
 import { AccountComponent } from './pages/account/account.component';
 import { ProjectComponent } from './pages/project/project.component';
 import { NewProjectComponent } from './pages/new-project/new-project.component';
+import { PasswordResetComponent } from './components/password-reset/password-reset.component';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -13,4 +14,5 @@ export const routes: Routes = [
     { path: 'account', component: AccountComponent, canActivate: [authGuard] },
     { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
     { path: 'new-project', component: NewProjectComponent, canActivate: [authGuard] },
+    { path: 'password-reset', component: PasswordResetComponent },
 ];

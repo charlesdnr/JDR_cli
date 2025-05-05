@@ -26,7 +26,7 @@ export class AppComponent implements AfterViewInit {
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.url = event.url;
-        this.onAuth = this.url.startsWith('/auth/');
+        this.onAuth = this.url.startsWith('/auth/') || this.url.startsWith('/password-reset');
       });
   }
 }
