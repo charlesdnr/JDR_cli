@@ -14,17 +14,17 @@
       </div>
       <div class="downsquare">
         <h2>{{ "Photo" | translate }}</h2>
-        <p class="subtitle">{{ "Upload Photo up to 2mb" | translate }}</p>
+        <p class="subtitle">{{ "Télécharger un Photo jusqu'à 2mb" | translate }}</p>
         <div class="button-group">
           <p-button
             (onClick)="uploadPhoto()"
-            label="{{ 'Upload Photo' | translate }}"
+            label="{{ 'Télécharger une Photo' | translate }}"
             icon="pi pi-upload"
             severity="secondary"
           />
           <p-button
             (onClick)="deletePhoto()"
-            label="{{ 'Delete Photo' | translate }}"
+            label="{{ 'Supprimer ma photo' | translate }}"
             icon="pi pi-trash"
             severity="danger"
             styleClass="p-button-danger"
@@ -36,7 +36,7 @@
       <div class="info-form">
         <div class="form-grid">
           <div class="form-field">
-            <label for="username">{{ "Username" | translate }}</label>
+            <label for="username">{{ "Nom d'utilisateur" | translate }}</label>
             <input
               id="username"
               type="text"
@@ -62,14 +62,14 @@
             <p-button
             (onClick)="changePassword()"
             icon="pi pi-key"
-            [label]="'Change Password' | translate"
+            [label]="'Changer mon mot de passe' | translate"
             severity="secondary"
           />
           </div>
           <p-button
             (onClick)="deleteAccount()"
             icon="pi pi-trash"
-            [label]="'Delete account' | translate"
+            [label]="'Supprimer mon compte' | translate"
             severity="danger"
             styleClass="p-button-danger"
           />
@@ -82,11 +82,10 @@
 
 <!-- Dialog de reset password -->
 <p-dialog
-  [header]="'Reset Password' | translate"
+  [header]="'Réinitialiser mon mot de passe' | translate"
   [modal]="true"
   [(visible)]="showPasswordResetDialog"
   [style]="{width: '450px'}"
-  class="reset-password-dialog"
 >
   <div class="reset-password-content">
     <p class="reset-description">
@@ -104,23 +103,22 @@
         styleClass="reset-email-input"
       />
     </div>
-
-    <ng-template pTemplate="footer">
-      <div class="dialog-footer">
-        <p-button
-          label="Annuler"
-          icon="pi pi-times"
-          severity="secondary"
-          (onClick)="showPasswordResetDialog.set(false)"
-          [disabled]="sendingEmail()"
-        />
-        <p-button
-          label="Envoyer Email"
-          icon="pi pi-envelope"
-          (onClick)="sendPasswordResetEmail()"
-          [loading]="sendingEmail()"
-        />
-      </div>
-    </ng-template>
   </div>
+  <ng-template #footer>
+    <div class="dialog-footer">
+      <p-button
+        label="Annuler"
+        icon="pi pi-times"
+        severity="secondary"
+        (onClick)="showPasswordResetDialog.set(false)"
+        [disabled]="sendingEmail()"
+      />
+      <p-button
+        label="Envoyer Email"
+        icon="pi pi-envelope"
+        (onClick)="sendPasswordResetEmail()"
+        [loading]="sendingEmail()"
+      />
+    </div>
+  </ng-template>
 </p-dialog>

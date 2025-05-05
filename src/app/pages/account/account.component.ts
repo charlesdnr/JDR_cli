@@ -10,7 +10,7 @@ import { MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Auth, deleteUser, sendPasswordResetEmail } from '@angular/fire/auth';
-import { DialogModule } from 'primeng/dialog';
+import { Dialog } from 'primeng/dialog';
 import { PasswordModule } from 'primeng/password';
 
 @Component({
@@ -22,8 +22,8 @@ import { PasswordModule } from 'primeng/password';
     FormsModule,
     InputTextModule,
     ButtonModule,
+    Dialog,
     AvatarModule,
-    DialogModule,
     PasswordModule
   ],
   templateUrl: './account.component.html',
