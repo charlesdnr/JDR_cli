@@ -1,15 +1,58 @@
-<label for="multi"> {{ label() }} </label>
-<p-multi-select [options]="users()" [(ngModel)]="selectedUsers" optionLabel="email" display="comma" placeholder="" />
+<p-button [disabled]="this.moduleId() === 0" (click)="op.toggle($event)" icon="pi pi-share-alt" label="Share" />
 <p-avatar-group>
-  @for(user of fourUsers(); track user){
-    @if(getImageForUser(user.id)){
-      <p-avatar [image]="getImageForUser(user.id)"  size="normal" shape="circle" />
-    } @else {
-      <p-avatar icon="pi pi-user" size="normal" shape="circle" />
-    }
+  @for(user of fourUsers(); track user){ @if(getImageForUser(user.id)){
+  <p-avatar [image]="getImageForUser(user.id)" size="normal" shape="circle" />
+  } @else {
+  <p-avatar icon="pi pi-user" size="normal" shape="circle" [pTooltip]="user.email" />
+  } } @if(moreThanFourUser()){
+  <p-avatar
+    [label]="'+' + (selectedUsers().length - 4).toString()"
+    size="normal"
+    shape="circle"
+  />
   }
-  @if(moreThanFourUser()){
-    <p-avatar [label]="'+' + (selectedUsers().length - 4).toString()" size="normal" shape="circle" />
-  }
-
 </p-avatar-group>
+
+<p-popover #op class="rounded">
+  @if(this.moduleId() !== 0){
+  <div class="container-label">
+    <label for="multi"> {{ label() }} </label>
+    <p-multi-select
+      [options]="users()"
+      [(ngModel)]="selectedUsers"
+      (ngModelChange)="checkEvent($event)"
+      optionLabel="email"
+      display="comma"
+      placeholder=""
+    />
+  </div>
+  <div class="separator"></div>
+  <div class="usersAccess rounded">
+    @for(user of selectedUsers(); track user){
+    <div class="user-row">
+      @if(getImageForUser(user.id)){
+      <p-avatar
+        [image]="getImageForUser(user.id)"
+        size="normal"
+        shape="circle"
+      />
+      } @else {
+      <p-avatar icon="pi pi-user" size="normal" shape="circle" />
+      }
+      <div class="container-span">
+        <span>{{ user.username }}</span>
+        <span>{{ user.email }}</span>
+      </div>
+      @let $moduleAcess = getModuleAccessByUser(user); @if($moduleAcess &&
+      getAcessRightEnumValue($moduleAcess)){
+      <p-select
+        [options]="optionsAccessRight"
+        [ngModel]="getAcessRightEnumValue($moduleAcess)"
+        (ngModelChange)="createOrUpdateAccessRight(user, $event)"
+      />
+      }
+    </div>
+    }
+  </div>
+  }
+</p-popover>

@@ -6,6 +6,7 @@ import {
   inject,
   signal,
   viewChild,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
@@ -39,6 +40,10 @@ import {
   DynamicDialogModule,
   DynamicDialogRef,
 } from 'primeng/dynamicdialog';
+import { ModuleRequest } from '../../classes/ModuleRequest';
+import { EModuleType } from '../../enum/ModuleType';
+import { ModuleAccess } from '../../classes/ModuleAccess';
+import { ModuleAccessHttpService } from '../../services/https/module-access-http.service';
 
 @Component({
   selector: 'app-new-project',
@@ -61,9 +66,14 @@ export class NewProjectComponent implements OnInit {
   private blockHttpService = inject(BlockHttpService);
   private moduleHttpService = inject(ModuleHttpService);
   private moduleVersionHttpService = inject(ModuleVersionHttpService);
+  private moduleAccessHttpService = inject(ModuleAccessHttpService);
   private gameSystemHttpService = inject(GameSystemHttpService);
   public dialogService = inject(DialogService);
   private messageService = inject(MessageService);
+
+  // inputs
+  moduleInput = input<ModuleResponse | null>(null);
+  moduleVersionIdInput = input<number | null>(null);
 
   ref: DynamicDialogRef | undefined;
 
@@ -80,6 +90,7 @@ export class NewProjectComponent implements OnInit {
   availableBlocks: Block[] = [];
   currentModule = signal<ModuleResponse>(new ModuleResponse());
   currentModuleVersion = signal<ModuleVersion>(new ModuleVersion());
+  currentModuleAccess = signal<ModuleAccess>(new ModuleAccess());
   currentUser = computed(() => this.userService.currentJdrUser());
   currentGameSystem = signal<GameSystem | undefined>(undefined);
   gameSystems = signal<GameSystem[]>([]);
@@ -93,9 +104,18 @@ export class NewProjectComponent implements OnInit {
 
   initialSetupDone = signal(false);
 
+  loadingSave= signal(false);
+
   constructor() {
-    this.currentModule().title = 'Nouveau Module';
-    this.currentModule().description = 'Description du module';
+    if (this.currentUser() && this.moduleInput() === null) {
+      this.currentModule().title = 'Nouveau Module';
+      this.currentModule().description = 'Description du module';
+      this.currentModule().creator = this.currentUser()!;
+      this.currentModule().isTemplate = false;
+      this.currentModule().type = EModuleType.Scenario;
+    } else if(this.moduleInput() !== null){
+      this.currentModule.set(this.moduleInput()!);
+    }
   }
 
   async ngOnInit() {
@@ -107,8 +127,6 @@ export class NewProjectComponent implements OnInit {
     } catch (error) {
       console.error('Error loading game systems:', error);
     }
-
-
 
     // Initialisation des blocs disponibles si l'utilisateur est connecté
     this.initializeAvailableBlocks();
@@ -401,7 +419,64 @@ export class NewProjectComponent implements OnInit {
 
   // Méthodes pour sauvegarder le projet
   async save() {
-    // Logique de sauvegarde du projet
+    console.log(this.currentModule())
+    if (this.currentModule().creator && this.currentModule().id == 0) {
+      this.loadingSave.set(true);
+      const moduleRequest = new ModuleRequest(
+        this.currentModule().title,
+        this.currentModule().description,
+        this.currentModule().isTemplate,
+        this.currentModule().type,
+        this.currentModule().creator!
+      );
+      this.moduleHttpService
+        .createModule(moduleRequest)
+        .then((resp: ModuleResponse) => {
+          this.currentModule.set(resp);
+          this.moduleVersionHttpService
+            .getModuleVersionsByModuleId(this.currentModule().id!)
+            .then((moduleVers: ModuleVersion[]) =>
+              this.currentModuleVersion.set(moduleVers[0])
+            );
+
+          this.moduleAccessHttpService
+            .getModuleAccessByModuleId(this.currentModule().id!)
+            .then((acc: ModuleAccess[]) =>
+              this.currentModuleAccess.set(acc[0])
+            );
+
+          this.blocks().forEach((block: Block) => {
+            block.moduleVersionId = this.currentModuleVersion().id!;
+            block.creator = this.currentModule().creator!;
+            this.blockHttpService.createBlock(block);
+          });
+
+        }).finally(() => this.loadingSave.set(false));
+    } else {
+      this.loadingSave.set(true);
+      const moduleRequest = new ModuleRequest(
+        this.currentModule().title,
+        this.currentModule().description,
+        this.currentModule().isTemplate,
+        this.currentModule().type,
+        this.currentModule().creator!
+      );
+      this.moduleHttpService
+        .updateModule(this.currentModule().id!, moduleRequest)
+        .then(() => {
+          this.blocks().forEach((block: Block) => {
+            block.moduleVersionId = this.currentModuleVersion().id!;
+            block.creator = this.currentModule().creator!;
+            this.blockHttpService.createBlock(block);
+          });
+        }).finally(() => this.loadingSave.set(false));
+
+        // this.moduleAccessHttpService
+        // .toggleAccessRight(this.currentModuleAccess().id!)
+        // .then((acc: ModuleAccess[]) =>
+        //   this.currentModuleAccess.set(acc[0])
+        // );
+    }
   }
 
   // Méthode pour générer avec l'IA
@@ -424,13 +499,17 @@ export class NewProjectComponent implements OnInit {
   }
 
   processAIResponse(blockId: number, blockType: string, response: string) {
-    console.log(blockId)
-    console.log(blockType)
-    console.log(response)
-    console.log(this.blocks().find((block) => block.id === blockId))
-    if(blockType == EBlockType.paragraph){
-      (this.blocks().find((block) => block.id === blockId) as ParagraphBlock).paragraph = response
-      const block: ParagraphBlock = this.blocks().find((block) => block.id === blockId) as ParagraphBlock
+    console.log(blockId);
+    console.log(blockType);
+    console.log(response);
+    console.log(this.blocks().find((block) => block.id === blockId));
+    if (blockType == EBlockType.paragraph) {
+      (
+        this.blocks().find((block) => block.id === blockId) as ParagraphBlock
+      ).paragraph = response;
+      const block: ParagraphBlock = this.blocks().find(
+        (block) => block.id === blockId
+      ) as ParagraphBlock;
       this.blocks.update((blocks) => {
         const index = blocks.findIndex((b) => b.id === blockId);
         if (index !== -1) {
@@ -439,7 +518,7 @@ export class NewProjectComponent implements OnInit {
         return blocks;
       });
 
-      console.log(this.blocks())
+      console.log(this.blocks());
     }
   }
 

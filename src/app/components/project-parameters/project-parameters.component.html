@@ -34,9 +34,9 @@
     ></p-select>
   </div>
   <div class="container-label">
-    <app-user-avatar-choose></app-user-avatar-choose>
+    <app-user-avatar-choose [moduleId]="currentModule().id" ></app-user-avatar-choose>
   </div>
-  <p-button label="Save" icon="pi pi-save" (onClick)="save()" severity="success" />
+  <p-button label="Sauvegarder" [loading]="loadingSave()" icon="pi pi-save" (onClick)="save()" severity="success" />
   <p-button
     label="Générer avec l'IA"
     icon="pi pi-sparkles"

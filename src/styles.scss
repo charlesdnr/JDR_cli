@@ -190,8 +190,9 @@
   --p-toast-info-detail-color: var(--font-color);
 
   // tooltip
-  --p-tooltip-background: var(--background-color-lighter);
+  // --p-tooltip-background: var(--background-color-lighter);
   --p-tooltip-color: var(--font-color);
+  --p-tooltip-max-width: 300px;
 
   // input number
   --p-inputnumber-button-hover-background: var(--primary-color);
@@ -213,6 +214,18 @@
 
   // range
   --p-slider-range-background: var(--primary-color);
+
+  // password overlay
+  --p-password-overlay-color: var(--font-color);
+
+  // contexte menu
+  --p-contextmenu-color: var(--font-color);
+  --p-contextmenu-item-color: var(--font-color);
+  --p-contextmenu-item-focus-background: var(--background-color-lighter);
+  --p-contextmenu-item-focus-color: var(--font-color);
+
+  // popover
+  --p-popover-color: var(--font-color);
 }
 
 html,

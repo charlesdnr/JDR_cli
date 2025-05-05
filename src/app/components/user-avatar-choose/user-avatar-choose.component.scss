@@ -4,7 +4,63 @@
   gap: calc(var(--padding) / 4);
 }
 
-::ng-deep .p-multiselect {
-  width: 100%;
-  max-width: 228px;
+// Main popover styling
+::ng-deep .p-popover {
+  width: 450px;
+  max-width: 90vw;
+  padding: 0;
+  border: 1px solid var(--neutral-color);
+
+  .p-popover-content {
+    padding: var(--padding);
+    background: var(--background-color);
+  }
+}
+
+// Separator styling
+.separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--padding) 0;
+}
+
+// Users access section
+.usersAccess {
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding);
+
+  > .user-row {
+    display: flex;
+    align-items: center;
+    gap: var(--padding);
+
+    // User info container
+    .container-span {
+      flex: 1;
+      min-width: 0; // Prevents flex items from overflowing
+
+      span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background-color: var(--background-color);
+        &:first-child {
+          font-weight: 500;
+          color: var(--font-color);
+          font-size: var(--font-size);
+        }
+
+        &:last-child {
+          color: var(--placeholder-color);
+          font-size: calc(var(--font-size) * 0.92);
+        }
+      }
+    }
+  }
+}
+
+::ng-deep .p-popover-content {
+  border-radius: calc(var(--padding) /2);
 }

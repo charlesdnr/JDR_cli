@@ -34,6 +34,7 @@ export class ProjectParametersComponent implements OnInit {
   currentModule = input.required<ModuleResponse>();
   gameSystems = input.required<GameSystem[]>();
   currentUser = input<User | null>(null);
+  loadingSave= input<boolean>(false);
 
   // Models
   currentGameSystem = model<GameSystem | undefined>(undefined);
