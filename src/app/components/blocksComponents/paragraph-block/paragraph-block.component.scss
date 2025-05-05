@@ -19,5 +19,10 @@
   }
   .basic-block {
     display: flex;
+    gap: calc(var(--padding) / 2);
   }
+}
+
+::ng-deep .ql-editor {
+  min-height: 200px;
 }

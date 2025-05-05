@@ -1,3 +1,7 @@
+.p-dialog-content{
+  height: 100%;
+}
+
 .ai-config-container {
   display: flex;
   flex-direction: column;
@@ -10,8 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px 0;
-  animation: fadeIn 0.5s ease-in-out;
+  // animation: fadeIn 0.5s ease-in-out;
 
   .ai-form-title {
     color: var(--primary-color);
@@ -51,23 +54,6 @@
         grid-column: 1 / -1;
       }
     }
-  }
-}
-
-.form-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.3s ease;
-
-  &:focus-within {
-    transform: translateY(-2px);
-  }
-
-  label {
-    font-weight: 500;
-    color: var(--font-color);
-    margin-bottom: 4px;
   }
 }
 
@@ -151,12 +137,6 @@
   justify-content: flex-end;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -189,4 +169,85 @@
   .p-editor-container .p-editor-content {
     height: 200px;
   }
+}
+
+::ng-deep .p-dialog-content{
+  padding: var(--padding);
+}
+.module-container-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding);
+}
+.star {
+  font-weight: 600;
+  color: var(--danger-color);
+}
+
+
+
+.writing-response-container {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  padding: var(--padding);
+  background-color: var(--surface-50);
+  animation: fadeIn 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.writing-response-container.absolute-version {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--padding);
+  background-color: var(--surface-50);
+  animation: fadeIn 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  min-height: unset; // Important pour le absolute
+}
+
+
+.writing-response {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.writing-text {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--font-color-primary);
+  overflow-y: auto;
+  padding: 1rem 0;
+  flex: 1;
+  font-family: inherit;
+  white-space: pre-wrap;
+}
+
+.animated-word {
+  display: inline;
+  transition: opacity 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.response-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  justify-content: flex-end;
+  padding-top: 1rem;
 }

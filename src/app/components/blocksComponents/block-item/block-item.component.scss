@@ -6,7 +6,7 @@
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   width: 100%;
-  min-height: 180px !important;
+  // min-height: 180px !important;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -23,6 +23,15 @@
 
   &.cdk-drag-animating {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  ::ng-deep .p-inputtext{
+    background-color: var(--background-color);
+  }
+  ::ng-deep .p-textarea {
+    background-color: var(--background-color);
+  }
+  ::ng-deep .p-select {
+    background-color: var(--background-color);
   }
 }
 
@@ -113,3 +122,5 @@
     background-color: rgba(59, 130, 246, 0.1);
   }
 }
+
+

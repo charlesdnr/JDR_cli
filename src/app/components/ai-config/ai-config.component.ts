@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { EBlockType } from '../../enum/BlockType';
 import {
   FormControl,
@@ -22,6 +22,8 @@ import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
 import { GameSystemService } from '../../services/https/GameSystemService.service';
 import { EditorModule } from 'primeng/editor';
+import { GameSystem } from '../../classes/GameSystem';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-ai-config',
@@ -43,7 +45,7 @@ import { EditorModule } from 'primeng/editor';
   templateUrl: './ai-config.component.html',
   styleUrl: './ai-config.component.scss',
 })
-export class AiConfigComponent implements OnInit {
+export class AiConfigComponent implements OnInit, OnDestroy {
   ref = inject(DynamicDialogRef);
   config = inject(DynamicDialogConfig);
   private AIService = inject(AIGenerationService);
@@ -52,7 +54,7 @@ export class AiConfigComponent implements OnInit {
 
   type = input<EBlockType>(EBlockType.paragraph);
   generatingMessage = signal<string>('Génération en cours...');
-  gameSystems = signal<any[]>([]);
+  gameSystems = signal<GameSystem[]>([]);
 
   // Messages aléatoires pour l'animation de génération
   private generationMessages = [
@@ -70,7 +72,7 @@ export class AiConfigComponent implements OnInit {
     context: new FormControl('', Validators.required),
     tone: new FormControl(''),
     characters: new FormControl(''),
-    gameSystem: new FormControl('fantasy'),
+    gameSystemId: new FormControl(1),
   });
 
   // Formulaire pour les musiques
@@ -84,7 +86,7 @@ export class AiConfigComponent implements OnInit {
     entityType: new FormControl('', Validators.required),
     entityName: new FormControl(''),
     powerLevel: new FormControl('moyen'),
-    gameSystemId: new FormControl('1'),
+    gameSystemId: new FormControl(1),
   });
 
   // Formulaire pour la génération complète de module
@@ -92,7 +94,7 @@ export class AiConfigComponent implements OnInit {
     theme: new FormControl('', Validators.required),
     title: new FormControl('', Validators.required),
     description: new FormControl(''),
-    gameSystemId: new FormControl('1'),
+    gameSystemId: new FormControl(1),
   });
 
   // Placeholders
@@ -128,14 +130,16 @@ export class AiConfigComponent implements OnInit {
     path: 'assets/lottie/success.json', // You'll need to add this animation file
   };
 
+  private readonly WORD_ANIMATION_DELAY = 10; // millisecondes entre chaque lettre
+  isWritingParagraph = signal(false);
+  animatedWords = signal<any[]>([]);
+  private animationTimeout: any;
+
   async ngOnInit() {
     // Charge les systèmes de jeu pour le dropdown
     try {
       const systems = await this.gameSystemService.getAllGameSystems();
-      this.gameSystems.set(systems.map((system: any) => ({
-        name: system.name,
-        id: system.id.toString()
-      })));
+      this.gameSystems.set(systems);
 
       // Pré-sélectionne le premier système
       if (systems.length > 0) {
@@ -162,10 +166,13 @@ export class AiConfigComponent implements OnInit {
           this.formgroupParaph.value.context || '',
           this.formgroupParaph.value.tone || '',
           this.formgroupParaph.value.characters || '',
-          this.formgroupParaph.value.gameSystem || 'fantasy'
+          this.formgroupParaph.value.gameSystemId?.toString() || "1"
         )
           .then(resp => {
-            this.handleSuccessResponse('paragraphe', resp.content);
+            this.loading.set(false);
+            this.isWritingParagraph.set(true);
+            this.response.set(resp.content);
+            this.startTextAnimation(resp.content);
           })
           .catch(error => {
             this.handleErrorResponse('paragraphe', error);
@@ -196,8 +203,8 @@ export class AiConfigComponent implements OnInit {
           this.formgroupStat.value.entityType || '',
           this.formgroupStat.value.entityName || '',
           this.formgroupStat.value.powerLevel || 'moyen',
-          this.getGameSystemName(this.formgroupStat.value.gameSystemId || '1'),
-          this.formgroupStat.value.gameSystemId || '1'
+          this.getGameSystemName(this.formgroupStat.value.gameSystemId || 1),
+          this.formgroupStat.value.gameSystemId?.toString() || '1'
         )
           .then(resp => {
             const statData = {
@@ -223,13 +230,46 @@ export class AiConfigComponent implements OnInit {
     }
   }
 
+  private startTextAnimation(text: string) {
+    // Nettoyer toute animation précédente
+    if (this.animationTimeout) {
+      clearTimeout(this.animationTimeout);
+    }
+
+    // Séparer le texte en mots en préservant les espaces importants
+    const words = text.split(/(\S+|\s+)/g)
+      .filter(word => word.trim().length > 0 || word === ' ') // Garde les espaces simples, supprime les multiples
+      .map(word => ({
+        text: word,
+        opacity: 0
+      }));
+
+    this.animatedWords.set(words);
+
+    // Animer chaque mot
+    words.forEach((word, index) => {
+      this.animationTimeout = setTimeout(() => {
+        const updatedWords = [...this.animatedWords()];
+        updatedWords[index] = { ...word, opacity: 1 };
+        this.animatedWords.set(updatedWords);
+      }, index * this.WORD_ANIMATION_DELAY);
+    });
+  }
+
+  // Ajouter une méthode pour régénérer
+  regenerate() {
+    this.isWritingParagraph.set(false);
+    this.animatedWords.set([]);
+    this.generate();
+  }
+
   generateCompleteModule() {
     this.loading.set(true);
     this.AIService.generateCompleteModule(
       this.formgroupCompleteModule.value.theme || '',
       this.formgroupCompleteModule.value.title || '',
       this.formgroupCompleteModule.value.description || '',
-      this.formgroupCompleteModule.value.gameSystemId || '1'
+      this.formgroupCompleteModule.value.gameSystemId?.toString() || '1'
     )
       .then(resp => {
         console.log('Réponse module complet:', resp);
@@ -274,7 +314,7 @@ export class AiConfigComponent implements OnInit {
     this.loading.set(false);
   }
 
-  private handleErrorResponse(type: string, error: any) {
+  private handleErrorResponse(type: string, error: HttpErrorResponse) {
     console.error(`Erreur lors de la génération du ${type}:`, error);
     this.messageService.add({
       severity: 'error',
@@ -285,8 +325,14 @@ export class AiConfigComponent implements OnInit {
     this.loading.set(false);
   }
 
-  private getGameSystemName(id: string): string {
+  private getGameSystemName(id: number): string {
     const system = this.gameSystems().find(sys => sys.id === id);
     return system ? system.name : 'Système inconnu';
+  }
+
+  ngOnDestroy() {
+    if (this.animationTimeout) {
+      clearTimeout(this.animationTimeout);
+    }
   }
 }

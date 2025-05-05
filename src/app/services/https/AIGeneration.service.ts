@@ -37,15 +37,15 @@ export class AIGenerationService {
    */
   async generateParagraph(
     context: string,
-    tone: string = '',
-    characters: string = '',
-    gameSystem: string = 'fantasy'
+    tone: string,
+    characters: string,
+    gameSystemId: string
   ): Promise<any> {
     return this.generateContent(EBlockType.paragraph, {
       context,
       tone,
       characters,
-      gameSystem
+      gameSystemId
     });
   }
 

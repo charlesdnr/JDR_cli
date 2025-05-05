@@ -5,6 +5,7 @@ import { ParagraphBlock } from '../../../classes/ParagraphBlock';
 import { TranslateModule } from '@ngx-translate/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { EditorModule } from 'primeng/editor';
 
 @Component({
   selector: 'app-paragraph-block',
@@ -13,26 +14,17 @@ import { SelectModule } from 'primeng/select';
     TextareaModule,
     TranslateModule,
     InputTextModule,
-    SelectModule
+    SelectModule,
+    EditorModule
   ],
   templateUrl: './paragraph-block.component.html',
   styleUrl: './paragraph-block.component.scss'
 })
-export class ParagraphBlockComponent implements OnInit {
+export class ParagraphBlockComponent {
   paragraphBlock = input.required<ParagraphBlock>();
-  content = model<string>('');
-
-  options = ["Introduction", ""]
-
-  ngOnInit() {
-    if (this.paragraphBlock().paragraph) {
-      this.content.set(this.paragraphBlock().paragraph ?? '');
-    }
-  }
-
-  onContentChange(value: string) {
-    if (this.paragraphBlock()) {
-      this.paragraphBlock().paragraph = value;
-    }
-  }
+  options = [
+    { label: 'Introduction', value: 'Introduction' },
+    { label: 'Clarification', value: 'Clarification' },
+    { label: 'Conclusion', value: 'Conclusion' }
+  ];
 }

@@ -57,18 +57,21 @@
         <div class="action-buttons">
           <div class="first">
             <p-button
+            icon="pi pi-save"
             (onClick)="saveUser()"
-            [label]="'Sauvegarder les changements' | translate"
+            [label]="'Sauvegarder' | translate"
             severity="secondary"
           />
             <p-button
             (onClick)="changePassword()"
+            icon="pi pi-pencil"
             [label]="'Change Password' | translate"
             severity="secondary"
           />
           </div>
           <p-button
             (onClick)="deleteAccount()"
+            icon="pi pi-trash"
             [label]="'Delete account' | translate"
             severity="danger"
             styleClass="p-button-danger"

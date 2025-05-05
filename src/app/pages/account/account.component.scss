@@ -16,6 +16,9 @@
       height: 40px;
     }
 }
+::ng-deep .p-inputtext{
+  background-color: var(--background-color);
+}
 }
 
 .container-account {

@@ -1,3 +1,7 @@
+:host{
+  height: 100%;
+}
+
 .blocks-container {
     display: flex;
     flex-direction: column;
@@ -5,6 +9,7 @@
     height: 100%;
     gap: 15px;
     padding: var(--padding);
+    padding-bottom: 8rem;
     border: 1px dashed transparent;
     -webkit-user-select: none;
     -ms-user-select: none;

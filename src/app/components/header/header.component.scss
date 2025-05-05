@@ -8,6 +8,7 @@ header {
   align-items: center;
   height: 80px;
   position: relative;
+  z-index: 10;
 
   .title {
     display: flex;
@@ -180,14 +181,11 @@ header {
   .mobile-nav {
     display: none;
     width: 100%;
-    position: fixed; /* Position fixe par rapport à la fenêtre */
-    top: 64px; /* Position juste en dessous du header */
+    position: fixed;
+    top: 64px;
     left: 0;
     right: 0;
-    background-color: var(
-      --surface-card,
-      #fff
-    ); /* Couleur de fond ou blanc par défaut */
+    background-color: var(--background-color);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 

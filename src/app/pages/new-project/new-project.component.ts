@@ -94,7 +94,8 @@ export class NewProjectComponent implements OnInit {
   initialSetupDone = signal(false);
 
   constructor() {
-    // Logique d'initialisation selon les utilisateurs disponibles...
+    this.currentModule().title = 'Nouveau Module';
+    this.currentModule().description = 'Description du module';
   }
 
   async ngOnInit() {
@@ -106,6 +107,8 @@ export class NewProjectComponent implements OnInit {
     } catch (error) {
       console.error('Error loading game systems:', error);
     }
+
+
 
     // Initialisation des blocs disponibles si l'utilisateur est connecté
     this.initializeAvailableBlocks();
@@ -405,7 +408,7 @@ export class NewProjectComponent implements OnInit {
   generateAIContent(data: { blockId: number; blockType: string }) {
     this.dialogService
       .open(AiConfigComponent, {
-        header: "Générer avec l'IA",
+        showHeader: false,
         width: '60rem',
         modal: true,
         inputValues: {
@@ -421,12 +424,28 @@ export class NewProjectComponent implements OnInit {
   }
 
   processAIResponse(blockId: number, blockType: string, response: string) {
-    // Logique de traitement de la réponse IA selon le type de bloc
+    console.log(blockId)
+    console.log(blockType)
+    console.log(response)
+    console.log(this.blocks().find((block) => block.id === blockId))
+    if(blockType == EBlockType.paragraph){
+      (this.blocks().find((block) => block.id === blockId) as ParagraphBlock).paragraph = response
+      const block: ParagraphBlock = this.blocks().find((block) => block.id === blockId) as ParagraphBlock
+      this.blocks.update((blocks) => {
+        const index = blocks.findIndex((b) => b.id === blockId);
+        if (index !== -1) {
+          blocks[index] = block;
+        }
+        return blocks;
+      });
+
+      console.log(this.blocks())
+    }
   }
 
   generateCompleteModule() {
     this.ref = this.dialogService.open(AiConfigComponent, {
-      header: "Générer un module complet avec l'IA",
+      showHeader: false,
       width: '70rem',
       modal: true,
       inputValues: {

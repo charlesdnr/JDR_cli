@@ -13,7 +13,7 @@
 }
 
 .toolbar {
-  background-color: var(--secondary-color);
+  background-color: var(--background-color-lighter);
   margin-bottom: 25px;
   max-width: 270px;
   min-width: 270px;
@@ -23,11 +23,11 @@
   box-shadow: 5px 0 5px -5px var(--neutral-color);
 
   ::ng-deep .p-tabpanels {
-    background-color: var(--secondary-color);
+    background-color: var(--background-color-lighter);
   }
 
   ::ng-deep .p-tablist-tab-list {
-    background-color: var(--secondary-color);
+    background-color: var(--background-color-lighter);
   }
 }
 
@@ -74,7 +74,7 @@
 :host ::ng-deep {
   .ai-dialog {
     .p-dialog-header {
-      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--background-color-lighter) 100%);
       color: white;
     }
 

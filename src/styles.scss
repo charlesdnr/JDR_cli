@@ -60,12 +60,12 @@
   --p-treetable-sort-icon-hover-color: var(--primary-color);
 
   // tabs
-  --p-tabs-tab-background: var(--background-color);
-  --p-tabs-tab-hover-background: var(--background-color);
-  --p-tabs-tab-active-background: var(--background-color);
+  --p-tabs-tab-background: var(--background-color-lighter);
+  --p-tabs-tab-hover-background: var(--background-color-lighter);
+  --p-tabs-tab-active-background: var(--background-color-lighter);
 
   --p-tabs-tab-gap: calc(var(--padding) / 2);
-  --p-tabs-tab-border-color: var(--background-color);
+  --p-tabs-tab-border-color: var(--background-color-lighter);
   // --p-tabs-tab-active-border-color: var(--primary-color);
   --p-tabs-tab-active-color: var(--primary-color);
   // --p-tabs-tab-color: var(--font-color);
@@ -73,18 +73,18 @@
   --p-tabs-tablist-background: var(--background-color);
   --scrollbar-bg: var(--primary-color);
 
-  --p-tabs-tabpanel-background: var(--background-color);
-  --p-tabs-tabpanel-border-color: var(--background-color);
+  --p-tabs-tabpanel-background: var(--background-color-lighter);
+  --p-tabs-tabpanel-border-color: var(--background-color-lighter);
   --p-tabs-tabpanel-color: var(--font-color);
   --p-tabs-tabpanel-focus-ring-color: var(--primary-color);
   --p-tabs-active-bar-background: var(--primary-color);
-  --p-tabs-tab-active-border-color: var(--background-color);
-  --p-tabs-tab-hover-border-color: var(--background-color);
+  --p-tabs-tab-active-border-color: var(--background-color-lighter);
+  --p-tabs-tab-hover-border-color: var(--background-color-lighter);
   --p-tabs-tab-padding: calc(var(--padding) / 2);
 
   // textarea
   --p-textarea-focus-border-color: var(--primary-color);
-
+  --p-textarea-color: var(--font-color);
   --p-button-text-primary-color: var(--primary-color);
 
   //tab
@@ -92,6 +92,7 @@
   --p-datatable-row-selected-color: var(--primary-color);
   --p-datatable-row-selected-background: var(--primary-color-transparent-50);
   --p-datatable-row-focus-ring-color: var(--primary-color);
+  --p-tabs-tab-hover-color: var(--font-color);
 
   //button
   --p-button-primary-focus-ring-color: var(--primary-color);
@@ -112,6 +113,12 @@
   --p-select-option-selected-color: var(--primary-color);
   --p-select-option-hover-background: var(--primary-color-transparent-50);
   --p-select-option-selected-focus-color: var(--primary-color);
+  --p-select-color: var(--font-color);
+  --p-select-overlay-color: var(--font-color);
+  --p-select-option-focus-color: var(--font-color);
+  --p-select-option-focus-background: var(--background-color-lighter);
+  --p-select-overlay-color: var(--font-color);
+  --p-select-option-color: var(--font-color);
 
   //checkbox
   --p-checkbox-checked-background: var(--primary-color);
@@ -134,9 +141,14 @@
   //multi-select
   --p-multiselect-border-color: var(--neutral-color);
   --p-multiselect-focus-border-color: var(--primary-color);
+  --p-multiselect-option-focus-color: var(--font-color);
+  --p-multiselect-option-focus-background: var(--font-color);
+  --p-multiselect-option-focus-background: var(--background-color-lighter);
+  --p-multiselect-option-color: var(--font-color);
+  --p-multiselect-color: var(--font-color);
 
   //p-tree
-  --p-tree-background: var(--background-color);
+  --p-tree-background: var(--background-color-lighter);
   --p-tree-node-selected-background: var(--primary-color-transparent-50);
   --p-tree-node-selected-color: var(--primary-color);
   --p-tree-node-icon-selected-color: var(--neutral-color);
@@ -152,6 +164,8 @@
   --p-button-secondary-border-color: var(--neutral-color);
   --p-button-secondary-color: var(--font-color);
   --p-button-secondary-hover-background: transparent;
+  --p-button-secondary-hover-border-color: var(--font-color);
+  --p-button-secondary-hover-color: var(--font-color);
 
   //button link
   --p-button-link-color: var(--primary-color);
@@ -161,8 +175,42 @@
 
   // p-avatar
   --p-avatar-background: var(--background-color-lighter);
-}
+  --p-avatar-color: var(--font-color);
 
+  // dark mode
+  --p-surface-0: var(--background-color-lighter);
+  --p-button-text-danger-hover-background: color-mix(in srgb, var(--p-red-400), transparent 96%);
+  --p-button-text-help-hover-background: color-mix(in srgb,var(--p-purple-400),transparent 96%);
+  --p-toast-success-detail-color: var(--font-color);
+  --p-toast-error-detail-color: var(--font-color);
+  --p-confirmdialog-icon-color: var(--font-color);
+  --p-toast-info-detail-color: var(--font-color);
+
+  // tooltip
+  --p-tooltip-background: var(--background-color-lighter);
+  --p-tooltip-color: var(--font-color);
+
+  // input number
+  --p-inputnumber-button-hover-background: var(--primary-color);
+  --p-editor-content-color: var(--font-color);
+
+  //p-editor
+  --p-editor-toolbar-item-hover-color: var(--primary-color);
+  --p-editor-toolbar-item-color: var(--font-color);
+  --p-editor-toolbar-item-active-color: var(--primary-color);
+  --p-editor-overlay-border-color: var(--neutral-color);
+  --p-editor-overlay-option-color: var(--font-color);
+  --p-editor-overlay-option-focus-color: var(--font-color);
+  --p-editor-overlay-option-focus-background: var(--background-color-lighter);
+  --p-editor-content-border-color: var(--neutral-color);
+  --p-editor-toolbar-border-color: var(--neutral-color);
+
+  // card
+  --p-card-color: var(--font-color);
+
+  // range
+  --p-slider-range-background: var(--primary-color);
+}
 
 html,
 body {
@@ -279,4 +327,10 @@ body.resizing [contenteditable="true"] {
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
+}
+
+.container-label {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--padding) / 4);
 }

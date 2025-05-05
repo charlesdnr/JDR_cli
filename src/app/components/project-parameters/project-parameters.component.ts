@@ -10,6 +10,7 @@ import { ModuleResponse } from '../../classes/ModuleResponse';
 import { UserAvatarChooseComponent } from '../../components/user-avatar-choose/user-avatar-choose.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { User } from '../../classes/User';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-project-parameters',
@@ -20,7 +21,8 @@ import { User } from '../../classes/User';
     InputTextModule,
     TextareaModule,
     TranslateModule,
-    UserAvatarChooseComponent
+    UserAvatarChooseComponent,
+    TooltipModule
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss'
