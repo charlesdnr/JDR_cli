@@ -1,4 +1,10 @@
-<div class="module-card">
+<div class="module-card"
+     (click)="loadModule()"
+     (keydown.enter)="loadModule()"
+     (keydown.space)="loadModule(); $event.preventDefault()"
+     tabindex="0"
+     role="button"
+     [attr.aria-label]="'Load module: ' + (currentModule()?.title || 'Module sans nom')">
   <img [src]="picture.length === 0 ? baseUrlImage : picture" alt="image du module">
-  <span> {{ currentModule()?.alias || 'Module sans nom' }} </span>
+  <span> {{ currentModule()?.title }} </span>
 </div>

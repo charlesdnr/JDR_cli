@@ -1,15 +1,30 @@
+import { Transform } from "class-transformer";
 import { User } from "./User";
+import { Block } from "./Block";
 
 export class ModuleVersion {
   id?: number;
   moduleId: number;
   version: number;
   creator?: User;
+  @Transform(({ value }) => {
+      if (value instanceof Date) {
+        return value.toISOString().replace(/Z$/, '');
+      }
+      return value;
+    })
   createdAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
+  @Transform(({ value }) => {
+    if (value instanceof Date) {
+      return value.toISOString().replace(/Z$/, '');
+    }
+    return value;
+  })
   updatedAt?: string; // Format ISO: "yyyy-MM-dd HH:mm:ss"
   published: boolean;
   gameSystemId?: number;
   language?: string;
+  blocks: Block[] = []
 
   constructor();
   constructor(

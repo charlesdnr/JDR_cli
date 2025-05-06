@@ -28,6 +28,7 @@
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",
     "@primeng/themes": "^19.0.10",
+    "class-transformer": "^0.5.1",
     "lottie-web": "^5.12.2",
     "ngx-lottie": "^13.0.1",
     "number-generator": "^4.0.6",

@@ -34,10 +34,14 @@
     ></p-select>
   </div>
   <div class="container-label">
-    <app-user-avatar-choose [moduleId]="currentModule().id" ></app-user-avatar-choose>
+    <label for="stockage">{{'Stocker dans'|translate}}</label>
+    <p-select [options]="folders()" optionLabel="name" [(ngModel)]="selectedFolder" (ngModelChange)="saveFolder()"  [fluid]="true" />
   </div>
-  <p-button label="Sauvegarder" [loading]="loadingSave()" icon="pi pi-save" (onClick)="save()" severity="success" />
-  <p-button
+  <p-button [label]="needToCreate() ? 'Créer' : 'Sauvegarder'" [loading]="loadingSave()" icon="pi pi-save" (onClick)="save()" severity="success" />
+  <div class="container-label">
+    <app-user-avatar-choose />
+  </div>
+  <!-- <p-button
     label="Générer avec l'IA"
     icon="pi pi-sparkles"
     styleClass="p-button-help p-button-raised"
@@ -45,5 +49,6 @@
     [disabled]="true"
     pTooltip="Bientot disponible !"
     tooltipPosition="top"
-  ></p-button>
+  ></p-button> -->
 </div>
+<p-button [fluid]="true" [label]="'Supprimer'" icon="pi pi-trash" (onClick)="deleteRequested.emit()" severity="danger" />

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
-import { ModuleResponse } from '../../classes/ModuleResponse';
 import { ModuleRequest } from '../../classes/ModuleRequest';
+import { Module } from '../../classes/Module';
 
 @Injectable({
   providedIn: 'root'
@@ -13,25 +13,25 @@ export class ModuleHttpService extends BaseHttpService {
   }
 
   /** GET /api/modules */
-  getAllModules(): Promise<ModuleResponse[]> {
-    return this.get<ModuleResponse[]>();
+  getAllModules(): Promise<Module[]> {
+    return this.get<Module[]>();
   }
 
   /** GET /api/modules/{id} */
-  getModuleById(id: number): Promise<ModuleResponse> {
-    return this.get<ModuleResponse>(id);
+  getModuleById(id: number): Promise<Module> {
+    return this.get<Module>(id);
   }
 
   /** POST /api/modules */
-  createModule(moduleRequest: ModuleRequest): Promise<ModuleResponse> {
+  createModule(moduleRequest: ModuleRequest): Promise<Module> {
     // Appel standard, T=ModuleResponse, B=ModuleRequest
-    return this.post<ModuleResponse, ModuleRequest>(moduleRequest);
+    return this.post<Module, ModuleRequest>(moduleRequest);
   }
 
   /** PUT /api/modules/{id} */
-  updateModule(id: number, moduleRequest: ModuleRequest): Promise<ModuleResponse> {
+  updateModule(id: number, moduleRequest: ModuleRequest): Promise<Module> {
     // Appel standard, T=ModuleResponse, B=ModuleRequest
-    return this.put<ModuleResponse, ModuleRequest>(moduleRequest, id);
+    return this.put<Module, ModuleRequest>(moduleRequest, id);
   }
 
   /** DELETE /api/modules/{id} */

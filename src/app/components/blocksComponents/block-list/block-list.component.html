@@ -8,7 +8,7 @@
   [class.highlight-drop-zone]="isDraggingIcon()"
 >
   <!-- Les blocs existants -->
-  @for(block of blocks(); track block; let i = $index) {
+  @for(block of blocks(); track block?.id; let i = $index) {
     @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {
       <div class="block-placeholder">
         <div class="placeholder-content">

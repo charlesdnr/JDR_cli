@@ -66,19 +66,19 @@ export class BlockListComponent {
   }
 
   isParagraphBlock(block: Block): boolean {
-    return block.type === EBlockType.paragraph;
+    return block?.type === EBlockType.paragraph;
   }
 
   isMusicBlock(block: Block): boolean {
-    return block.type === EBlockType.music;
+    return block?.type === EBlockType.music;
   }
 
   isStatBlock(block: Block): boolean {
-    return block.type === EBlockType.stat;
+    return block?.type === EBlockType.stat;
   }
 
   isModuleBlock(block: Block): boolean {
-    return block.type === EBlockType.module;
+    return block?.type === EBlockType.module;
   }
 
   asParagraphBlock(block: Block): ParagraphBlock {

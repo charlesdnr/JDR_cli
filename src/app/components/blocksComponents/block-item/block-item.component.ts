@@ -22,7 +22,7 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './block-item.component.scss'
 })
 export class BlockItemComponent {
-  block = input.required<Block>();
+  block = input.required<Block | null>();
   enum = input.required<typeof EBlockType>();
 
   removeBlock = output<number>();

@@ -5,7 +5,7 @@
       color: core.$font-color;
       background-color: transparent;
       @include core.border(2px, solid, $color);
-   
+
       &:disabled {
          color: core.$font-disabled-color;
          @include core.border(2px, solid, core.$disabled-color);
@@ -52,7 +52,7 @@ button.x {
       // width: core.$inputs-size;
       aspect-ratio: 1 / 1;
       padding: unset;
-      
+
       justify-content: center;
       align-items: center;
       @include _outline-style(core.$font-color);

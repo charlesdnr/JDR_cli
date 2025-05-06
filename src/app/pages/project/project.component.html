@@ -24,7 +24,7 @@
           <p-inputicon styleClass="pi pi-search" />
           <input type="text" pInputText placeholder="Search" />
         </p-iconfield>
-        <p-button icon="pi pi-plus" label="Nouveau module" routerLink="/new-project" />
+        <p-button icon="pi pi-plus" label="Nouveau module" (onClick)="resetModule()" routerLink="/new-project" />
       </div>
       <div class="filtres"></div>
     </div>
@@ -32,10 +32,10 @@
       @for(module of displayedModules(); track module){
         <app-module-viewer [moduleId]="module.moduleId" />
         }
-        <h2> Aucun Dossier Lié </h2>
+        <!-- <h2> Aucun Dossier Lié </h2>
         @for(module of moduleWithoutFolder(); track module){
           <app-module-viewer [moduleId]="module.moduleId" />
-        }
+        } -->
     </div>
   </div>
 </div>

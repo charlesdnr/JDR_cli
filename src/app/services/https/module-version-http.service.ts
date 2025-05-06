@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
 import { ModuleVersion } from '../../classes/ModuleVersion';
-import { firstValueFrom, map } from 'rxjs';
-import { createBlock } from '../../utils/createBlock';
-import { IModuleVersionResponse } from '../../interfaces/IModuleVersionResponse';
-import { Block } from '../../classes/Block';
-import { environment } from '../../../environments/environment';
-import { IBlockData } from '../../interfaces/IBlockData';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -47,21 +42,5 @@ export class ModuleVersionHttpService extends BaseHttpService {
   deleteModuleVersion(versionId: number): Promise<void> {
     // Appel standard, le backend renvoie 204 No Content
     return this.delete<void>(versionId);
-  }
-
-  /** GET /api/module-versions/{versionId}/with-blocks (Chemin spécifique) */
-  getModuleVersionWithBlocks(versionId: number): Promise<ModuleVersion & { blocks: Block[] }> {
-    // Chemin spécifique, différent de baseApiUrl
-    const specificUrl = `${environment.apiUrl}api/module-versions/${versionId}/with-blocks`; // Utilise l'URL de base de l'environnement
-    return firstValueFrom(this.httpClient.get<IModuleVersionResponse>(specificUrl)
-      .pipe(
-        map(data => ({
-          ...new ModuleVersion(
-            data.moduleId, data.version, data.creator, data.gameSystemId, data.published, data.createdAt,
-            data.updatedAt, data.language, data.id
-          ),
-          blocks: data.blocks.map((blockData: IBlockData) => createBlock(blockData))
-        }))
-      ));
   }
 }

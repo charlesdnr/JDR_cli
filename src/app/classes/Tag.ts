@@ -1,13 +1,13 @@
-import { ModuleResponse } from "./ModuleResponse";
+import { Module } from "./Module";
 
 export class Tag {
   id?: number;
   name: string;
-  modules?: ModuleResponse[]; // Simplification, car les modules complets ne sont probablement pas nécessaires côté client
+  modules?: Module[]; // Simplification, car les modules complets ne sont probablement pas nécessaires côté client
 
   constructor(
       name: string,
-      modules?: ModuleResponse[],
+      modules?: Module[],
       id?: number
   ) {
       this.id = id;

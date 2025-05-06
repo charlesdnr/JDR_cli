@@ -4,24 +4,24 @@
       <i class="pi pi-bars" cdkDragHandle aria-hidden="true"></i>
     </div>
     <div class="texte">
-      <i [class]="getIconByType(block().type)" aria-hidden="true"></i>
-      <span>{{ getBlockPreview(block().type) }}</span>
+      <i [class]="getIconByType(block()?.type ?? 'stat')" aria-hidden="true"></i>
+      <span>{{ getBlockPreview(block()?.type ?? 'stat') }}</span>
     </div>
     <div class="block-controls">
-      @if(block().id){
+      @if(block()?.id){
       <p-button
         icon="pi pi-sparkles"
         pTooltip="Générer avec l'IA"
         tooltipPosition="top"
-        (click)="onGenerateAI(block().id!, block().type)"
-        [disabled]="block().type === enum().module"
+        (click)="onGenerateAI(block()?.id!, block()!.type)"
+        [disabled]="block()!.type === enum().module"
         [rounded]="true"
         [text]="true"
         severity="help"
       />
       <p-button
         icon="pi pi-times"
-        (click)="onRemoveBlock(block().id!)"
+        (click)="onRemoveBlock(block()!.id!)"
         pTooltip="Supprimer"
         tooltipPosition="top"
         [rounded]="true"
@@ -35,7 +35,7 @@
 
   <div *cdkDragPreview class="block-preview">
     <div class="block-preview-content">
-      {{ getBlockPreview(block().type) }}
+      {{ getBlockPreview(block()?.type ?? 'stat') }}
     </div>
   </div>
 

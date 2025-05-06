@@ -2,11 +2,11 @@
   <div class="basic-block">
     <div class="container-label">
       <label for="title"> {{ "Titre" | translate }} </label>
-      <input type="text" pInputText placeholder="La folle aventure..." />
+      <input type="text" [(ngModel)]="paragraphBlock().title" pInputText placeholder="La folle aventure..." />
     </div>
     <div class="container-label">
       <label for="style">Style</label>
-      <p-select id="style" [options]="options" optionLabel="label" />
+      <p-select id="style" [(ngModel)]="paragraphBlock().style" [options]="options" optionValue="value" optionLabel="label" />
     </div>
   </div>
   <div class="container-label">

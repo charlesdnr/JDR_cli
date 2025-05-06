@@ -15,7 +15,6 @@ import { ModuleHttpService } from '../../services/https/module-http.service'; //
 import { MessageService } from 'primeng/api';
 import { UserFolder } from '../../classes/UserFolder';
 import { UserSavedModule } from '../../classes/UserSavedModule';
-import { ModuleResponse } from '../../classes/ModuleResponse';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
 import { DialogModule } from 'primeng/dialog';
@@ -26,9 +25,11 @@ import { ModuleViewerComponent } from '../../components/module-viewer/module-vie
 import { TreeModule, TreeNodeContextMenuSelectEvent, TreeNodeSelectEvent } from 'primeng/tree';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { RouterLink } from '@angular/router';
+import { Module } from '../../classes/Module';
+import { ModuleService } from '../../services/module.service';
 
 interface DisplayableSavedModule extends UserSavedModule {
-  moduleDetails?: ModuleResponse;
+  moduleDetails?: Module;
   isLoadingDetails?: boolean;
 }
 
@@ -63,6 +64,7 @@ export class ProjectComponent implements OnInit {
   private httpUserService = inject(UserHttpService);
   private httpUserSavedModuleService = inject(UserSavedModuleHttpService);
   private moduleHttpService = inject(ModuleHttpService);
+  private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
 
   currentUser = computed(() => this.httpUserService.currentJdrUser())
@@ -369,5 +371,8 @@ export class ProjectComponent implements OnInit {
 
   subsribe(moduleId: number) {
     console.log(moduleId);
+  }
+  resetModule(){
+    this.moduleService.clearCurrentModule();
   }
 }

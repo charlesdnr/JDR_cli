@@ -1,7 +1,10 @@
-<p-button [disabled]="this.moduleId() === 0" (click)="op.toggle($event)" icon="pi pi-share-alt" label="Share" />
+@let $currentModule = currentModule();
+
+@if($currentModule){
+  <p-button [disabled]="$currentModule.id === 0" (click)="op.toggle($event)" icon="pi pi-share-alt" label="Partager" />
 <p-avatar-group>
-  @for(user of fourUsers(); track user){ @if(getImageForUser(user.id)){
-  <p-avatar [image]="getImageForUser(user.id)" size="normal" shape="circle" />
+  @for(user of fourUsers(); track user){ @if(getImageForUser(user)){
+  <p-avatar [image]="getImageForUser(user)" size="normal" shape="circle" />
   } @else {
   <p-avatar icon="pi pi-user" size="normal" shape="circle" [pTooltip]="user.email" />
   } } @if(moreThanFourUser()){
@@ -14,7 +17,7 @@
 </p-avatar-group>
 
 <p-popover #op class="rounded">
-  @if(this.moduleId() !== 0){
+  @if($currentModule.id !== 0){
   <div class="container-label">
     <label for="multi"> {{ label() }} </label>
     <p-multi-select
@@ -30,9 +33,9 @@
   <div class="usersAccess rounded">
     @for(user of selectedUsers(); track user){
     <div class="user-row">
-      @if(getImageForUser(user.id)){
+      @if(getImageForUser(user)){
       <p-avatar
-        [image]="getImageForUser(user.id)"
+        [image]="getImageForUser(user)"
         size="normal"
         shape="circle"
       />
@@ -56,3 +59,5 @@
   </div>
   }
 </p-popover>
+
+}

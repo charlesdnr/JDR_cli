@@ -1,15 +1,17 @@
 :host {
+  cursor: pointer;
   display: block;
   width: 100%;
   height: 250px;
   border-radius: 8px;
+  border: 1px solid transparent;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--background-color-lighter);
+  // box-shadow: 0 2px 4px var(--neutral-color);
   transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
   }
 }
 

@@ -1,44 +1,54 @@
-<div class="toolbar">
-  <p-tabs value="0">
-    <p-tablist>
-      <p-tab value="0"> {{ "Paramètres" | translate }} </p-tab>
-      <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
-    </p-tablist>
-    <p-tabpanels>
-      <p-tabpanel value="0">
-        <app-project-parameters
-          [currentModule]="currentModule()"
-          [gameSystems]="gameSystems()"
-          [currentUser]="currentUser()"
-          [(currentGameSystem)]="currentGameSystem"
-          (saveRequested)="save()"
-          [loadingSave]="loadingSave()"
-          (generateModuleRequested)="generateCompleteModule()"
-        ></app-project-parameters>
-      </p-tabpanel>
-      <p-tabpanel value="1">
-        <app-block-types-toolbar
-          [availableBlocks]="availableBlocks"
-          [isDraggingIcon]="isDraggingIcon()"
-          [dragPosition]="dragPosition"
-          [draggedIconType]="draggedIconType"
-          (blockDragStarted)="startIconDrag($event)"
-        ></app-block-types-toolbar>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
-</div>
-<div class="container-edit">
-  <div class="editor">
-    <app-block-list
-      [blocks]="blocks()"
-      [isDraggingIcon]="isDraggingIcon()"
-      [isOverDropZone]="isOverDropZone()"
-      [draggedIconType]="draggedIconType"
-      [insertPosition]="insertPosition()"
-      (blockDropped)="onDrop($event)"
-      (blockRemoved)="removeBlock($event)"
-      (generateAIContent)="generateAIContent($event)"
-    ></app-block-list>
+@let $module = currentModule();
+@let $currentBlocks = currentModuleVersion()?.blocks;
+
+@if($module){
+  <div class="toolbar">
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0"> {{ "Paramètres" | translate }} </p-tab>
+        <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <app-project-parameters
+            [currentModule]="$module"
+            [gameSystems]="gameSystems()"
+            [currentUser]="currentUser()"
+            [(currentGameSystem)]="currentGameSystem"
+            (saveRequested)="save()"
+            [loadingSave]="loadingSave()"
+            (generateModuleRequested)="generateCompleteModule()"
+            (deleteRequested)="deleteModule()"
+          ></app-project-parameters>
+        </p-tabpanel>
+        <p-tabpanel value="1">
+          <app-block-types-toolbar
+            [availableBlocks]="availableBlocks"
+            [isDraggingIcon]="isDraggingIcon()"
+            [dragPosition]="dragPosition"
+            [draggedIconType]="draggedIconType"
+            (blockDragStarted)="startIconDrag($event)"
+          ></app-block-types-toolbar>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </div>
-</div>
+  <div class="container-edit">
+    <div class="editor">
+      @if($currentBlocks){
+        <app-block-list
+        [blocks]="$currentBlocks"
+        [isDraggingIcon]="isDraggingIcon()"
+        [isOverDropZone]="isOverDropZone()"
+        [draggedIconType]="draggedIconType"
+        [insertPosition]="insertPosition()"
+        (blockDropped)="onDrop($event)"
+        (blockRemoved)="removeBlock($event)"
+        (generateAIContent)="generateAIContent($event)"
+      ></app-block-list>
+      }
+    </div>
+  </div>
+}
+
+
