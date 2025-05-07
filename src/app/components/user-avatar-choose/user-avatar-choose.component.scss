@@ -74,3 +74,33 @@
   align-items: center;
   gap: calc(var(--padding) /2);
 }
+.container-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--padding) / 2);
+  width: 100%;
+}
+.container-action {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--padding) / 2);
+  min-width: 12rem; /* Augmentez cette valeur si nécessaire */
+  width: auto; /* Remplacez la largeur fixe par auto */
+  flex-shrink: 0; /* Empêche le container de rétrécir */
+}
+.container-item-auto {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--padding) / 2);
+  width: 100%;
+}
+
+::ng-deep .container-action .p-multiselect {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 2.5rem);
+}
+
+::ng-deep .p-multiselect-panel {
+  max-width: 90vw;
+}

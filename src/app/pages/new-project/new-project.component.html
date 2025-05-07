@@ -38,11 +38,12 @@
   <div class="editor">
     @if($currentBlocks && $currentBlocks.length === 0 && !isDraggingIcon()){
     <div class="container-empty">
-      <ng-lottie height="40rem" [options]="options" />
+      <ng-lottie height="30rem" [options]="options" />
       <h1>{{ "Glisse et dépose un block pour commencer !" | translate }}</h1>
     </div>
     } @if($currentBlocks){
     <app-block-list
+      [style.height]="$currentBlocks.length === 0 && !isDraggingIcon() ? '0':'100%'"
       [blocks]="$currentBlocks"
       [isDraggingIcon]="isDraggingIcon()"
       [isOverDropZone]="isOverDropZone()"

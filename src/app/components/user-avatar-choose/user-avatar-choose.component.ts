@@ -22,6 +22,9 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { User } from '../../classes/User';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { Subject } from 'rxjs';
+import { MessageService } from 'primeng/api';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-user-avatar-choose',
@@ -34,6 +37,7 @@ import { Subject } from 'rxjs';
     SelectModule,
     TooltipModule,
     AutoCompleteModule,
+    MultiSelectModule
   ],
   templateUrl: './user-avatar-choose.component.html',
   styleUrl: './user-avatar-choose.component.scss',
@@ -42,23 +46,47 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   private userService = inject(UserHttpService);
   private httpAccessRightService = inject(ModuleAccessHttpService);
   private moduleService = inject(ModuleService);
+  private messageService = inject(MessageService);
 
   currentUser = computed(() => this.userService.currentJdrUser());
   currentModule = this.moduleService.currentModule;
 
   label = input<string>("Droit d'accés");
   searchResults = signal<User[]>([]);
-  selectedUsers: User[] = [];
+  selectedUsers = signal<User[]>([])
   filterText: string = '';
 
-  fourUsers = computed(() => this.selectedUsers.slice(0, 4));
-  moreThanFourUser = computed(() => this.selectedUsers.length > 4);
+  accessRightsForUsers = computed(() => {
+    const result = new Map<number, string[]>(); // Changement de type ici
+
+    if (this.currentModule()) {
+      this.currentModule()!.accesses.forEach(access => {
+        const rights: string[] = []; // Changement de type ici
+        if (access.canEdit) rights.push(AccessRight.EDIT);
+        if (access.canInvite) rights.push(AccessRight.INVITE);
+        if (access.canPublish) rights.push(AccessRight.PUBLISH);
+        if (access.canView) rights.push(AccessRight.VIEW);
+
+        result.set(access.id!, rights);
+      });
+    }
+
+    return result;
+  });
+
+
+  getAccessRightsForUser(moduleAccess: ModuleAccess): string[] {
+    return this.accessRightsForUsers().get(moduleAccess.id!) || [];
+  }
+
+  fourUsers = computed(() => this.selectedUsers().slice(0, 4));
+  moreThanFourUser = computed(() => this.selectedUsers().length > 4);
 
   optionsAccessRight = [
-    AccessRight.EDIT,
-    AccessRight.VIEW,
-    AccessRight.INVITE,
-    AccessRight.PUBLISH,
+    { value: AccessRight.EDIT, label: 'Modifier' },
+    { value: AccessRight.VIEW, label: 'Voir' },
+    { value: AccessRight.INVITE, label: 'Invité' },
+    { value: AccessRight.PUBLISH, label: 'Publier' },
   ];
 
   private destroy$ = new Subject<void>();
@@ -69,7 +97,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
       const usersWithAccess = this.currentModule()!.accesses.map(
         (access) => access.user
       );
-      this.selectedUsers = [...usersWithAccess];
+      this.selectedUsers.set(usersWithAccess);
     }
   }
 
@@ -90,7 +118,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
           next: (results) => {
             // Filter out already selected users
             const filteredResults = results.filter(user =>
-              !this.selectedUsers.some(selected => selected.id === user.id)
+              !this.selectedUsers().some(selected => selected.id === user.id)
             );
             this.searchResults.set(filteredResults);
             this.loadingListUser = false;
@@ -108,9 +136,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
 
   onUserSelect(user: User): void {
     // Check if user is already selected
-    if (!this.selectedUsers.some(selected => selected.id === user.id)) {
-      // Add to selectedUsers
-      this.selectedUsers = [...this.selectedUsers, user];
+    if (!this.selectedUsers().some(selected => selected.id === user.id)) {
       // Create access right with VIEW by default
       this.createOrUpdateAccessRight(user, AccessRight.VIEW);
     }
@@ -121,13 +147,30 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
 
   removeUser(user: User): void {
     // Remove user from selection
-    this.selectedUsers = this.selectedUsers.filter(selected => selected.id !== user.id);
-
-    // Here you could also remove their access rights in the backend if needed
-    console.log('User removed:', user);
-
-    // Optional: If you want to remove access rights from backend too
-    // this.httpAccessRightService.removeModuleAccess(this.currentModule()!.id, user.id);
+    const moduleAcc = this.getModuleAccessByUser(user);
+    if (moduleAcc && moduleAcc.id && user !== this.currentUser()) {
+      this.httpAccessRightService.deleteModuleAccess(moduleAcc.id).then(() => {
+        this.selectedUsers.set(this.selectedUsers().filter(selected => selected.id !== user.id));
+        this.currentModule.update(mod => {
+          if (!mod) {
+            return null;
+          }
+          const updatedAccesses = mod.accesses.filter(acc => acc.user.id !== user.id);
+          return { ...mod, accesses: updatedAccesses };
+        });
+        console.log(this.currentModule())
+        this.messageService.add({
+          severity: 'success', summary: 'Suppression', detail:
+            "L'utilisateur " + user.email + " n'a plus accés a ce module"
+        })
+      }).catch((err: HttpErrorResponse) => {
+        if (err.status == HttpStatusCode.NotFound) {
+          this.messageService.add({ severity: 'error', summary: "Erreur", detail: 'Une erreur est survenue : access module introuvable' + "\n L'utilisateur " + user.email + " a toujours accés a ce module" })
+        }
+      });
+    } else if (user !== this.currentUser()) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Vous ne pouvez pas enlever les droits du créteur du module' })
+    }
   }
 
   getImageForUser(user: User): string | undefined {
@@ -146,6 +189,25 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
     if (moduleAccess.canPublish) return AccessRight.PUBLISH;
     if (moduleAccess.canView) return AccessRight.VIEW;
     return undefined;
+  }
+
+
+  createOrUpdateAccessRightArray(user: User, accessRight: AccessRight[]) {
+    const access = this.getModuleAccessByUser(user);
+    const edit = accessRight.some(acc => acc == AccessRight.EDIT);
+    const invite = accessRight.some(acc => acc == AccessRight.INVITE);
+    const publish = accessRight.some(acc => acc == AccessRight.PUBLISH);
+    const view = accessRight.some(acc => acc == AccessRight.VIEW);
+    if (access) {
+      // si un access right différe des current access right le toggle
+      if (access.canEdit !== edit) this.createOrUpdateAccessRight(user, AccessRight.EDIT);
+      if (access.canInvite !== invite) this.createOrUpdateAccessRight(user, AccessRight.INVITE);
+      if (access.canPublish !== publish) this.createOrUpdateAccessRight(user, AccessRight.PUBLISH);
+      if (access.canView !== view) this.createOrUpdateAccessRight(user, AccessRight.VIEW);
+    } else {
+      // par défaut on lui met view
+      this.createOrUpdateAccessRight(user, AccessRight.VIEW)
+    }
   }
 
   createOrUpdateAccessRight(user: User, accessRight: AccessRight) {
@@ -184,7 +246,9 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
               this.currentModule.update((moduleUpd) => {
                 if (moduleUpd) {
                   moduleUpd.accesses.push(mod);
+                  this.selectedUsers.set([...this.selectedUsers(), user]);
                   this.moduleService.currentModule.set(moduleUpd);
+                  this.messageService.add({ severity: 'success', summary: 'User', detail: "L'utilisateur " + user.email + " a maintenant accés a votre module" })
                   return moduleUpd;
                 } else {
                   return null;

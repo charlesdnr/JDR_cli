@@ -192,8 +192,8 @@ export class ProjectParametersComponent implements OnInit {
       this.currentUser()!,
       this.currentGameSystem()!.id!,
       false
-    )).then(() => {
-      this.moduleService.refreshCurrentModule()
+    )).then(async () => {
+      await this.moduleService.refreshCurrentModule();
       this.messageService.add({ severity: 'success', summary: 'Nouvelle version', detail: 'La nouvelle version a été créée' })
     });
   }

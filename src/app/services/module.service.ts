@@ -24,11 +24,6 @@ export class ModuleService {
 
   // Charger un module par son ID (utilisé par le composant lors de la navigation vers /module/:id)
   async loadModuleById(id: number): Promise<void> {
-    // Si le module demandé est déjà chargé, ne rien faire
-    if (this.currentModule()?.id === id) {
-        console.log(`Module ${id} déjà chargé.`);
-        return;
-    }
 
     this.loadingModule.set(true);
     this.currentModule.set(null); // Vide le module actuel avant de charger le nouveau
@@ -63,7 +58,7 @@ export class ModuleService {
     const newModule = new Module();
     newModule.id = 0;
     newModule.title = 'Nouveau Module';
-    newModule.description = '';
+    newModule.description = 'Nouvelle Description';
     newModule.creator = user;
     newModule.isTemplate = false;
     newModule.type = EModuleType.Scenario;
@@ -102,6 +97,7 @@ export class ModuleService {
   async refreshCurrentModule(): Promise<void> {
     const module = this.currentModule();
     if (module && module.id !== 0) { // Ne recharge que si ce n'est pas un nouveau module non sauvegardé
+      alert('')
       await this.loadModuleById(module.id);
     } else {
         console.log("Impossible de rafraîchir un nouveau module non sauvegardé.");
