@@ -1,5 +1,27 @@
 <div class="container-parametres">
   <div class="container-label">
+    <label for="versions">Version du module</label>
+    <p-select
+      [filter]="true"
+      fluid
+      [options]="versions()"
+      optionLabel="version"
+      [(ngModel)]="currentVersion"
+    >
+      <ng-template #footer>
+        <p-button
+          (onClick)="createNewVersion()"
+          label="Nouvelle version"
+          [fluid]="true"
+          severity="secondary"
+          text
+          size="small"
+          icon="pi pi-plus"
+        />
+      </ng-template>
+    </p-select>
+  </div>
+  <div class="container-label">
     <label for="moduleName">{{ "Titre" | translate }}</label>
     <input
       class="input"
@@ -11,9 +33,7 @@
     />
   </div>
   <div class="container-label">
-    <label for="moduleDescription">{{
-      "Description" | translate
-    }}</label>
+    <label for="moduleDescription">{{ "Description" | translate }}</label>
     <textarea
       class="input"
       id="moduleDescription"
@@ -27,6 +47,7 @@
     <label for="gameSystem">{{ "Jeux" | translate }}</label>
     <p-select
       [options]="gameSystems()"
+      [loading]="gameLoading"
       [(ngModel)]="currentGameSystem"
       optionLabel="name"
       placeholder="Selectionner un jeux"
@@ -34,13 +55,37 @@
     ></p-select>
   </div>
   <div class="container-label">
-    <label for="stockage">{{'Stocker dans'|translate}}</label>
-    <p-select [options]="folders()" optionLabel="name" [(ngModel)]="selectedFolder" (ngModelChange)="saveFolder()"  [fluid]="true" />
+    <label for="stockage">{{ "Stocker dans" | translate }}</label>
+    <p-select
+      [options]="folders()"
+      [disabled]="needToCreate()"
+      optionLabel="name"
+      [loading]="folderLoading"
+      [(ngModel)]="selectedFolder"
+      (ngModelChange)="saveFolder()"
+      [fluid]="true"
+    />
   </div>
-  <p-button [label]="needToCreate() ? 'Créer' : 'Sauvegarder'" [loading]="loadingSave()" icon="pi pi-save" (onClick)="save()" severity="success" />
+  <p-button
+    [label]="needToCreate() ? 'Créer' : 'Sauvegarder'"
+    [loading]="loadingSave()"
+    icon="pi pi-save"
+    (onClick)="save()"
+    severity="success"
+  />
+  <p-button
+    [disabled]="needToCreate()"
+    (onClick)="published()"
+    [loading]="loadingPublished()"
+    [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
+    [label]="currentVersion().published ? 'Rendre Privée' : 'Publier'"
+    severity="help"
+  />
+  @if(!currentVersion().published){
   <div class="container-label">
     <app-user-avatar-choose />
   </div>
+  }
   <!-- <p-button
     label="Générer avec l'IA"
     icon="pi pi-sparkles"
@@ -51,4 +96,11 @@
     tooltipPosition="top"
   ></p-button> -->
 </div>
-<p-button [fluid]="true" [label]="'Supprimer'" icon="pi pi-trash" (onClick)="deleteRequested.emit()" severity="danger" />
+<p-button
+  [fluid]="true"
+  [disabled]="needToCreate()"
+  [label]="'Supprimer'"
+  icon="pi pi-trash"
+  (onClick)="deleteRequested.emit()"
+  severity="danger"
+/>

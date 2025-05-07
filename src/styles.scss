@@ -105,6 +105,7 @@
   --p-button-success-border-color: var(--success-color);
 
   //select
+  --p-select-disabled-background: light-dark(rgba(239, 239, 239, 0.3), rgba(19, 1, 1, 0.3));
   --p-select-focus-border-color: var(--primary-color);
   --p-select-option-selected-focus-background: var(
     --primary-color-transparent-50
@@ -226,12 +227,33 @@
 
   // popover
   --p-popover-color: var(--font-color);
+
+  // autocomplete
+  --p-autocomplete-focus-border-color: var(--primary-color);
+  --p-autocomplete-border-color: var(--neutral-color);
+  --p-autocomplete-color: var(--font-color);
+  --p-autocomplete-option-focus-color: var(--font-color);
+  --p-autocomplete-option-focus-background: var(--background-color-lighter);
+  --p-autocomplete-option-selected-focus-background: var(--background-color-lighter);
+  --p-autocomplete-option-selected-background: var(--background-color-lighter);
+  --p-chip-background: var(--background-color);
+  --p-chip-color: var(--font-color);
+  --p-chip-remove-icon-color: var(--danger-color);
+  --p-autocomplete-option-color: var(--font-color);
+  --p-autocomplete-dropdown-background: var(--background-color);
+  --p-autocomplete-overlay-color: var(--font-color);
+
+  --neutral-color-transparent: rgba(var(--neutral-color-rgb), 0.2); // Exemple
+  --font-secondary-color: var(--neutral-color);
 }
 
 html,
 body {
   height: 100%;
   overflow: hidden;
+}
+.p-autocomplete-input-multiple {
+  padding: calc(var(--padding) / 2);
 }
 
 body {

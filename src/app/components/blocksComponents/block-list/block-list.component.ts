@@ -1,5 +1,5 @@
 import { EBlockType } from './../../../enum/BlockType';
-import { Component, ElementRef, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, output, viewChild } from '@angular/core';
 import { StatBlockComponent } from '../stat-block/stat-block.component';
 import { BlockItemComponent } from '../block-item/block-item.component';
 import { MusicBlockComponent } from '../music-block/music-block.component';
@@ -9,6 +9,8 @@ import { Block } from '../../../classes/Block';
 import { ParagraphBlock } from '../../../classes/ParagraphBlock';
 import { MusicBlock } from '../../../classes/MusicBlock';
 import { StatBlock } from '../../../classes/StatBlock';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ModuleService } from '../../../services/module.service';
 
 @Component({
   selector: 'app-block-list',
@@ -18,17 +20,21 @@ import { StatBlock } from '../../../classes/StatBlock';
     ParagraphBlockComponent,
     MusicBlockComponent,
     StatBlockComponent,
+    SkeletonModule
   ],
   templateUrl: './block-list.component.html',
   styleUrl: './block-list.component.scss',
 })
 export class BlockListComponent {
+  private moduleService = inject(ModuleService);
+
   blocksContainerRef = viewChild<ElementRef<HTMLElement>>('blocksContainer');
   blocks = input.required<Block[]>();
   isDraggingIcon = input<boolean>(false);
   isOverDropZone = input<boolean>(false);
   draggedIconType = input<EBlockType | null>(null);
   insertPosition = input<number | null>(null);
+  loadingBlock = this.moduleService.loadingModule.asReadonly();
 
   blockDropped = output<CdkDragDrop<Block[]>>();
   blockRemoved = output<number>();

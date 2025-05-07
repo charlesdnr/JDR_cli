@@ -33,6 +33,7 @@
   > .user-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--padding);
 
     // User info container
@@ -61,6 +62,15 @@
   }
 }
 
+::ng-deep .p-iconfield .p-inputtext:not(:last-child) {
+  width: 100%;
+}
+
 ::ng-deep .p-popover-content {
   border-radius: calc(var(--padding) /2);
+}
+.container-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--padding) /2);
 }

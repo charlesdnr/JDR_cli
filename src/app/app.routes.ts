@@ -8,11 +8,13 @@ import { NewProjectComponent } from './pages/new-project/new-project.component';
 import { PasswordResetComponent } from './components/password-reset/password-reset.component';
 
 export const routes: Routes = [
-    { path: '', pathMatch: 'full', redirectTo: 'home' },
-    { path: 'auth/:config', component: AuthComponent },
-    { path: 'home', component: HomeComponent },
-    { path: 'account', component: AccountComponent, canActivate: [authGuard] },
-    { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
-    { path: 'new-project', component: NewProjectComponent, canActivate: [authGuard] },
-    { path: 'password-reset', component: PasswordResetComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  { path: 'auth/:config', component: AuthComponent },
+  { path: 'home', component: HomeComponent },
+  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
+  { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
+  { path: 'new-module', component: NewProjectComponent, canActivate: [authGuard] },
+  { path: 'module/:moduleId', component: NewProjectComponent, canActivate: [authGuard] },
+  { path: 'password-reset', component: PasswordResetComponent },
+  { path: 'module', redirectTo: 'projects', pathMatch: 'full' },
 ];

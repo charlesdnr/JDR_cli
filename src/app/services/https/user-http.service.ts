@@ -63,6 +63,15 @@ export class UserHttpService extends BaseHttpService {
     return firstValueFrom(this.httpClient.get<User>(specificUrl));
   }
 
+  searchUserByEmail(email: string){
+    const specificUrl = `${this.baseApiUrl}/search/email/${email}`;
+    return this.httpClient.get<User[]>(specificUrl);
+  }
+  searchUserByUsername(username: string){
+    const specificUrl = `${this.baseApiUrl}/search/username/${username}`;
+    return this.httpClient.get<User[]>(specificUrl);
+  }
+
 
   // --- Gestion Signal et SessionStorage ---
 

@@ -6,7 +6,7 @@ import {
   inject,
   signal,
   viewChild,
-  effect
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
@@ -15,7 +15,7 @@ import {
   DragDropModule,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProjectParametersComponent } from '../../components/project-parameters/project-parameters.component';
 import { Block } from '../../classes/Block';
 import { ParagraphBlock } from '../../classes/ParagraphBlock';
@@ -28,7 +28,6 @@ import { EBlockType } from '../../enum/BlockType';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { BlockHttpService } from '../../services/https/block-http.service';
 import { ModuleHttpService } from '../../services/https/module-http.service';
-import { GameSystemHttpService } from '../../services/https/game-system-http.service';
 import { AiConfigComponent } from '../../components/ai-config/ai-config.component';
 import { BlockTypesToolbarComponent } from '../../components/blocksComponents/block-types-toolbar/block-types-toolbar.component';
 import { BlockListComponent } from '../../components/blocksComponents/block-list/block-list.component';
@@ -39,9 +38,14 @@ import {
   DynamicDialogRef,
 } from 'primeng/dynamicdialog';
 import { ModuleRequest } from '../../classes/ModuleRequest';
-import { EModuleType } from '../../enum/ModuleType';
 import { ModuleService } from '../../services/module.service';
 import { Module } from '../../classes/Module';
+import { LottieComponent, AnimationOptions } from 'ngx-lottie';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-new-project',
@@ -55,25 +59,31 @@ import { Module } from '../../classes/Module';
     BlockListComponent,
     TranslateModule,
     DynamicDialogModule,
+    LottieComponent,
+    SkeletonModule,
+    ConfirmDialogModule,
+    ButtonModule,
   ],
+  providers: [ConfirmationService],
   templateUrl: './new-project.component.html',
   styleUrl: './new-project.component.scss',
 })
-export class NewProjectComponent implements OnInit {
+export class NewProjectComponent implements OnInit, OnDestroy {
   private moduleService = inject(ModuleService);
   private userService = inject(UserHttpService);
   private blockHttpService = inject(BlockHttpService);
   private moduleHttpService = inject(ModuleHttpService);
-  private gameSystemHttpService = inject(GameSystemHttpService);
   public dialogService = inject(DialogService);
+  public confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
-  currentModule = this.moduleService.currentModule
-  currentModuleVersion = this.moduleService.currentModuleVersion
+  currentModule = this.moduleService.currentModule;
+  loadingModuleState = this.moduleService.loadingModule;
   currentUser = computed(() => this.userService.currentJdrUser());
   currentGameSystem = signal<GameSystem | undefined>(undefined);
-
-
+  currentVersion = this.moduleService.currentModuleVersion;
 
   ref: DynamicDialogRef | undefined;
 
@@ -85,10 +95,12 @@ export class NewProjectComponent implements OnInit {
   // Enums
   enumBlockType = EBlockType;
 
+  options: AnimationOptions = {
+    path: 'assets/lottie/empty_blocks.json',
+  };
+
   // States
   availableBlocks: Block[] = [];
-
-  gameSystems = signal<GameSystem[]>([]);
   isDraggingIcon = signal(false);
   draggedIconType: EBlockType | null = null;
   activeIconElement: HTMLElement | null = null;
@@ -98,48 +110,47 @@ export class NewProjectComponent implements OnInit {
 
   initialSetupDone = signal(false);
 
-  loadingSave= signal(false);
+  loadingSave = signal(false);
 
-  constructor() {
-    effect(() => {
-      const module = this.currentModule()
-      console.log(module)
-    })
-  }
+  private routeSubscription: Subscription | undefined;
 
-  async ngOnInit() {
-    let module = this.currentModule()
-    // init le module si on est dans le cas ou on veut en créer un
-    if(!module){
-      module = new Module();
-      module.title = 'Nouveau Module';
-      module.description = 'Description du module';
-      module.creator = this.currentUser()!;
-      module.isTemplate = false;
-      module.type = EModuleType.Scenario;
-      const modVers = new ModuleVersion()
-      modVers.blocks.push(new ParagraphBlock(0, 'Preview Paragraphe', 0, this.currentUser()!))
-      module.versions.push(modVers)
-      this.moduleService.currentModule.set(module);
-    }
-    try {
-      const systems = await this.gameSystemHttpService.getAllGameSystems();
-      this.gameSystems.set(systems);
-      const defaultGameSystem = systems.length > 0 ? systems[0] : undefined;
-      this.currentGameSystem.set(defaultGameSystem);
-    } catch (error) {
-      console.error('Error loading game systems:', error);
-    }
-
-    // Initialisation des blocs disponibles si l'utilisateur est connecté
+  ngOnInit() {
     this.initializeAvailableBlocks();
+    // S'abonner aux paramètres de la route
+    this.routeSubscription = this.route.paramMap.subscribe((params) => {
+      const moduleIdParam = params.get('moduleId');
+
+      if (moduleIdParam) {
+        // Route /module/:moduleId -> Charger un module existant
+        const moduleId = parseInt(moduleIdParam, 10);
+        if (!isNaN(moduleId)) {
+          this.moduleService.loadModuleById(moduleId);
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'ID de module invalide.',
+          });
+          this.router.navigate(['/projects']);
+        }
+      } else if (this.route.snapshot.routeConfig?.path === 'new-module') {
+        this.moduleService.prepareNewModule();
+      } else {
+        this.router.navigate(['/projects']);
+      }
+    });
   }
 
-  // Méthode d'initialisation des blocs disponibles
+  ngOnDestroy() {
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
+    }
+  }
+
   private initializeAvailableBlocks() {
     const user = this.currentUser();
     if (user) {
-      const tempModuleVersionId = 0;
+      const tempModuleVersionId = 0; // ID temporaire, sera mis à jour lors de la sauvegarde
       this.availableBlocks = [
         new ParagraphBlock(tempModuleVersionId, 'Preview Paragraphe', 0, user),
         new MusicBlock(tempModuleVersionId, 'Preview Musique', 1, user),
@@ -151,8 +162,9 @@ export class NewProjectComponent implements OnInit {
           user
         ),
       ];
-      // this.addBlock(EBlockType.paragraph);
-      this.initialSetupDone.set(true);
+    } else {
+      // Gérer le cas où l'utilisateur n'est pas disponible (peu probable avec le guard)
+      this.availableBlocks = [];
     }
   }
 
@@ -244,8 +256,8 @@ export class NewProjectComponent implements OnInit {
   }
 
   calculateInsertPosition(event: MouseEvent): number {
-    const currentBlocks = this.currentModuleVersion()?.blocks;
-    if(!currentBlocks) return 0;
+    const currentBlocks = this.currentVersion()?.blocks; // Utilise currentVersion signal
+    if (!currentBlocks) return 0;
     if (!this.dropZoneElement()) return currentBlocks.length;
 
     const blockElements = Array.from(
@@ -256,25 +268,17 @@ export class NewProjectComponent implements OnInit {
 
     if (blockElements.length === 0) return 0;
 
-    // Pour chaque bloc, déterminer si le curseur est au-dessus ou en-dessous
+    // Logique existante pour calculer la position
     for (let i = 0; i < blockElements.length; i++) {
       const blockRect = blockElements[i].getBoundingClientRect();
-
-      // Si la souris est au-dessus de ce bloc
       if (event.clientY < blockRect.top) return i;
-
-      // Si la souris est dans ce bloc
       if (event.clientY >= blockRect.top && event.clientY <= blockRect.bottom) {
         const blockMiddle = blockRect.top + blockRect.height / 2;
         return event.clientY < blockMiddle ? i : i + 1;
       }
-
-      // Si c'est le dernier bloc et que la souris est en-dessous
       if (i === blockElements.length - 1 && event.clientY > blockRect.bottom) {
         return blockElements.length;
       }
-
-      // Si la souris est entre ce bloc et le suivant
       if (i < blockElements.length - 1) {
         const nextBlockRect = blockElements[i + 1].getBoundingClientRect();
         if (
@@ -286,40 +290,39 @@ export class NewProjectComponent implements OnInit {
       }
     }
 
-    // Fallback : trouver le bloc le plus proche
     let closestIndex = currentBlocks.length;
     let smallestDistance = Infinity;
-
     blockElements.forEach((element, index) => {
       const blockRect = element.getBoundingClientRect();
       const elementMidY = blockRect.top + blockRect.height / 2;
       const distance = Math.abs(event.clientY - elementMidY);
-
       if (distance < smallestDistance) {
         smallestDistance = distance;
         closestIndex = event.clientY < elementMidY ? index : index + 1;
       }
     });
-
     return closestIndex;
   }
 
-  // Méthodes de gestion des blocs
   addBlock(type: EBlockType, position?: number) {
     const user = this.currentUser();
-    if (!user) {
-      console.error('Cannot add block: user not available.');
+    const version = this.currentVersion();
+
+    if (!user || !version) {
+      console.error(
+        "Impossible d'ajouter un bloc: utilisateur ou version non disponible."
+      );
       return;
     }
 
     let newBlock: Block | null = null;
-    const currentVersionId = this.currentModuleVersion()?.id ?? 0;
-    const currentBlockArray = this.currentModuleVersion()?.blocks;
-    if(!currentBlockArray) return
+    const currentVersionId = version.id ?? 0; // Utilise l'ID de la version actuelle (ou 0 si nouveau)
+    const currentBlockArray = version.blocks || []; // Assure que blocks existe
     const blockOrder =
       position !== undefined ? position : currentBlockArray.length;
     const blockPreviewTitle = this.getBlockPreview(type) ?? 'Nouveau Bloc';
 
+    // Création du bloc avec l'ID de version correct
     switch (type) {
       case EBlockType.paragraph:
         newBlock = new ParagraphBlock(
@@ -354,49 +357,71 @@ export class NewProjectComponent implements OnInit {
         );
         break;
       default:
-        console.warn(`Block type ${type} not handled in addBlock`);
+        console.warn(`Type de bloc ${type} non géré.`);
         return;
     }
-    const currentBlocks = this.currentModuleVersion()?.blocks;
-    if(!currentBlocks) return
-    newBlock.id = currentBlocks.length + 1;
+
+    newBlock.id = Date.now() + Math.random(); // ID temporaire plus unique
 
     const newBlocks = [...currentBlockArray];
+    newBlocks.splice(blockOrder, 0, newBlock);
+    newBlocks.forEach((block, index) => (block.blockOrder = index));
 
-    if (position !== undefined) {
-      newBlocks.splice(position, 0, newBlock);
-    } else {
-      newBlocks.push(newBlock);
-    }
-
-    newBlocks.forEach((block, index) => {
-      block.blockOrder = index;
+    // Met à jour directement le signal du service
+    this.moduleService.currentModule.update((mod) => {
+      if (mod) {
+        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
+        if (versionIndex !== -1) {
+          mod.versions[versionIndex].blocks = newBlocks;
+        } else if (mod.versions.length > 0) {
+          mod.versions[0].blocks = newBlocks;
+        }
+      }
+      return mod ? { ...mod } : null;
     });
-
-    this.currentModuleVersion()!.blocks = newBlocks;
   }
 
   removeBlock(blockId: number) {
-    const currentBlocks = this.currentModuleVersion()?.blocks;
-    if(!currentBlocks) return
+    const version = this.currentVersion();
+    if (!version || !version.blocks) return;
+
+    const currentBlocks = version.blocks;
     const newBlocks = currentBlocks.filter((block) => block.id !== blockId);
+    newBlocks.forEach((block, idx) => (block.blockOrder = idx));
 
-    newBlocks.forEach((block, idx) => {
-      block.blockOrder = idx;
+    // Met à jour directement le signal du service
+    this.moduleService.currentModule.update((mod) => {
+      if (mod) {
+        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
+        if (versionIndex !== -1) {
+          mod.versions[versionIndex].blocks = newBlocks;
+        } else if (mod.versions.length > 0) {
+          mod.versions[0].blocks = newBlocks;
+        }
+      }
+      return mod ? { ...mod } : null;
     });
-
-    this.currentModuleVersion()!.blocks = newBlocks;
   }
 
   onDrop(event: CdkDragDrop<Block[]>) {
-    const currentBlocks = [...this.currentModuleVersion()!.blocks];
+    const version = this.currentVersion();
+    if (!version || !version.blocks) return;
+
+    const currentBlocks = [...version.blocks];
     moveItemInArray(currentBlocks, event.previousIndex, event.currentIndex);
+    currentBlocks.forEach((block, index) => (block.blockOrder = index));
 
-    currentBlocks.forEach((block, index) => {
-      block.blockOrder = index;
+    this.moduleService.currentModule.update((mod) => {
+      if (mod) {
+        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
+        if (versionIndex !== -1) {
+          mod.versions[versionIndex].blocks = currentBlocks;
+        } else if (mod.versions.length > 0) {
+          mod.versions[0].blocks = currentBlocks;
+        }
+      }
+      return mod ? { ...mod } : null;
     });
-
-    this.currentModuleVersion()!.blocks = currentBlocks;
   }
 
   getBlockPreview(type: EBlockType): string | undefined {
@@ -418,60 +443,77 @@ export class NewProjectComponent implements OnInit {
 
   onGameSystemChange(system: GameSystem) {
     this.currentGameSystem.set(system);
-    this.currentModuleVersion.update((version: ModuleVersion | undefined) => {
-      if (version) {
+    this.currentVersion.update((version: ModuleVersion | undefined) => {
+      if (version)
         version.gameSystemId = system?.id ?? version.gameSystemId ?? undefined;
-        return version;
-      }
-      return undefined;
+      return version;
     });
   }
 
-  // Méthodes pour sauvegarder le projet
   async save() {
     const module = this.currentModule();
-    if (module && module.creator && module.id == 0) {
-      this.loadingSave.set(true);
-      const moduleRequest = new ModuleRequest(
-        module.title,
-        module.description,
-        module.isTemplate,
-        module.type,
-        module.creator!,
-        module.picture,
-        module.versions,
-        module.accesses
-      );
-      this.moduleHttpService
-        .createModule(moduleRequest)
-        .then((resp: Module) => {
-          console.log(resp)
-          const blocks = this.currentModuleVersion()?.blocks
-          if(blocks){
-            resp.versions[0].blocks.push(...blocks);
-          }
-          console.log(resp)
-          this.moduleService.updateCurrentModule(resp);
-        }).finally(() => this.loadingSave.set(false));
-    } else if (module) {
-      this.loadingSave.set(true);
-      const moduleRequest = new ModuleRequest(
-        module.title,
-        module.description,
-        module.isTemplate,
-        module.type,
-        module.creator!,
-        module.picture,
-        module.versions,
-        module.accesses
-      );
-      this.moduleHttpService
-        .updateModule(module.id!, moduleRequest)
-        .then((resp: Module) => {
-          // Mettre à jour le module stocké avec la réponse
-          this.moduleService.updateCurrentModule(resp);
-        })
-        .finally(() => this.loadingSave.set(false));
+    const version = this.currentVersion();
+
+    if (!module || !module.creator || !version) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Données du module ou utilisateur manquantes.',
+      });
+      return;
+    }
+
+    this.loadingSave.set(true);
+
+    if (this.currentGameSystem()) {
+      version.gameSystemId = this.currentGameSystem()!.id;
+    }
+
+    const moduleRequest = new ModuleRequest(
+      module.title,
+      module.description,
+      module.isTemplate,
+      module.type,
+      module.creator!,
+      module.picture,
+      module.versions,
+      module.accesses
+    );
+
+    try {
+      let savedModule: Module;
+      if (module.id === 0) {
+        // Création
+        savedModule = await this.moduleHttpService.createModule(moduleRequest);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Module créé avec succès !',
+        });
+        this.moduleService.setCurrentModule(savedModule);
+        this.router.navigate(['/module', savedModule.id], { replaceUrl: true });
+      } else {
+        // Mise à jour
+        savedModule = await this.moduleHttpService.updateModule(
+          module.id!,
+          moduleRequest
+        );
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Module mis à jour avec succès !',
+        });
+        this.moduleService.setCurrentModule(savedModule);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du module :', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'La sauvegarde a échoué.',
+      });
+    } finally {
+      this.loadingSave.set(false);
     }
   }
 
@@ -498,21 +540,25 @@ export class NewProjectComponent implements OnInit {
     console.log(blockId);
     console.log(blockType);
     console.log(response);
-    console.log(this.currentModuleVersion()?.blocks.find((block) => block.id === blockId));
+    console.log(
+      this.currentVersion()?.blocks.find((block) => block.id === blockId)
+    );
     if (blockType == EBlockType.paragraph) {
       (
-        this.currentModuleVersion()?.blocks.find((block) => block.id === blockId) as ParagraphBlock
+        this.currentVersion()?.blocks.find(
+          (block) => block.id === blockId
+        ) as ParagraphBlock
       ).paragraph = response;
-      const block: ParagraphBlock = this.currentModuleVersion()?.blocks.find(
+      const block: ParagraphBlock = this.currentVersion()?.blocks.find(
         (block) => block.id === blockId
       ) as ParagraphBlock;
-      this.currentModuleVersion()?.blocks.map((blocks, index) => {
-        if (index !== -1 && this.currentModuleVersion()?.blocks) {
-          this.currentModuleVersion()!.blocks[index] = block;
+      this.currentVersion()?.blocks.map((blocks, index) => {
+        if (index !== -1 && this.currentVersion()?.blocks) {
+          this.currentVersion()!.blocks[index] = block;
         }
       });
 
-      console.log(this.currentModuleVersion()?.blocks);
+      console.log(this.currentVersion()?.blocks);
     }
   }
 
@@ -535,40 +581,39 @@ export class NewProjectComponent implements OnInit {
 
         // Update the current module with metadata
         this.currentModule.update((module) => {
-          if(module){
-           return {
+          if (module) {
+            return {
               ...module,
               title: moduleData.title || module.title,
               description: moduleData.description || module.description,
-            }
+            };
           } else {
-            return null
+            return null;
           }
-        }
-      );
+        });
 
         // Update game system if provided
-        if (moduleData.gameSystemId) {
-          const gameSystemId = parseInt(moduleData.gameSystemId);
-          const gameSystem = this.gameSystems().find(
-            (gs) => gs.id === gameSystemId
-          );
-          if (gameSystem) {
-            this.currentGameSystem.set(gameSystem);
+        // if (moduleData.gameSystemId) {
+        //   const gameSystemId = parseInt(moduleData.gameSystemId);
+        //   const gameSystem = this.gameSystems().find(
+        //     (gs) => gs.id === gameSystemId
+        //   );
+        //   if (gameSystem) {
+        //     this.currentGameSystem.set(gameSystem);
 
-            // Update the moduleVersion
-            this.currentModuleVersion.update((version) => {
-              if(version){
-                return {
-                  ...version,
-                  gameSystemId: gameSystemId,
-                }
-              } else {
-                return version
-              }
-            });
-          }
-        }
+        //     // Update the moduleVersion
+        //     this.currentVersion.update((version) => {
+        //       if(version){
+        //         return {
+        //           ...version,
+        //           gameSystemId: gameSystemId,
+        //         }
+        //       } else {
+        //         return version
+        //       }
+        //     });
+        //   }
+        // }
 
         // Clear existing blocks and create new ones from the response
         if (moduleData.blocks && Array.isArray(moduleData.blocks)) {
@@ -577,8 +622,8 @@ export class NewProjectComponent implements OnInit {
 
           // Process each block from the response
           moduleData.blocks.forEach((block: Block, index: number) => {
-            const module = this.currentModule()
-            if(module){
+            const module = this.currentModule();
+            if (module) {
               if (this.currentUser()) {
                 let newBlock: Block | null = null;
 
@@ -600,7 +645,9 @@ export class NewProjectComponent implements OnInit {
                       block.title || 'Musique générée',
                       index,
                       this.currentUser()!,
-                      (block as MusicBlock).label || block.title || 'Ambiance musicale',
+                      (block as MusicBlock).label ||
+                        block.title ||
+                        'Ambiance musicale',
                       (block as MusicBlock).src || ''
                     );
                     break;
@@ -627,7 +674,7 @@ export class NewProjectComponent implements OnInit {
           });
 
           // Update blocks signal with the new array
-          this.currentModuleVersion()!.blocks = newBlocks;
+          this.currentVersion()!.blocks = newBlocks;
         }
 
         // Notify user of successful generation
@@ -647,7 +694,61 @@ export class NewProjectComponent implements OnInit {
     });
   }
 
-  deleteModule(){
-    this.moduleHttpService.deleteModule(this.currentModule()!.id);
+  deleteModule() {
+    const module = this.currentModule();
+    if (module && module.id !== 0) {
+      this.confirmationService.confirm({
+        message: 'Étes-vous sûr de vouloir supprimer ce module ?',
+        header: 'Confirmation',
+        closable: true,
+        closeOnEscape: true,
+        icon: 'pi pi-exclamation-triangle',
+        rejectButtonProps: {
+          label: 'Cancel',
+          severity: 'secondary',
+          outlined: true,
+        },
+        acceptButtonProps: {
+          label: 'Confirmer',
+          severity: 'danger',
+        },
+        accept: () => {
+          if(this.currentModule()?.id)
+            this.acceptDelete(this.currentModule()!.id)
+        }
+      });
+    } else {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Impossible de supprimer un module non sauvegardé.',
+      });
+    }
+  }
+
+  async acceptDelete(moduleId: number) {
+    this.messageService.clear('confirmDelete');
+    if (!moduleId) return;
+
+    try {
+      await this.moduleHttpService.deleteModule(moduleId);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Succès',
+        detail: 'Module supprimé avec succès.',
+      });
+      this.moduleService.clearCurrentModule();
+      this.router.navigate(['/projects']);
+    } catch (error) {
+      console.error(
+        `Erreur lors de la suppression du module ${moduleId}:`,
+        error
+      );
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Impossible de supprimer le module.',
+      });
+    }
   }
 }

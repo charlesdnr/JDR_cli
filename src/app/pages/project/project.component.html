@@ -9,7 +9,10 @@
       (onNodeSelect)="onNodeSelect($event)"
       (onNodeContextMenuSelect)="onNodeRightClick($event)"
       [contextMenu]="cm"
-      [draggableNodes]="true" [droppableNodes]="true" draggableScope="self" droppableScope="self"
+      [draggableNodes]="true"
+      [droppableNodes]="true"
+      draggableScope="self"
+      droppableScope="self"
     />
     <p-button
       label="Nouveau dossier"
@@ -24,18 +27,19 @@
           <p-inputicon styleClass="pi pi-search" />
           <input type="text" pInputText placeholder="Search" />
         </p-iconfield>
-        <p-button icon="pi pi-plus" label="Nouveau module" (onClick)="resetModule()" routerLink="/new-project" />
+        <p-button
+          icon="pi pi-plus"
+          label="Nouveau module"
+          (onClick)="resetModule()"
+          routerLink="/new-module"
+        />
       </div>
       <div class="filtres"></div>
     </div>
     <div class="modules-list">
-      @for(module of displayedModules(); track module){
-        <app-module-viewer [moduleId]="module.moduleId" />
-        }
-        <!-- <h2> Aucun Dossier Lié </h2>
-        @for(module of moduleWithoutFolder(); track module){
-          <app-module-viewer [moduleId]="module.moduleId" />
-        } -->
+      @for (module of displayedModules(); track module) {
+      <app-module-viewer [moduleId]="module.moduleId" />
+      }
     </div>
   </div>
 </div>

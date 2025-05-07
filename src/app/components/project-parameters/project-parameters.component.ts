@@ -26,6 +26,10 @@ import { UserSavedModuleHttpService } from '../../services/https/user-saved-modu
 import { UserFolder } from '../../classes/UserFolder';
 import { MessageService } from 'primeng/api';
 import { UserSavedModule } from '../../classes/UserSavedModule';
+import { ModuleVersion } from '../../classes/ModuleVersion';
+import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
+import { ModuleService } from '../../services/module.service';
+import { GameSystemHttpService } from '../../services/https/game-system-http.service';
 
 @Component({
   selector: 'app-project-parameters',
@@ -47,12 +51,19 @@ export class ProjectParametersComponent implements OnInit {
   private messageService = inject(MessageService);
   private httpUserFolderService = inject(UserFolderHttpService);
   private httpUserSavedModuleService = inject(UserSavedModuleHttpService);
+  private httpModuleVersionService = inject(ModuleVersionHttpService);
+  private moduleService = inject(ModuleService);
+  private gameSystemHttpService = inject(GameSystemHttpService);
 
   // Inputs
   currentModule = input.required<Module>();
-  gameSystems = input.required<GameSystem[]>();
+  currentVersion = model.required<ModuleVersion>();
+  versions = computed(() => this.currentModule().versions)
+  gameSystems = signal<GameSystem[]>([]);
+
   currentUser = input<User | null>(null);
   loadingSave = input<boolean>(false);
+  loadingPublished = signal<boolean>(false);
 
   // Models
   currentGameSystem = model<GameSystem | undefined>(undefined);
@@ -67,12 +78,22 @@ export class ProjectParametersComponent implements OnInit {
   folders: WritableSignal<UserFolder[]> = signal([]);
   selectedFolder = signal<UserFolder | null>(null);
 
+  gameLoading = false;
+  folderLoading = false;
+
   async ngOnInit(): Promise<void> {
     await this.loadFolders();
     this.findInUserSavedModule();
-    // Si un système de jeu est disponible, le sélectionner par défaut
-    if (this.gameSystems().length > 0) {
-      this.currentGameSystem.set(this.gameSystems()[0]);
+     try {
+      this.gameLoading = true
+      const systems = await this.gameSystemHttpService.getAllGameSystems();
+      this.gameSystems.set(systems);
+      const defaultGameSystem = systems.length > 0 ? systems[0] : undefined;
+      this.currentGameSystem.set(defaultGameSystem);
+    } catch (error) {
+      console.error('Error loading game systems:', error);
+    } finally {
+      this.gameLoading = false;
     }
   }
 
@@ -90,6 +111,7 @@ export class ProjectParametersComponent implements OnInit {
   async loadFolders(): Promise<UserFolder[]> {
     // this.isLoadingFolders.set(true);
     try {
+      this.folderLoading = true;
       const user = this.currentUser();
       if (!user) return [];
       const fetchedFolders = await this.httpUserFolderService.getAllUserFolders(
@@ -104,12 +126,16 @@ export class ProjectParametersComponent implements OnInit {
         detail: 'Impossible de charger les dossiers.' + error,
       });
       return [];
+    } finally {
+      this.folderLoading = false;
     }
   }
 
   findInUserSavedModule() {
-    this.httpUserSavedModuleService
-      .getAllUserSavedModules(this.currentUser()!.id)
+    const user = this.currentUser();
+    if(user){
+      this.httpUserSavedModuleService
+      .getAllUserSavedModules(user.id)
       .then((savedModules: UserSavedModule[]) => {
         // TODO : changer versions[0] a la vrai version
         const savMod = savedModules.find(
@@ -121,9 +147,11 @@ export class ProjectParametersComponent implements OnInit {
           this.httpUserFolderService.getUserFolderById(savMod.folderId).then(folder => this.selectedFolder.set(folder))
         }
       });
+    }
   }
 
   saveFolder() {
+    this.folderLoading = true;
     this.httpUserSavedModuleService.getSavedModulesByFolder(this.selectedFolder()!.folderId!).then((savedModule: UserSavedModule[]) => {
       this.httpUserSavedModuleService.put(
         new UserSavedModule(
@@ -140,7 +168,8 @@ export class ProjectParametersComponent implements OnInit {
             save.moduleVersionId == this.currentModule().versions[0].id
         )!.savedModuleId!
       );
-    }).catch(err => {
+      this.messageService.add({ severity: 'success', summary: 'Dossiers', detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name })
+    }).catch(() => {
       this.httpUserSavedModuleService.post(
         new UserSavedModule(
           this.currentUser()!.id,
@@ -151,7 +180,35 @@ export class ProjectParametersComponent implements OnInit {
           0
         )
       );
-    })
+      this.messageService.add({ severity: 'success', summary: 'Dossiers', detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name })
+    }).finally(() => this.folderLoading = false)
 
+  }
+
+  createNewVersion(){
+    this.httpModuleVersionService.createModuleVersion(this.currentModule().id, new ModuleVersion(
+      this.currentModule().id,
+      this.currentModule().versions.length + 1,
+      this.currentUser()!,
+      this.currentGameSystem()!.id!,
+      false
+    )).then(() => {
+      this.moduleService.refreshCurrentModule()
+      this.messageService.add({ severity: 'success', summary: 'Nouvelle version', detail: 'La nouvelle version a été créée' })
+    });
+  }
+
+  published(){
+    this.currentVersion().published = !this.currentVersion().published
+    this.loadingPublished.set(true);
+    this.httpModuleVersionService.updateModuleVersion(this.currentVersion().id!,this.currentVersion())
+    .then(() => {
+      if(this.currentVersion().published){
+        this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été publiée' })
+      } else {
+        this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été rendu privée' })
+      }
+    })
+    .finally(() => this.loadingPublished.set(false))
   }
 }

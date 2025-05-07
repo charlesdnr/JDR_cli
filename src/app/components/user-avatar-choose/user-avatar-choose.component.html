@@ -9,7 +9,7 @@
   <p-avatar icon="pi pi-user" size="normal" shape="circle" [pTooltip]="user.email" />
   } } @if(moreThanFourUser()){
   <p-avatar
-    [label]="'+' + (selectedUsers().length - 4).toString()"
+    [label]="'+' + (selectedUsers.length - 4).toString()"
     size="normal"
     shape="circle"
   />
@@ -18,46 +18,81 @@
 
 <p-popover #op class="rounded">
   @if($currentModule.id !== 0){
-  <div class="container-label">
-    <label for="multi"> {{ label() }} </label>
-    <p-multi-select
-      [options]="users()"
-      [(ngModel)]="selectedUsers"
-      (ngModelChange)="checkEvent($event)"
-      optionLabel="email"
-      display="comma"
-      placeholder=""
-    />
-  </div>
-  <div class="separator"></div>
-  <div class="usersAccess rounded">
-    @for(user of selectedUsers(); track user){
-    <div class="user-row">
-      @if(getImageForUser(user)){
-      <p-avatar
-        [image]="getImageForUser(user)"
-        size="normal"
-        shape="circle"
-      />
-      } @else {
-      <p-avatar icon="pi pi-user" size="normal" shape="circle" />
-      }
-      <div class="container-span">
-        <span>{{ user.username }}</span>
-        <span>{{ user.email }}</span>
+    <div class="container-label">
+      <p-autoComplete
+        fluid
+        [(ngModel)]="filterText"
+        [suggestions]="searchResults()"
+        (completeMethod)="searchUsers($event)"
+        field="email"
+        [dropdown]="true"
+        [delay]="300"
+        [minLength]="1"
+        placeholder="Rechercher et ajouter des utilisateurs"
+        [showEmptyMessage]="true"
+        emptyMessage="Aucun utilisateur trouvé"
+        (onSelect)="onUserSelect($event.value); filterText = ''"
+        styleClass="w-full"
+        [showClear]="true"
+      >
+        <ng-template let-user pTemplate="item">
+          <div class="flex align-items-center gap-2">
+            @if(getImageForUser(user)){
+              <p-avatar [image]="getImageForUser(user)"  shape="circle" />
+            } @else {
+              <p-avatar icon="pi pi-user" shape="circle" />
+            }
+            <div>
+              <div>{{ user.username || user.email.split('@')[0] }}</div>
+              <div class="text-sm text-gray-600">{{ user.email }}</div>
+            </div>
+          </div>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    <!-- Liste des utilisateurs sélectionnés avec bouton de suppression -->
+    <div class="usersAccess rounded">
+      @for(user of selectedUsers; track user){
+      <div class="user-row">
+        <div class="flex items-center">
+          @if(getImageForUser(user)){
+          <p-avatar [image]="getImageForUser(user)" size="normal" shape="circle" />
+          } @else {
+          <p-avatar icon="pi pi-user" size="normal" shape="circle" />
+          }
+          <div class="container-span">
+            <span>{{ user.username || user.email.split('@')[0] }}</span>
+            <span>{{ user.email }}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          @let $moduleAcess = getModuleAccessByUser(user); @if($moduleAcess &&
+          getAcessRightEnumValue($moduleAcess)){
+          <p-select
+            [options]="optionsAccessRight"
+            [ngModel]="getAcessRightEnumValue($moduleAcess)"
+            (ngModelChange)="createOrUpdateAccessRight(user, $event)"
+          />
+          }
+          <p-button
+            icon="pi pi-times"
+            styleClass="p-button-danger p-button-text"
+            (onClick)="removeUser(user)"
+            pTooltip="Supprimer"
+          ></p-button>
+        </div>
       </div>
-      @let $moduleAcess = getModuleAccessByUser(user); @if($moduleAcess &&
-      getAcessRightEnumValue($moduleAcess)){
-      <p-select
-        [options]="optionsAccessRight"
-        [ngModel]="getAcessRightEnumValue($moduleAcess)"
-        (ngModelChange)="createOrUpdateAccessRight(user, $event)"
-      />
+      }
+
+      <!-- Message si aucun utilisateur sélectionné -->
+      @if(selectedUsers.length === 0){
+        <div class="text-center p-3 text-gray-500">
+          Aucun utilisateur sélectionné
+        </div>
       }
     </div>
-    }
-  </div>
   }
 </p-popover>
-
 }
