@@ -161,7 +161,14 @@
   gap: 10px;
 }
 
-
+.password-field {
+  ::ng-deep .p-button-text.p-button-secondary {
+    color: var(--font-color);
+  }
+  ::ng-deep .p-button-text.p-button-secondary:not(:disabled):hover {
+    background-color: transparent;
+  }
+}
 .dialog-footer {
   display: flex;
   justify-content: flex-end;

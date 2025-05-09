@@ -18,7 +18,7 @@ import { ModuleAccess } from '../../classes/ModuleAccess';
 import { TooltipModule } from 'primeng/tooltip';
 import { ModuleAccessHttpService } from '../../services/https/module-access-http.service';
 import { ModuleService } from '../../services/module.service';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { User } from '../../classes/User';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { Subject } from 'rxjs';
@@ -54,7 +54,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   label = input<string>("Droit d'accés");
   searchResults = signal<User[]>([]);
   selectedUsers = signal<User[]>([])
-  filterText: string = '';
+  filterText = '';
 
   accessRightsForUsers = computed(() => {
     const result = new Map<number, string[]>(); // Changement de type ici
@@ -106,7 +106,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  searchUsers(event: any): void {
+  searchUsers(event: AutoCompleteCompleteEvent): void {
     const query = event.query;
 
     // Only search if there's a search term
@@ -174,6 +174,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   }
 
   getImageForUser(user: User): string | undefined {
+    // console.log(user)
     return '';
   }
 
@@ -211,50 +212,88 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   }
 
   createOrUpdateAccessRight(user: User, accessRight: AccessRight) {
-    const moduleAcess = this.currentModule()?.accesses.find(
+    const currentMod = this.currentModule();
+    if (!currentMod || !currentMod.id) {
+      console.error('Aucun module courant ou ID de module trouvé');
+      return;
+    }
+
+    const moduleAcess = currentMod.accesses.find(
       (moduleAccess: ModuleAccess) => moduleAccess.user.id === user.id
     );
 
-    if (moduleAcess && moduleAcess?.id) {
+    if (moduleAcess && moduleAcess.id) {
+      // Mise à jour d'un accès existant
       this.httpAccessRightService
         .toggleAccessRight(moduleAcess.id, accessRight)
         .then((updatedAccess) => {
-          // Mettre à jour l'accès dans le module actuel
           this.currentModule.update((moduleUpd) => {
-            if (moduleUpd) {
-              // Remplacer l'ancien accès par le nouveau
-              const index = moduleUpd.accesses.findIndex(
-                (a) => a.id === updatedAccess.id
-              );
-              if (index !== -1) {
-                moduleUpd.accesses[index] = updatedAccess;
-              }
-              this.moduleService.currentModule.set(moduleUpd);
-              return moduleUpd;
-            } else {
-              return null;
+            if (!moduleUpd) return null;
+
+            // Créer une nouvelle copie des accès au lieu de modifier directement
+            const newAccesses = [...moduleUpd.accesses];
+            const index = newAccesses.findIndex((a) => a.id === updatedAccess.id);
+
+            if (index !== -1) {
+              newAccesses[index] = updatedAccess;
             }
+
+            // Retourner un nouvel objet
+            return {...moduleUpd, accesses: newAccesses};
+          });
+        })
+        .catch(err => {
+          console.error('Erreur lors de la modification des droits:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: "Une erreur est survenue lors de la modification des droits d'accès"
           });
         });
     } else {
+      // Création d'un nouvel accès
       this.httpAccessRightService
-        .createModuleAccess(this.currentModule()!.id, user.id)
+        .createModuleAccess(currentMod.id, user.id)
         .then((modd: ModuleAccess) => {
-          this.httpAccessRightService
-            .toggleAccessRight(modd.id!, accessRight)
-            .then((mod) =>
-              this.currentModule.update((moduleUpd) => {
-                if (moduleUpd) {
-                  moduleUpd.accesses.push(mod);
-                  this.selectedUsers.set([...this.selectedUsers(), user]);
-                  this.moduleService.currentModule.set(moduleUpd);
-                  this.messageService.add({ severity: 'success', summary: 'User', detail: "L'utilisateur " + user.email + " a maintenant accés a votre module" })
-                  return moduleUpd;
-                } else {
-                  return null;
-                }
-              })
-            );
+          if (!modd || !modd.id) {
+            throw new Error('Le module access créé n\'a pas d\'ID');
+          }
+
+          return this.httpAccessRightService.toggleAccessRight(modd.id, accessRight);
+        })
+        .then((mod) => {
+          // Mettre à jour les deux états en une seule opération
+          this.currentModule.update((moduleUpd) => {
+            if (!moduleUpd) return null;
+
+            // Créer un nouveau tableau d'accès avec le nouvel élément
+            const newAccesses = [...moduleUpd.accesses, mod];
+
+            // Mettre à jour la liste des utilisateurs sélectionnés
+            setTimeout(() => {
+              this.selectedUsers.set([...this.selectedUsers(), user]);
+            }, 0);
+
+            // Afficher le message de succès après la mise à jour
+            setTimeout(() => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'User',
+                detail: "L'utilisateur " + user.email + " a maintenant accès à votre module"
+              });
+            }, 0);
+
+            // Retourner un nouvel objet au lieu de modifier directement
+            return {...moduleUpd, accesses: newAccesses};
+          });
+        })
+        .catch(err => {
+          console.error('Erreur lors de l\'ajout des droits:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: "Une erreur est survenue lors de l'ajout des droits d'accès"
+          });
         });
     }
   }

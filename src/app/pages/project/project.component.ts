@@ -1,7 +1,5 @@
 import { Component, inject, OnInit, signal, WritableSignal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms'; // Nécessaire pour ngModel avec Listbox
-
-// PrimeNG Modules
+import { FormsModule } from '@angular/forms';
 import { DataViewModule } from 'primeng/dataview';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -24,7 +22,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ModuleViewerComponent } from '../../components/module-viewer/module-viewer.component';
 import { TreeModule, TreeNodeContextMenuSelectEvent, TreeNodeSelectEvent } from 'primeng/tree';
 import { ContextMenuModule } from 'primeng/contextmenu';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Module } from '../../classes/Module';
 import { ModuleService } from '../../services/module.service';
 
@@ -66,6 +64,8 @@ export class ProjectComponent implements OnInit {
   private moduleHttpService = inject(ModuleHttpService);
   private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   currentUser = computed(() => this.httpUserService.currentJdrUser())
 
@@ -80,12 +80,9 @@ export class ProjectComponent implements OnInit {
   isLoadingModules = signal(false);
   searchValue = signal('');
 
-  // selectedFolderName = computed(() => {
-
-  // });
   contextMenuItems: MenuItem[] = [
     {
-      label: 'Nouveau dossier',
+      label: 'Nouveau sous-dossier',
       icon: 'pi pi-fw pi-plus',
       command: () => this.showNewFolderDialog(this.selectedNode)
     },
@@ -111,8 +108,6 @@ export class ProjectComponent implements OnInit {
     const folderMap = new Map<number, TreeNode>();
     const rootFolders: UserFolder[] = [];
     let childFolders: UserFolder[] = [];
-
-    console.log(this.folders())
 
     // Première passe: séparer les dossiers racines et les enfants
     this.folders().forEach(folder => {
@@ -198,12 +193,19 @@ export class ProjectComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.loadFolders();
     await this.loadModulesWithoutFolder();
-    // Sélectionner le premier dossier s'il existe
+
     if (this.treeNode().length > 0) {
-      const firstNode = this.treeNode()[0];
-      this.selectFolder(firstNode);
+      // Vérifier les paramètres de requête
+      this.route.queryParamMap.subscribe(queryParams => {
+        const folderIdQueryParam = queryParams.get('folderId');
+        if (folderIdQueryParam) {
+          const node = this.treeNode().find(node => node.data?.folderId == folderIdQueryParam);
+          if (node) {
+            this.selectFolder(node);
+          }
+        }
+      });
     }
-    // this.httpUserSavedModuleService.post(new UserSavedModule(4,1,1, 3))
   }
 
   selectFolder(node: TreeNode): void {
@@ -359,12 +361,21 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  // Ajouter cette méthode dans le project.component.ts
   onNodeSelect(event: TreeNodeSelectEvent): void {
     if (event.node) {
       this.selectedFolder.set(event.node);
       if (event.node.data) {
         this.loadModulesForSelectedFolder(event.node.data);
+
+        // Mise à jour de l'URL avec le folderId en query parameter
+        const folderId = event.node.data.folderId;
+        if (folderId) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { folderId: folderId },
+            queryParamsHandling: 'merge'
+          });
+        }
       }
     }
   }

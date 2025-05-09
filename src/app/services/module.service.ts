@@ -1,5 +1,4 @@
-// src/app/services/module.service.ts
-import { Injectable, signal, linkedSignal, inject, WritableSignal } from '@angular/core';
+import { Injectable, signal, inject, WritableSignal } from '@angular/core';
 import { Module } from '../classes/Module';
 import { ModuleVersion } from '../classes/ModuleVersion';
 import { ModuleAccess } from '../classes/ModuleAccess';
@@ -16,9 +15,7 @@ export class ModuleService {
 
   currentModule: WritableSignal<Module | null> = signal(null);
 
-  currentModuleVersion = linkedSignal<ModuleVersion | undefined>(
-    () => this.currentModule()?.versions[0]
-  );
+  currentModuleVersion = signal<ModuleVersion | undefined>(this.currentModule()?.versions[0]);
   loadingModule = signal<boolean>(false);
 
 
@@ -97,10 +94,13 @@ export class ModuleService {
   async refreshCurrentModule(): Promise<void> {
     const module = this.currentModule();
     if (module && module.id !== 0) { // Ne recharge que si ce n'est pas un nouveau module non sauvegardé
-      alert('')
       await this.loadModuleById(module.id);
     } else {
         console.log("Impossible de rafraîchir un nouveau module non sauvegardé.");
     }
+  }
+
+  setCurrentVersion(version: ModuleVersion): void {
+    this.currentModuleVersion.set(version);
   }
 }

@@ -19,8 +19,14 @@
     </p-inputgroup>
   </div>
 
-  <!-- Menu hamburger pour mobile -->
-  <div class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+  <!-- Menu hamburger pour mobile - Corrigé pour l'accessibilité -->
+  <div
+    class="mobile-menu-toggle"
+    (click)="toggleMobileMenu()"
+    (keyup.enter)="toggleMobileMenu()"
+    tabindex="0"
+    role="button"
+    aria-label="Toggle mobile menu">
     <span class="material-symbols-outlined">{{ isMobileMenuOpen() ? 'close' : 'menu' }}</span>
   </div>
 
@@ -28,20 +34,26 @@
   <div class="desktop-menu">
     @if(currentUser()){
     <div class="container-liste">
-      @for(button of mapButton; track button){
+      @for(button of mapButton(); track button){
       <div class="container-button">
-        <span
-          [routerLink]="button.link"
-          [pTooltip]="button.name"
-          tooltipPosition="bottom"
-          appendTo="body"
-          class="material-symbols-outlined"
-          >{{ button.icon }}</span
-        >
+        <!-- @if(folders()[0] && folders()[0].folderId){ -->
+          <span
+            [routerLink]="[button.link]"
+            [queryParams]="button.name === 'Projets' && folders()[0]?.folderId ? {folderId: folders()[0]?.folderId} : null"
+            [pTooltip]="button.name"
+            tooltipPosition="bottom"
+            appendTo="body"
+            class="material-symbols-outlined"
+          >{{ button.icon }}</span>
+        <!-- } -->
       </div>
       }
       <i
         (click)="logout($event)"
+        (keyup.enter)="logout($event)"
+        tabindex="0"
+        role="button"
+        aria-label="Logout"
         class="pi pi-sign-out"
         style="color: red; cursor: pointer"
       ></i>
@@ -62,20 +74,26 @@
   <div class="mobile-nav" [class.open]="isMobileMenuOpen()">
     @if(currentUser()){
     <div class="container-liste">
-      @for(button of mapButton; track button){
+      @for(button of mapButton(); track button){
       <div class="container-button">
-        <span
-          [routerLink]="button.link"
+        <!-- @if(folders()[0] && folders()[0].folderId){ -->
+          <span
+          [routerLink]="[button.link]"
+          [queryParams]="button.name === 'Projets' && folders()[0]?.folderId ? {folderId: folders()[0]?.folderId} : null"
           [pTooltip]="button.name"
           tooltipPosition="bottom"
           appendTo="body"
           class="material-symbols-outlined"
-          >{{ button.icon }}</span
-        >
+        >{{ button.icon }}</span>
+        <!-- } -->
       </div>
       }
       <i
         (click)="logout($event)"
+        (keyup.enter)="logout($event)"
+        tabindex="0"
+        role="button"
+        aria-label="Logout"
         class="pi pi-sign-out"
         style="color: red; cursor: pointer"
       ></i>

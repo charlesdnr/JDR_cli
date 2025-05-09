@@ -1,5 +1,4 @@
-@let $module = currentModule(); @let $currentBlocks = currentVersion()?.blocks;
-@if($module){
+@let $module = currentModule(); @let $currentBlocks = blocks(); @if($module){
 <div class="toolbar">
   <p-tabs value="0">
     <p-tablist>
@@ -18,7 +17,7 @@
           (generateModuleRequested)="generateCompleteModule()"
           (deleteRequested)="deleteModule()"
           [currentVersion]="currentVersion()!"
-          (currentVersionChange)="this.currentVersion.set($event)"
+          (currentVersionChange)="this.updateCurrentVersion($event)"
         ></app-project-parameters>
         }
       </p-tabpanel>
@@ -43,15 +42,16 @@
     </div>
     } @if($currentBlocks){
     <app-block-list
-      [style.height]="$currentBlocks.length === 0 && !isDraggingIcon() ? '0':'100%'"
+      [style.height]="
+        $currentBlocks.length === 0 && !isDraggingIcon() ? '0' : '100%'
+      "
       [blocks]="$currentBlocks"
-      [isDraggingIcon]="isDraggingIcon()"
-      [isOverDropZone]="isOverDropZone()"
-      [draggedIconType]="draggedIconType"
-      [insertPosition]="insertPosition()"
-      (blockDropped)="onDrop($event)"
-      (blockRemoved)="removeBlock($event)"
-      (generateAIContent)="generateAIContent($event)"
+      [(isDraggingIcon)]="isDraggingIcon"
+      [(isOverDropZone)]="isOverDropZone"
+      [(draggedIconType)]="draggedIconType"
+      [(insertPosition)]="insertPosition"
+      [(activeIconElement)]="activeIconElement"
+      [(dragPosition)]="dragPosition"
     ></app-block-list>
     }
   </div>

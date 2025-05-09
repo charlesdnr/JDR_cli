@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -12,6 +12,9 @@ import { Router } from '@angular/router';
 import { Auth, deleteUser, sendPasswordResetEmail } from '@angular/fire/auth';
 import { Dialog } from 'primeng/dialog';
 import { PasswordModule } from 'primeng/password';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-account',
@@ -24,12 +27,15 @@ import { PasswordModule } from 'primeng/password';
     ButtonModule,
     Dialog,
     AvatarModule,
-    PasswordModule
+    PasswordModule,
+    InputGroupModule,
+    InputGroupAddonModule,
+    TooltipModule
   ],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss'
 })
-export class AccountComponent {
+export class AccountComponent implements OnInit {
   private userService = inject(UserHttpService);
   private messageService = inject(MessageService);
   private router = inject(Router);
@@ -40,6 +46,14 @@ export class AccountComponent {
     confirm: new FormControl('', [Validators.required])
   });
 
+  originalUsername = signal('');
+  hasChanges = computed(() => {
+    console.log(this.originalUsername())
+    const username = this.currentUser()?.username;
+    return username !== this.originalUsername();
+  });
+
+
   showPasswordResetDialog = signal(false);
   resetPasswordEmail = signal('');
   sendingEmail = signal(false);
@@ -47,10 +61,21 @@ export class AccountComponent {
   currentUser = computed(() => this.userService.currentJdrUser())
   // loading = signal(false)
 
+  ngOnInit() {
+    const user = this.currentUser();
+    if (user?.username) {
+      this.originalUsername.set(user.username);
+    }
+  }
+
   saveUser() {
     const user = this.currentUser()
     if(!user?.id) return
     this.userService.put(this.currentUser(), user.id).then(() => {
+      // Mettre à jour l'username original après sauvegarde
+      if (user?.username) {
+        this.originalUsername.set(user.username);
+      }
       this.messageService.add({
         severity: 'success',
         summary: 'Success',

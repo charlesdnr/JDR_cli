@@ -1,19 +1,15 @@
 import {
   Component,
   OnInit,
-  HostListener,
   computed,
   inject,
   signal,
-  viewChild,
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import {
-  CdkDragDrop,
   DragDropModule,
-  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProjectParametersComponent } from '../../components/project-parameters/project-parameters.component';
@@ -84,13 +80,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   currentUser = computed(() => this.userService.currentJdrUser());
   currentGameSystem = signal<GameSystem | undefined>(undefined);
   currentVersion = this.moduleService.currentModuleVersion;
+  blocks = computed(() => this.currentVersion()?.blocks)
 
   ref: DynamicDialogRef | undefined;
-
-  blockListComponent = viewChild(BlockListComponent);
-  dropZoneElement = computed(() =>
-    this.blockListComponent()?.blocksContainerRef()
-  );
 
   // Enums
   enumBlockType = EBlockType;
@@ -116,15 +108,38 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initializeAvailableBlocks();
-    // S'abonner aux paramètres de la route
+
+    // Combinaison des paramètres de route et de requête
     this.routeSubscription = this.route.paramMap.subscribe((params) => {
       const moduleIdParam = params.get('moduleId');
 
       if (moduleIdParam) {
-        // Route /module/:moduleId -> Charger un module existant
         const moduleId = parseInt(moduleIdParam, 10);
         if (!isNaN(moduleId)) {
-          this.moduleService.loadModuleById(moduleId);
+          // Chargement du module
+          this.moduleService.loadModuleById(moduleId).then(() => {
+            // Une fois le module chargé, récupérer le paramètre de requête versionId
+            this.route.queryParamMap.subscribe(queryParams => {
+              const versionIdParam = queryParams.get('versionId');
+              const module = this.currentModule();
+
+              if (versionIdParam && module) {
+                const versionId = parseInt(versionIdParam, 10);
+                const selectedVersion = module.versions.find(v => v.id === versionId);
+
+                if (selectedVersion) {
+                  // Si la version spécifiée existe, la définir comme courante
+                  this.moduleService.currentModuleVersion.set(selectedVersion);
+                } else {
+                  // Si la version spécifiée n'existe pas, sélectionner la première par défaut
+                  this.selectDefaultVersionAndUpdateURL();
+                }
+              } else if (module && module.versions.length > 0) {
+                // Si aucun versionId n'est spécifié, sélectionner la première version
+                this.selectDefaultVersionAndUpdateURL();
+              }
+            });
+          });
         } else {
           this.messageService.add({
             severity: 'error',
@@ -139,6 +154,44 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         this.router.navigate(['/projects']);
       }
     });
+  }
+
+  selectDefaultVersionAndUpdateURL() {
+    const module = this.currentModule();
+    if (module && module.versions && module.versions.length > 0) {
+      const defaultVersion = module.versions[0];
+      this.moduleService.currentModuleVersion.set(defaultVersion);
+
+      // Mise à jour de l'URL avec le paramètre de requête pour la version par défaut
+      if (module.id && defaultVersion.id) {
+        this.router.navigate(
+          [],
+          {
+            relativeTo: this.route,
+            queryParams: { versionId: defaultVersion.id },
+            queryParamsHandling: 'merge', // préserve les autres paramètres
+            replaceUrl: true
+          }
+        );
+      }
+    }
+  }
+
+  updateCurrentVersion(version: ModuleVersion) {
+    this.moduleService.currentModuleVersion.set(version);
+
+    // Mise à jour de l'URL pour refléter la nouvelle version sélectionnée
+    if (version.id) {
+      this.router.navigate(
+        [],
+        {
+          relativeTo: this.route,
+          queryParams: { versionId: version.id },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        }
+      );
+    }
   }
 
   ngOnDestroy() {
@@ -168,7 +221,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Méthodes de gestion du drag & drop
   startIconDrag(event: { event: Event; blockType: EBlockType }) {
     if (this.isDraggingIcon()) return;
 
@@ -195,234 +247,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('document:mousemove', ['$event']) onMouseMove = (
-    event: MouseEvent
-  ) => {
-    if (!this.isDraggingIcon()) return;
-    this.dragPosition = { x: event.clientX, y: event.clientY };
-    this.checkIfOverDropZone(event);
 
-    // Mettre à jour la position d'insertion en temps réel
-    if (this.isOverDropZone()) {
-      this.insertPosition.set(this.calculateInsertPosition(event));
-    } else {
-      this.insertPosition.set(null);
-    }
-  };
-
-  @HostListener('document:mouseup', ['$event']) onMouseUp = (
-    event: MouseEvent
-  ) => {
-    if (!this.isDraggingIcon()) return;
-    if (this.isOverDropZone()) {
-      const insertPosition = this.calculateInsertPosition(event);
-      this.addBlock(
-        this.draggedIconType || EBlockType.paragraph,
-        insertPosition
-      );
-    }
-    this.endIconDrag();
-  };
-
-  endIconDrag() {
-    if (!this.isDraggingIcon()) return;
-    this.isDraggingIcon.set(false);
-    this.draggedIconType = null;
-    this.isOverDropZone.set(false);
-    this.insertPosition.set(null);
-
-    if (this.activeIconElement) {
-      this.activeIconElement.classList.remove('active-drag');
-      this.activeIconElement = null;
-    }
-  }
-
-  checkIfOverDropZone(event: MouseEvent) {
-    if (!(this.dropZoneElement() != undefined)) {
-      this.isOverDropZone.set(false);
-      return;
-    }
-
-    const rect = this.dropZoneElement()!.nativeElement.getBoundingClientRect();
-    const isOver =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom;
-
-    if (isOver !== this.isOverDropZone()) {
-      this.isOverDropZone.set(isOver);
-    }
-  }
-
-  calculateInsertPosition(event: MouseEvent): number {
-    const currentBlocks = this.currentVersion()?.blocks; // Utilise currentVersion signal
-    if (!currentBlocks) return 0;
-    if (!this.dropZoneElement()) return currentBlocks.length;
-
-    const blockElements = Array.from(
-      this.dropZoneElement()?.nativeElement.querySelectorAll(
-        '.block-container:not(.cdk-drag-preview):not(.cdk-drag-placeholder)'
-      ) || []
-    );
-
-    if (blockElements.length === 0) return 0;
-
-    // Logique existante pour calculer la position
-    for (let i = 0; i < blockElements.length; i++) {
-      const blockRect = blockElements[i].getBoundingClientRect();
-      if (event.clientY < blockRect.top) return i;
-      if (event.clientY >= blockRect.top && event.clientY <= blockRect.bottom) {
-        const blockMiddle = blockRect.top + blockRect.height / 2;
-        return event.clientY < blockMiddle ? i : i + 1;
-      }
-      if (i === blockElements.length - 1 && event.clientY > blockRect.bottom) {
-        return blockElements.length;
-      }
-      if (i < blockElements.length - 1) {
-        const nextBlockRect = blockElements[i + 1].getBoundingClientRect();
-        if (
-          event.clientY > blockRect.bottom &&
-          event.clientY < nextBlockRect.top
-        ) {
-          return i + 1;
-        }
-      }
-    }
-
-    let closestIndex = currentBlocks.length;
-    let smallestDistance = Infinity;
-    blockElements.forEach((element, index) => {
-      const blockRect = element.getBoundingClientRect();
-      const elementMidY = blockRect.top + blockRect.height / 2;
-      const distance = Math.abs(event.clientY - elementMidY);
-      if (distance < smallestDistance) {
-        smallestDistance = distance;
-        closestIndex = event.clientY < elementMidY ? index : index + 1;
-      }
-    });
-    return closestIndex;
-  }
-
-  addBlock(type: EBlockType, position?: number) {
-    const user = this.currentUser();
-    const version = this.currentVersion();
-
-    if (!user || !version) {
-      console.error(
-        "Impossible d'ajouter un bloc: utilisateur ou version non disponible."
-      );
-      return;
-    }
-
-    let newBlock: Block | null = null;
-    const currentVersionId = version.id ?? 0; // Utilise l'ID de la version actuelle (ou 0 si nouveau)
-    const currentBlockArray = version.blocks || []; // Assure que blocks existe
-    const blockOrder =
-      position !== undefined ? position : currentBlockArray.length;
-    const blockPreviewTitle = this.getBlockPreview(type) ?? 'Nouveau Bloc';
-
-    // Création du bloc avec l'ID de version correct
-    switch (type) {
-      case EBlockType.paragraph:
-        newBlock = new ParagraphBlock(
-          currentVersionId,
-          blockPreviewTitle,
-          blockOrder,
-          user
-        );
-        break;
-      case EBlockType.module:
-        newBlock = new IntegratedModuleBlock(
-          currentVersionId,
-          blockPreviewTitle,
-          blockOrder,
-          user
-        );
-        break;
-      case EBlockType.music:
-        newBlock = new MusicBlock(
-          currentVersionId,
-          blockPreviewTitle,
-          blockOrder,
-          user
-        );
-        break;
-      case EBlockType.stat:
-        newBlock = new StatBlock(
-          currentVersionId,
-          blockPreviewTitle,
-          blockOrder,
-          user
-        );
-        break;
-      default:
-        console.warn(`Type de bloc ${type} non géré.`);
-        return;
-    }
-
-    newBlock.id = Date.now() + Math.random(); // ID temporaire plus unique
-
-    const newBlocks = [...currentBlockArray];
-    newBlocks.splice(blockOrder, 0, newBlock);
-    newBlocks.forEach((block, index) => (block.blockOrder = index));
-
-    // Met à jour directement le signal du service
-    this.moduleService.currentModule.update((mod) => {
-      if (mod) {
-        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
-        if (versionIndex !== -1) {
-          mod.versions[versionIndex].blocks = newBlocks;
-        } else if (mod.versions.length > 0) {
-          mod.versions[0].blocks = newBlocks;
-        }
-      }
-      return mod ? { ...mod } : null;
-    });
-  }
-
-  removeBlock(blockId: number) {
-    const version = this.currentVersion();
-    if (!version || !version.blocks) return;
-
-    const currentBlocks = version.blocks;
-    const newBlocks = currentBlocks.filter((block) => block.id !== blockId);
-    newBlocks.forEach((block, idx) => (block.blockOrder = idx));
-
-    // Met à jour directement le signal du service
-    this.moduleService.currentModule.update((mod) => {
-      if (mod) {
-        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
-        if (versionIndex !== -1) {
-          mod.versions[versionIndex].blocks = newBlocks;
-        } else if (mod.versions.length > 0) {
-          mod.versions[0].blocks = newBlocks;
-        }
-      }
-      return mod ? { ...mod } : null;
-    });
-  }
-
-  onDrop(event: CdkDragDrop<Block[]>) {
-    const version = this.currentVersion();
-    if (!version || !version.blocks) return;
-
-    const currentBlocks = [...version.blocks];
-    moveItemInArray(currentBlocks, event.previousIndex, event.currentIndex);
-    currentBlocks.forEach((block, index) => (block.blockOrder = index));
-
-    this.moduleService.currentModule.update((mod) => {
-      if (mod) {
-        const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
-        if (versionIndex !== -1) {
-          mod.versions[versionIndex].blocks = currentBlocks;
-        } else if (mod.versions.length > 0) {
-          mod.versions[0].blocks = currentBlocks;
-        }
-      }
-      return mod ? { ...mod } : null;
-    });
-  }
 
   getBlockPreview(type: EBlockType): string | undefined {
     switch (type) {
@@ -503,7 +328,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
           summary: 'Succès',
           detail: 'Module mis à jour avec succès !',
         });
-        this.moduleService.setCurrentModule(savedModule);
+        // this.moduleService.setCurrentModule(savedModule);
+        // this.moduleService.setCurrentVersion(version)
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du module :', error);

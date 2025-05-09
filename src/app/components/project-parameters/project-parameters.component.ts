@@ -30,6 +30,7 @@ import { ModuleVersion } from '../../classes/ModuleVersion';
 import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
 import { ModuleService } from '../../services/module.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-parameters',
@@ -54,6 +55,8 @@ export class ProjectParametersComponent implements OnInit {
   private httpModuleVersionService = inject(ModuleVersionHttpService);
   private moduleService = inject(ModuleService);
   private gameSystemHttpService = inject(GameSystemHttpService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Inputs
   currentModule = input.required<Module>();
@@ -73,6 +76,7 @@ export class ProjectParametersComponent implements OnInit {
   saveRequested = output<void>();
   generateModuleRequested = output<void>();
   deleteRequested = output<void>();
+  versionUpdated = output<ModuleVersion>();
 
   foldersName = computed(() => this.folders().map((folder) => folder.name));
   folders: WritableSignal<UserFolder[]> = signal([]);
@@ -152,51 +156,138 @@ export class ProjectParametersComponent implements OnInit {
 
   saveFolder() {
     this.folderLoading = true;
-    this.httpUserSavedModuleService.getSavedModulesByFolder(this.selectedFolder()!.folderId!).then((savedModule: UserSavedModule[]) => {
-      this.httpUserSavedModuleService.put(
-        new UserSavedModule(
-          this.currentUser()!.id,
-          this.currentModule().id,
-          this.currentModule().versions[0].id!,
-          this.selectedFolder()!.folderId!,
-          '',
-          0
-        )
-        ,savedModule.find(
-          (save) =>
-            save.moduleId === this.currentModule().id &&
-            save.moduleVersionId == this.currentModule().versions[0].id
-        )!.savedModuleId!
-      );
-      this.messageService.add({ severity: 'success', summary: 'Dossiers', detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name })
-    }).catch(() => {
-      this.httpUserSavedModuleService.post(
-        new UserSavedModule(
-          this.currentUser()!.id,
-          this.currentModule().id,
-          this.currentModule().versions[0].id!,
-          this.selectedFolder()!.folderId!,
-          '',
-          0
-        )
-      );
-      this.messageService.add({ severity: 'success', summary: 'Dossiers', detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name })
-    }).finally(() => this.folderLoading = false)
+    const user = this.currentUser();
+    const currentModuleId = this.currentModule().id;
+    const currentVersionId = this.currentModule().versions[0].id!;
 
+    // D'abord, récupérer TOUS les modules sauvegardés de l'utilisateur
+    this.httpUserSavedModuleService.getAllUserSavedModules(user!.id)
+      .then((allUserSavedModules: UserSavedModule[]) => {
+        // Trouver toutes les associations existantes pour ce module/version
+        const existingModuleAssociations = allUserSavedModules.filter(
+          (save) => save.moduleId === currentModuleId &&
+                    save.moduleVersionId === currentVersionId
+        );
+
+        // Si des associations existantes sont trouvées dans d'autres dossiers que celui sélectionné
+        const promises: Promise<any>[] = [];
+
+        existingModuleAssociations.forEach(association => {
+          // Si l'association n'est pas avec le dossier actuellement sélectionné
+          if (association.folderId !== this.selectedFolder()!.folderId) {
+            // Supprimer cette association
+            promises.push(
+              this.httpUserSavedModuleService.delete(association.savedModuleId!)
+            );
+          }
+        });
+
+        // Après avoir supprimé les anciennes associations, vérifier si une association
+        // existe déjà dans le dossier sélectionné
+        return Promise.all(promises).then(() => {
+          const existingInSelectedFolder = existingModuleAssociations.find(
+            association => association.folderId === this.selectedFolder()!.folderId
+          );
+
+          if (existingInSelectedFolder) {
+            // Mettre à jour l'association existante
+            return this.httpUserSavedModuleService.put(
+              new UserSavedModule(
+                user!.id,
+                currentModuleId,
+                currentVersionId,
+                this.selectedFolder()!.folderId!,
+                '',
+                0
+              ),
+              existingInSelectedFolder.savedModuleId!
+            );
+          } else {
+            // Créer une nouvelle association
+            return this.httpUserSavedModuleService.post(
+              new UserSavedModule(
+                user!.id,
+                currentModuleId,
+                currentVersionId,
+                this.selectedFolder()!.folderId!,
+                '',
+                0
+              )
+            );
+          }
+        });
+      })
+      .then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Dossiers',
+          detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name
+        });
+      })
+      .catch(error => {
+        console.error('Erreur lors de la mise à jour du dossier:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de mettre à jour le dossier'
+        });
+      })
+      .finally(() => this.folderLoading = false);
   }
 
-  createNewVersion(){
-    this.httpModuleVersionService.createModuleVersion(this.currentModule().id, new ModuleVersion(
+
+
+createNewVersion() {
+  this.httpModuleVersionService.createModuleVersion(
+    this.currentModule().id,
+    new ModuleVersion(
       this.currentModule().id,
       this.currentModule().versions.length + 1,
       this.currentUser()!,
       this.currentGameSystem()!.id!,
       false
-    )).then(async () => {
-      await this.moduleService.refreshCurrentModule();
-      this.messageService.add({ severity: 'success', summary: 'Nouvelle version', detail: 'La nouvelle version a été créée' })
+    )
+  ).then(async (newVersion) => {
+    // Rafraîchir le module
+    await this.moduleService.refreshCurrentModule();
+
+    // Obtenir le module mis à jour et la nouvelle version
+    const updatedModule = this.moduleService.currentModule();
+    if (updatedModule) {
+      // Trouver la nouvelle version
+      const latestVersion = updatedModule.versions.find(v => v.id === newVersion.id) ||
+                            updatedModule.versions[updatedModule.versions.length - 1];
+
+      // Mettre à jour directement via le service
+      this.moduleService.currentModuleVersion.set(latestVersion);
+
+      // Mettre à jour aussi l'URL directement
+      this.router.navigate(
+        [],
+        {
+          relativeTo: this.route,
+          queryParams: { versionId: latestVersion.id },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        }
+      );
+
+      // Message de succès
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Nouvelle version',
+        detail: 'La nouvelle version a été créée et sélectionnée'
+      });
+    }
+  }).catch(error => {
+    console.error('Erreur lors de la création de la version:', error);
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: 'Impossible de créer la nouvelle version'
     });
-  }
+  });
+}
 
   published(){
     this.currentVersion().published = !this.currentVersion().published

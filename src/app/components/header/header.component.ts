@@ -10,6 +10,7 @@ import { AuthHttpService } from '../../services/https/auth-http.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { FolderService } from '../../services/folders.service';
 
 export interface buttonHeader {
   name: string;
@@ -29,6 +30,7 @@ export interface buttonHeader {
     TranslateModule,
     TooltipModule,
   ],
+  providers: [FolderService],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
@@ -38,14 +40,17 @@ export class HeaderComponent {
   private router = inject(Router);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
+  private folderSerice = inject(FolderService);
 
   isMobileMenuOpen = signal(false);
+  folders = this.folderSerice.currentFolders.asReadonly();
 
-  mapButton: buttonHeader[] = [
-    // { name: 'Nouveau Projet', icon: 'assignment_add', link: '/new-project' },
-    { name: 'Projets', icon: 'assignment', link: '/projects' },
-    { name: 'Compte', icon: 'account_circle', link: '/account' },
-  ];
+  mapButton = computed(() => {
+    return [
+      { name: 'Projets', icon: 'assignment', link: '/projects' },
+      { name: 'Compte', icon: 'account_circle', link: '/account' },
+    ]
+  })
 
   currentUser = computed(() => this.userService.currentJdrUser());
 

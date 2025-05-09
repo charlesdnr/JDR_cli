@@ -1,6 +1,4 @@
-@let $currentUser = currentUser();
-
-@if($currentUser){
+@let $currentUser = currentUser(); @if($currentUser){
 <div class="container-account">
   <div class="container-square">
     <div class="left rounded">
@@ -14,7 +12,9 @@
       </div>
       <div class="downsquare">
         <h2>{{ "Photo" | translate }}</h2>
-        <p class="subtitle">{{ "Télécharger un Photo jusqu'à 2mb" | translate }}</p>
+        <p class="subtitle">
+          {{ "Télécharger un Photo jusqu'à 2mb" | translate }}
+        </p>
         <div class="button-group">
           <p-button
             (onClick)="uploadPhoto()"
@@ -47,24 +47,45 @@
           <div class="form-field"></div>
           <div class="form-field email-field">
             <label for="email">{{ "Email" | translate }}</label>
-            <input id="email" type="email" pInputText [(ngModel)]="$currentUser.email" />
+            <input
+              [disabled]="true"
+              id="email"
+              type="email"
+              pInputText
+              [ngModel]="$currentUser.email"
+            />
+          </div>
+          <div class="form-field"></div>
+          <div class="form-field password-field">
+            <label for="password">{{ "Mot de passe" | translate }}</label>
+            <p-inputgroup>
+              <input
+                pInputText
+                [disabled]="true"
+                id="password"
+                [ngModel]="'••••••••••••'"
+              />
+              <p-inputgroup-addon>
+                <p-button
+                pTooltip="Changer le mot de passe"
+                (onClick)="changePassword()"
+                icon="pi pi-pencil"
+                severity="secondary"
+                variant="text"
+              />
+              </p-inputgroup-addon>
+            </p-inputgroup>
           </div>
         </div>
 
         <div class="action-buttons">
           <div class="first">
             <p-button
-            icon="pi pi-save"
-            (onClick)="saveUser()"
-            [label]="'Sauvegarder' | translate"
-            severity="secondary"
-          />
-            <p-button
-            (onClick)="changePassword()"
-            icon="pi pi-key"
-            [label]="'Changer mon mot de passe' | translate"
-            severity="secondary"
-          />
+              icon="pi pi-save"
+              (onClick)="saveUser()"
+              [label]="'Sauvegarder' | translate"
+              severity="success"
+            />
           </div>
           <p-button
             (onClick)="deleteAccount()"
@@ -85,7 +106,7 @@
   [header]="'Réinitialiser mon mot de passe' | translate"
   [modal]="true"
   [(visible)]="showPasswordResetDialog"
-  [style]="{width: '450px'}"
+  [style]="{ width: '450px' }"
 >
   <div class="reset-password-content">
     <p class="reset-description">
