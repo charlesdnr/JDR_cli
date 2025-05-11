@@ -245,6 +245,13 @@
 
   --neutral-color-transparent: rgba(var(--neutral-color-rgb), 0.2); // Exemple
   --font-secondary-color: var(--neutral-color);
+
+
+  // treeselect
+  --p-tree-node-toggle-button-color: var(--font-color);
+  --p-tree-node-focus-ring-color: var(--primary-color);
+  --p-treeselect-color: var(--font-color);
+  --p-treeselect-focus-border-color: var(--primary-color);
 }
 
 html,

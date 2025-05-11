@@ -24,13 +24,14 @@ import { Module } from '../../classes/Module';
 import { UserFolderHttpService } from '../../services/https/user-folder-http.service';
 import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
 import { UserFolder } from '../../classes/UserFolder';
-import { MessageService } from 'primeng/api';
+import { MessageService, TreeNode } from 'primeng/api';
 import { UserSavedModule } from '../../classes/UserSavedModule';
 import { ModuleVersion } from '../../classes/ModuleVersion';
 import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
 import { ModuleService } from '../../services/module.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TreeSelectModule } from 'primeng/treeselect';
 
 @Component({
   selector: 'app-project-parameters',
@@ -43,6 +44,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     TranslateModule,
     UserAvatarChooseComponent,
     TooltipModule,
+    TreeSelectModule
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss',
@@ -80,15 +82,99 @@ export class ProjectParametersComponent implements OnInit {
 
   foldersName = computed(() => this.folders().map((folder) => folder.name));
   folders: WritableSignal<UserFolder[]> = signal([]);
-  selectedFolder = signal<UserFolder | null>(null);
+  selectedFolder = signal<TreeNode | null>(null);
 
   gameLoading = false;
   folderLoading = false;
 
+  treeNode = computed<TreeNode[]>(() => {
+    const nodes: TreeNode[] = [];
+    const folderMap = new Map<number, TreeNode>();
+    const rootFolders: UserFolder[] = [];
+    let childFolders: UserFolder[] = [];
+
+    // Première passe: séparer les dossiers racines et les enfants
+    this.folders().forEach(folder => {
+      if (!folder.parentFolder) {
+        rootFolders.push(folder);
+      } else {
+        childFolders.push(folder);
+      }
+    });
+
+    // Créer les nœuds racines
+    rootFolders.forEach(folder => {
+      const node: TreeNode = {
+        key: folder.folderId?.toString() || '',
+        label: folder.name || 'Sans nom',
+        data: folder,
+        icon: 'pi pi-folder',
+        children: [],
+        selectable: true,
+        expanded: false
+      };
+
+      nodes.push(node);
+      if (folder.folderId) {
+        folderMap.set(folder.folderId, node);
+      }
+    });
+
+    // Ajouter les enfants de manière récursive
+    const addChildren = () => {
+      let remainingChildren = [...childFolders];
+      let processedAny = false;
+
+      childFolders.forEach(folder => {
+        if (folder.parentFolder && folderMap.has(folder.parentFolder)) {
+          const parentNode = folderMap.get(folder.parentFolder);
+          if (parentNode) {
+            const childNode: TreeNode = {
+              key: folder.folderId?.toString() || '',
+              label: folder.name || 'Sans nom',
+              data: folder,
+              icon: 'pi pi-folder',
+              children: [],
+              parent: parentNode,
+              selectable: true,
+              expanded: false
+            };
+
+            if (!parentNode.children) {
+              parentNode.children = [];
+            }
+
+            parentNode.children.push(childNode);
+
+            if (folder.folderId) {
+              folderMap.set(folder.folderId, childNode);
+            }
+
+            // Supprimer ce dossier de la liste des enfants restants
+            remainingChildren = remainingChildren.filter(f => f !== folder);
+            processedAny = true;
+          }
+        }
+      });
+
+      // Si nous avons ajouté des enfants, et qu'il reste des enfants à traiter,
+      // continue jusqu'à ce que tous soient traités ou qu'aucun ne puisse être ajouté
+      if (processedAny && remainingChildren.length > 0) {
+        childFolders = remainingChildren;
+        addChildren();
+      }
+    };
+
+    // Lancer le processus d'ajout des enfants
+    addChildren();
+    console.log(nodes)
+    return nodes;
+  });
+
   async ngOnInit(): Promise<void> {
     await this.loadFolders();
     this.findInUserSavedModule();
-     try {
+    try {
       this.gameLoading = true
       const systems = await this.gameSystemHttpService.getAllGameSystems();
       this.gameSystems.set(systems);
@@ -137,21 +223,50 @@ export class ProjectParametersComponent implements OnInit {
 
   findInUserSavedModule() {
     const user = this.currentUser();
-    if(user){
+    if (user) {
       this.httpUserSavedModuleService
-      .getAllUserSavedModules(user.id)
-      .then((savedModules: UserSavedModule[]) => {
-        // TODO : changer versions[0] a la vrai version
-        const savMod = savedModules.find(
-          (save) =>
-            save.moduleId === this.currentModule().id &&
-            save.moduleVersionId == this.currentModule().versions[0].id
-        );
-        if(savMod && savMod.folderId){
-          this.httpUserFolderService.getUserFolderById(savMod.folderId).then(folder => this.selectedFolder.set(folder))
-        }
-      });
+        .getAllUserSavedModules(user.id)
+        .then((savedModules: UserSavedModule[]) => {
+          const savMod = savedModules.find(
+            (save) =>
+              save.moduleId === this.currentModule().id &&
+              save.moduleVersionId == this.currentVersion().id
+          );
+          if (savMod && savMod.folderId) {
+            this.httpUserFolderService.getUserFolderById(savMod.folderId).then(folder => {
+              // Utiliser une fonction de recherche récursive au lieu de find()
+              const foundNode = this.findNodeRecursively(this.treeNode(), folder.folderId ?? 0);
+              console.log(foundNode);
+              if (foundNode) {
+                this.selectedFolder.set(foundNode);
+                console.log(this.selectedFolder());
+              }
+            });
+          }
+        });
     }
+  }
+
+
+  findNodeRecursively(nodes: TreeNode[], folderId: number): TreeNode | null {
+    // Parcourir tous les nœuds du niveau actuel
+    for (const node of nodes) {
+      // Vérifier si le nœud actuel correspond
+      if (node.key === folderId.toString()) {
+        return node;
+      }
+
+      // Si le nœud a des enfants, rechercher récursivement dans ses enfants
+      if (node.children && node.children.length > 0) {
+        const foundInChildren = this.findNodeRecursively(node.children, folderId);
+        if (foundInChildren) {
+          return foundInChildren;
+        }
+      }
+    }
+
+    // Si aucun nœud correspondant n'est trouvé
+    return null;
   }
 
   saveFolder() {
@@ -166,7 +281,7 @@ export class ProjectParametersComponent implements OnInit {
         // Trouver toutes les associations existantes pour ce module/version
         const existingModuleAssociations = allUserSavedModules.filter(
           (save) => save.moduleId === currentModuleId &&
-                    save.moduleVersionId === currentVersionId
+            save.moduleVersionId === currentVersionId
         );
 
         // Si des associations existantes sont trouvées dans d'autres dossiers que celui sélectionné
@@ -174,7 +289,7 @@ export class ProjectParametersComponent implements OnInit {
 
         existingModuleAssociations.forEach(association => {
           // Si l'association n'est pas avec le dossier actuellement sélectionné
-          if (association.folderId !== this.selectedFolder()!.folderId) {
+          if (association.folderId !== this.selectedFolder()!.data.folderId) {
             // Supprimer cette association
             promises.push(
               this.httpUserSavedModuleService.delete(association.savedModuleId!)
@@ -186,7 +301,7 @@ export class ProjectParametersComponent implements OnInit {
         // existe déjà dans le dossier sélectionné
         return Promise.all(promises).then(() => {
           const existingInSelectedFolder = existingModuleAssociations.find(
-            association => association.folderId === this.selectedFolder()!.folderId
+            association => association.folderId === this.selectedFolder()!.data.folderId
           );
 
           if (existingInSelectedFolder) {
@@ -196,7 +311,7 @@ export class ProjectParametersComponent implements OnInit {
                 user!.id,
                 currentModuleId,
                 currentVersionId,
-                this.selectedFolder()!.folderId!,
+                this.selectedFolder()!.data.folderId!,
                 '',
                 0
               ),
@@ -209,7 +324,7 @@ export class ProjectParametersComponent implements OnInit {
                 user!.id,
                 currentModuleId,
                 currentVersionId,
-                this.selectedFolder()!.folderId!,
+                this.selectedFolder()!.data.folderId!,
                 '',
                 0
               )
@@ -221,7 +336,7 @@ export class ProjectParametersComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Dossiers',
-          detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.name
+          detail: 'Le Module fait maintenant partie du dossier ' + this.selectedFolder()?.data.name
         });
       })
       .catch(error => {
@@ -237,69 +352,69 @@ export class ProjectParametersComponent implements OnInit {
 
 
 
-createNewVersion() {
-  this.httpModuleVersionService.createModuleVersion(
-    this.currentModule().id,
-    new ModuleVersion(
+  createNewVersion() {
+    this.httpModuleVersionService.createModuleVersion(
       this.currentModule().id,
-      this.currentModule().versions.length + 1,
-      this.currentUser()!,
-      this.currentGameSystem()!.id!,
-      false
-    )
-  ).then(async (newVersion) => {
-    // Rafraîchir le module
-    await this.moduleService.refreshCurrentModule();
+      new ModuleVersion(
+        this.currentModule().id,
+        this.currentModule().versions.length + 1,
+        this.currentUser()!,
+        this.currentGameSystem()!.id!,
+        false
+      )
+    ).then(async (newVersion) => {
+      // Rafraîchir le module
+      await this.moduleService.refreshCurrentModule();
 
-    // Obtenir le module mis à jour et la nouvelle version
-    const updatedModule = this.moduleService.currentModule();
-    if (updatedModule) {
-      // Trouver la nouvelle version
-      const latestVersion = updatedModule.versions.find(v => v.id === newVersion.id) ||
-                            updatedModule.versions[updatedModule.versions.length - 1];
+      // Obtenir le module mis à jour et la nouvelle version
+      const updatedModule = this.moduleService.currentModule();
+      if (updatedModule) {
+        // Trouver la nouvelle version
+        const latestVersion = updatedModule.versions.find(v => v.id === newVersion.id) ||
+          updatedModule.versions[updatedModule.versions.length - 1];
 
-      // Mettre à jour directement via le service
-      this.moduleService.currentModuleVersion.set(latestVersion);
+        // Mettre à jour directement via le service
+        this.moduleService.currentModuleVersion.set(latestVersion);
 
-      // Mettre à jour aussi l'URL directement
-      this.router.navigate(
-        [],
-        {
-          relativeTo: this.route,
-          queryParams: { versionId: latestVersion.id },
-          queryParamsHandling: 'merge',
-          replaceUrl: true
-        }
-      );
+        // Mettre à jour aussi l'URL directement
+        this.router.navigate(
+          [],
+          {
+            relativeTo: this.route,
+            queryParams: { versionId: latestVersion.id },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          }
+        );
 
-      // Message de succès
+        // Message de succès
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Nouvelle version',
+          detail: 'La nouvelle version a été créée et sélectionnée'
+        });
+      }
+    }).catch(error => {
+      console.error('Erreur lors de la création de la version:', error);
       this.messageService.add({
-        severity: 'success',
-        summary: 'Nouvelle version',
-        detail: 'La nouvelle version a été créée et sélectionnée'
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Impossible de créer la nouvelle version'
       });
-    }
-  }).catch(error => {
-    console.error('Erreur lors de la création de la version:', error);
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Erreur',
-      detail: 'Impossible de créer la nouvelle version'
     });
-  });
-}
+  }
 
-  published(){
+  published() {
     this.currentVersion().published = !this.currentVersion().published
     this.loadingPublished.set(true);
-    this.httpModuleVersionService.updateModuleVersion(this.currentVersion().id!,this.currentVersion())
-    .then(() => {
-      if(this.currentVersion().published){
-        this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été publiée' })
-      } else {
-        this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été rendu privée' })
-      }
-    })
-    .finally(() => this.loadingPublished.set(false))
+    this.httpModuleVersionService.updateModuleVersion(this.currentVersion().id!, this.currentVersion())
+      .then(() => {
+        if (this.currentVersion().published) {
+          this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été publiée' })
+        } else {
+          this.messageService.add({ severity: 'success', summary: 'Version', detail: 'La version a été rendu privée' })
+        }
+      })
+      .finally(() => this.loadingPublished.set(false))
   }
 }

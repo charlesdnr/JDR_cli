@@ -56,10 +56,10 @@
   </div>
   <div class="container-label">
     <label for="stockage">{{ "Stocker dans" | translate }}</label>
-    <p-select
-      [options]="folders()"
+    <p-treeselect
+      [options]="treeNode()"
       [disabled]="needToCreate()"
-      optionLabel="name"
+      metaKeySelection="true"
       [loading]="folderLoading"
       [(ngModel)]="selectedFolder"
       (ngModelChange)="saveFolder()"
