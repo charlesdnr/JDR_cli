@@ -2,43 +2,65 @@
   <div class="folders">
     <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
     <p-tree
-      #treeElement
-      [value]="treeNode()"
-      selectionMode="single"
-      [(selection)]="selectedFolder"
-      (onNodeSelect)="onNodeSelect($event)"
-      (onNodeContextMenuSelect)="onNodeRightClick($event)"
-      [contextMenu]="cm"
-      [draggableNodes]="true"
-      [droppableNodes]="true"
-      draggableScope="self"
-      droppableScope="self"
-    />
+  #treeElement
+  [value]="treeNode()"
+  selectionMode="single"
+  [(selection)]="selectedFolder"
+  (onNodeSelect)="onNodeSelect($event)"
+  (onNodeContextMenuSelect)="onNodeRightClick($event)"
+  (onNodeDrop)="onNodeDrop($event)"
+  [contextMenu]="cm"
+  [draggableNodes]="true"
+  [droppableNodes]="true"
+  draggableScope="folders"
+  droppableScope="folders"
+>
+</p-tree>
     <p-button
       label="Nouveau dossier"
       icon="pi pi-folder-plus"
       (onClick)="showNewFolderDialog(null)"
-    />
+    ></p-button>
   </div>
   <div class="modules-container">
     <div class="header-project">
       <div class="searchbar">
         <p-iconfield>
           <p-inputicon styleClass="pi pi-search" />
-          <input type="text" pInputText placeholder="Search" />
+          <input type="text" pInputText placeholder="Search" [(ngModel)]="searchValue" />
         </p-iconfield>
         <p-button
           icon="pi pi-plus"
           label="Nouveau module"
           (onClick)="resetModule()"
           routerLink="/new-module"
-        />
+        ></p-button>
       </div>
       <div class="filtres"></div>
     </div>
     <div class="modules-list">
-      @for (module of displayedModules(); track module) {
-      <app-module-viewer [moduleId]="module.moduleId" />
+      @if (selectedFolder()) {
+        @for (module of displayedModules(); track module) {
+          <div
+            class="module-item"
+            [draggable]="true"
+            (dragstart)="onModuleDragStart(module)"
+            (dragend)="onModuleDragEnd()"
+          >
+            <app-module-viewer [moduleId]="module.moduleId" />
+          </div>
+        }
+      } @else {
+        @for (module of moduleWithoutFolder(); track module) {
+          <div
+            class="module-item"
+            [draggable]="true"
+            (dragstart)="onModuleDragStart(module)"
+            (dragend)="onModuleDragEnd()"
+          >
+            <app-module-viewer [moduleId]="module.moduleId" />
+          </div>
+        }
       }
     </div>
   </div>
@@ -60,8 +82,8 @@
         label="Annuler"
         severity="secondary"
         (click)="dialogVisible = false"
-      />
-      <p-button label="Confirmer" (click)="handleDialogAction()" />
+      ></p-button>
+      <p-button label="Confirmer" (click)="handleDialogAction()"></p-button>
     </div>
   </div>
 </p-dialog>
