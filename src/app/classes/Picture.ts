@@ -4,21 +4,31 @@ export class Picture {
   id?: number;
   title?: string;
   src?: string;
-  
+
   @Transform(({ value }) => {
     if (value instanceof Date) {
-      return value.toISOString().replace(/Z$/, '');
+        // Format with time component guaranteed
+        return value.toISOString().split('T')[0] + 'T00:00:00';
+    }
+    // Handle existing string values
+    if (typeof value === 'string' && value.length === 10) { // Just a date
+        return value + 'T00:00:00';
     }
     return value;
-  })
+})
   createdAt: string;
 
   @Transform(({ value }) => {
     if (value instanceof Date) {
-      return value.toISOString().replace(/Z$/, '');
+        // Format with time component guaranteed
+        return value.toISOString().split('T')[0] + 'T00:00:00';
+    }
+    // Handle existing string values
+    if (typeof value === 'string' && value.length === 10) { // Just a date
+        return value + 'T00:00:00';
     }
     return value;
-  })
+})
   updateAt?: string;
 
   constructor();

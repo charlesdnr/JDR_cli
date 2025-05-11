@@ -31,6 +31,7 @@ import { provideLottieOptions } from 'ngx-lottie';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
+import { dateFormatInterceptor } from './interceptors/DateFormat.interceptor';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
@@ -49,7 +50,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, dateFormatInterceptor])),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

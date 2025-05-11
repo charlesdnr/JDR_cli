@@ -4,7 +4,6 @@ import { Auth } from '@angular/fire/auth';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-// Intercepteur fonctionnel utilisant async/await pour getIdToken
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn

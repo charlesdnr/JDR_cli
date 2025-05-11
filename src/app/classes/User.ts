@@ -2,7 +2,7 @@ import { IUser } from "../interfaces/IUser";
 
 export class User implements IUser {
     id: number;
-    username: string = '';
+    username = '';
     password: string;
     email: string;
 
