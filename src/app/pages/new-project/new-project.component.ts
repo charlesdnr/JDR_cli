@@ -222,6 +222,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   startIconDrag(event: { event: Event; blockType: EBlockType }) {
+    console.log(this.currentModule())
     if (this.isDraggingIcon()) return;
 
     let clientX = 0,
@@ -316,6 +317,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
           detail: 'Module créé avec succès !',
         });
         this.moduleService.setCurrentModule(savedModule);
+        this.moduleService.currentModuleVersion.set(this.moduleService.currentModule()?.versions[0])
         this.router.navigate(['/module', savedModule.id], { replaceUrl: true });
       } else {
         // Mise à jour

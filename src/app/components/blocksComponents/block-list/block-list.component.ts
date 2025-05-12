@@ -322,6 +322,7 @@ export class BlockListComponent {
   @HostListener('document:mousemove', ['$event']) onMouseMove = (
     event: MouseEvent
   ) => {
+    console.log(this.isDraggingIcon())
     if (!this.isDraggingIcon()) return;
     this.dragPosition.set({ x: event.clientX, y: event.clientY });
     this.checkIfOverDropZone(event);

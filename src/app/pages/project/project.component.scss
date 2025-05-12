@@ -88,3 +88,12 @@
   display: flex;
   flex-direction: column;
 }
+
+
+::ng-deep .p-tree {
+  .module-file{
+    .p-tree-node-toggle-button{
+      visibility: hidden !important;
+    }
+  }
+} 

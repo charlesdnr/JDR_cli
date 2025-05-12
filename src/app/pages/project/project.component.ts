@@ -1,4 +1,11 @@
-import { Component, inject, OnInit, signal, WritableSignal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  WritableSignal,
+  computed,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataViewModule } from 'primeng/dataview';
 import { CardModule } from 'primeng/card';
@@ -7,7 +14,12 @@ import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { MenuItem, MessageService, TreeDragDropService, TreeNode } from 'primeng/api';
+import {
+  MenuItem,
+  MessageService,
+  TreeDragDropService,
+  TreeNode,
+} from 'primeng/api';
 import { UserFolderHttpService } from '../../services/https/user-folder-http.service';
 import { ModuleHttpService } from '../../services/https/module-http.service';
 import { UserFolder } from '../../classes/UserFolder';
@@ -19,7 +31,12 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ModuleViewerComponent } from '../../components/module-viewer/module-viewer.component';
-import { TreeModule, TreeNodeContextMenuSelectEvent, TreeNodeDropEvent, TreeNodeSelectEvent } from 'primeng/tree';
+import {
+  TreeModule,
+  TreeNodeContextMenuSelectEvent,
+  TreeNodeDropEvent,
+  TreeNodeSelectEvent,
+} from 'primeng/tree';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Module } from '../../classes/Module';
@@ -51,14 +68,13 @@ interface DisplayableSavedModule extends UserSavedModule {
     TreeModule,
     ContextMenuModule,
     RouterLink,
-    DragDropModule
+    DragDropModule,
   ],
   providers: [TreeDragDropService],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })
 export class ProjectComponent implements OnInit {
-
   private httpUserFolderService = inject(UserFolderHttpService);
   private httpUserService = inject(UserHttpService);
   private httpUserSavedModuleService = inject(UserSavedModuleHttpService);
@@ -68,7 +84,7 @@ export class ProjectComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  currentUser = computed(() => this.httpUserService.currentJdrUser())
+  currentUser = computed(() => this.httpUserService.currentJdrUser());
 
   // --- Signals pour l'état ---
   folders: WritableSignal<UserFolder[]> = signal([]);
@@ -86,18 +102,18 @@ export class ProjectComponent implements OnInit {
     {
       label: 'Nouveau sous-dossier',
       icon: 'pi pi-fw pi-plus',
-      command: () => this.showNewFolderDialog(this.selectedNode)
+      command: () => this.showNewFolderDialog(this.selectedNode),
     },
     {
       label: 'Renommer',
       icon: 'pi pi-fw pi-pencil',
-      command: () => this.renameFolder(this.selectedNode)
+      command: () => this.renameFolder(this.selectedNode),
     },
     {
       label: 'Supprimer',
       icon: 'pi pi-fw pi-trash',
-      command: () => this.deleteFolder(this.selectedNode)
-    }
+      command: () => this.deleteFolder(this.selectedNode),
+    },
   ];
   selectedNode: TreeNode | null = null;
   dialogTitle = 'Nouveau Dossier';
@@ -112,7 +128,7 @@ export class ProjectComponent implements OnInit {
     let childFolders: UserFolder[] = [];
 
     // Première passe: séparer les dossiers racines et les enfants
-    this.folders().forEach(folder => {
+    this.folders().forEach((folder) => {
       if (!folder.parentFolder) {
         rootFolders.push(folder);
       } else {
@@ -121,7 +137,7 @@ export class ProjectComponent implements OnInit {
     });
 
     // Créer les nœuds racines
-    rootFolders.forEach(folder => {
+    rootFolders.forEach((folder) => {
       const node: TreeNode = {
         key: folder.folderId?.toString() || '',
         label: folder.name || 'Sans nom',
@@ -130,7 +146,7 @@ export class ProjectComponent implements OnInit {
         children: [],
         selectable: true,
         expanded: false,
-        droppable: true
+        droppable: true,
       };
 
       nodes.push(node);
@@ -144,7 +160,7 @@ export class ProjectComponent implements OnInit {
       let remainingChildren = [...childFolders];
       let processedAny = false;
 
-      childFolders.forEach(folder => {
+      childFolders.forEach((folder) => {
         if (folder.parentFolder && folderMap.has(folder.parentFolder)) {
           const parentNode = folderMap.get(folder.parentFolder);
           if (parentNode) {
@@ -157,7 +173,7 @@ export class ProjectComponent implements OnInit {
               parent: parentNode,
               selectable: true,
               expanded: false,
-              droppable: true
+              droppable: true,
             };
 
             if (!parentNode.children) {
@@ -171,7 +187,7 @@ export class ProjectComponent implements OnInit {
             }
 
             // Supprimer ce dossier de la liste des enfants restants
-            remainingChildren = remainingChildren.filter(f => f !== folder);
+            remainingChildren = remainingChildren.filter((f) => f !== folder);
             processedAny = true;
           }
         }
@@ -191,14 +207,14 @@ export class ProjectComponent implements OnInit {
   });
 
   dialogVisible = false;
-  folderName = "";
+  folderName = '';
 
   async ngOnInit(): Promise<void> {
     await this.loadFolders();
     await this.loadModulesWithoutFolder();
 
     // Résoudre le problème de chargement des dossiers imbriqués
-    this.route.queryParamMap.subscribe(queryParams => {
+    this.route.queryParamMap.subscribe((queryParams) => {
       const folderIdQueryParam = queryParams.get('folderId');
       if (folderIdQueryParam) {
         this.findAndExpandToFolder(parseInt(folderIdQueryParam, 10));
@@ -212,7 +228,9 @@ export class ProjectComponent implements OnInit {
     let targetFolder: UserFolder | undefined = undefined;
 
     // Trouver le dossier cible
-    targetFolder = this.folders().find(folder => folder.folderId === folderId);
+    targetFolder = this.folders().find(
+      (folder) => folder.folderId === folderId
+    );
 
     if (!targetFolder) {
       return; // Dossier non trouvé
@@ -227,7 +245,9 @@ export class ProjectComponent implements OnInit {
 
       // Trouver le parent
       if (currentFolder.parentFolder) {
-        currentFolder = this.folders().find(folder => folder.folderId === currentFolder?.parentFolder);
+        currentFolder = this.folders().find(
+          (folder) => folder.folderId === currentFolder?.parentFolder
+        );
       } else {
         break; // Plus de parent
       }
@@ -242,7 +262,10 @@ export class ProjectComponent implements OnInit {
     if (folderIds.length === 0) return;
 
     // Fonction récursive pour trouver et développer les nœuds
-    const findAndExpandNode = (nodes: TreeNode[], index: number): TreeNode | null => {
+    const findAndExpandNode = (
+      nodes: TreeNode[],
+      index: number
+    ): TreeNode | null => {
       for (const node of nodes) {
         if (node.data?.folderId === folderIds[index]) {
           // Si c'est le dernier ID dans le chemin, on le sélectionne
@@ -281,7 +304,9 @@ export class ProjectComponent implements OnInit {
     try {
       const user = this.currentUser();
       if (!user) return [];
-      const fetchedFolders = await this.httpUserFolderService.getAllUserFolders(user.id);
+      const fetchedFolders = await this.httpUserFolderService.getAllUserFolders(
+        user.id
+      );
       this.folders.set(fetchedFolders);
 
       // Après avoir chargé les dossiers, chargez les modules pour chaque dossier
@@ -289,7 +314,11 @@ export class ProjectComponent implements OnInit {
 
       return fetchedFolders;
     } catch (error: unknown) {
-      this.messageService.add({ severity: 'error', summary: 'Erreur Dossiers', detail: 'Impossible de charger les dossiers.' + error });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur Dossiers',
+        detail: 'Impossible de charger les dossiers.' + error,
+      });
       return [];
     } finally {
       this.isLoadingFolders.set(false);
@@ -301,15 +330,36 @@ export class ProjectComponent implements OnInit {
       // Pour chaque dossier, charger ses modules et les ajouter à l'arbre
       for (const folder of folders) {
         if (folder.folderId) {
-          const modules = await this.httpUserSavedModuleService.getSavedModulesByFolder(folder.folderId);
-          this.addModulesToTreeNode(folder.folderId, modules);
+          // Récupérer les modules sauvegardés pour ce dossier
+          const savedModules =
+            await this.httpUserSavedModuleService.getSavedModulesByFolder(
+              folder.folderId
+            );
+
+          // Enrichir chaque savedModule avec les détails du module
+          const enrichedModules: DisplayableSavedModule[] = [];
+
+          for (const savedModule of savedModules) {
+            const moduleDetails = await this.moduleHttpService.getModuleById(
+              savedModule.moduleId
+            );
+            enrichedModules.push({
+              ...savedModule,
+              moduleDetails: moduleDetails,
+            });
+          }
+
+          // Ajouter les modules enrichis à l'arbre
+          this.addModulesToTreeNode(folder.folderId, enrichedModules);
         }
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des modules pour tous les dossiers:', error);
+      console.error(
+        'Erreur lors du chargement des modules pour tous les dossiers:',
+        error
+      );
     }
   }
-
 
   /**
    * Charge les modules sauvegardés en fonction du dossier sélectionné
@@ -317,46 +367,73 @@ export class ProjectComponent implements OnInit {
   async loadModulesForSelectedFolder(folder: UserFolder): Promise<void> {
     this.isLoadingModules.set(true);
     try {
-      const user = this.currentUser()
-      if (!user) return
+      const user = this.currentUser();
+      if (!user) return;
       const folderId = folder?.folderId;
-      if (!folderId) return
-      const modules = await this.httpUserSavedModuleService.getSavedModulesByFolder(folderId);
-      this.displayedModules.set(modules);
+      if (!folderId) return;
 
-      // Ajouter les modules au nœud de l'arbre comme enfants
-      this.addModulesToTreeNode(folderId, modules);
+      // Récupérer les modules sauvegardés
+      const savedModules =
+        await this.httpUserSavedModuleService.getSavedModulesByFolder(folderId);
+
+      // Enrichir chaque savedModule avec les détails du module
+      const enrichedModules: DisplayableSavedModule[] = [];
+
+      for (const savedModule of savedModules) {
+        const moduleDetails = await this.moduleHttpService.getModuleById(
+          savedModule.moduleId
+        );
+        enrichedModules.push({
+          ...savedModule,
+          moduleDetails: moduleDetails,
+        });
+      }
+
+      this.displayedModules.set(enrichedModules);
+
+      // Ajouter les modules enrichis à l'arbre
+      this.addModulesToTreeNode(folderId, enrichedModules);
     } catch (error: unknown) {
-      console.error('Erreur lors du chargement des modules sauvegardés:', error);
-      this.messageService.add({ severity: 'error', summary: 'Erreur Modules', detail: 'Impossible de charger les modules sauvegardés.' });
+      console.error(
+        'Erreur lors du chargement des modules sauvegardés:',
+        error
+      );
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur Modules',
+        detail: 'Impossible de charger les modules sauvegardés.',
+      });
       this.displayedModules.set([]);
     } finally {
       this.isLoadingModules.set(false);
     }
   }
 
-  // Nouvelle méthode pour ajouter les modules comme enfants dans l'arbre
-  addModulesToTreeNode(folderId: number, modules: DisplayableSavedModule[]): void {
+  addModulesToTreeNode(
+    folderId: number,
+    modules: DisplayableSavedModule[]
+  ): void {
     // Fonction récursive pour trouver le nœud correspondant au folderId
     const findNodeAndAddModules = (nodes: TreeNode[]): boolean => {
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         if (node.data?.folderId === folderId) {
           // Filtrer les enfants existants qui sont des dossiers (pour garder la structure)
-          const folderChildren = node.children ?
-            node.children.filter(child => child.type !== 'module') :
-            [];
+          const folderChildren = node.children
+            ? node.children.filter((child) => child.type !== 'module')
+            : [];
 
           // Créer des nœuds pour les modules
-          const moduleNodes: TreeNode[] = modules.map(module => ({
+          const moduleNodes: TreeNode[] = modules.map((module) => ({
             key: `module-${module.moduleId}`,
             label: module.moduleDetails?.title || 'Module sans nom',
-            data: module,
-            icon: 'pi pi-file', // Icône différente pour les modules
-            selectable: true,
+            data: module, // On stocke le DisplayableSavedModule complet
+            icon: 'pi pi-file',
+            selectable: false,
             draggable: true,
+            styleClass: 'module-file',
             droppable: false,
-            type: 'module' // Identifier que c'est un module
+            type: 'module',
           }));
 
           // Combiner les dossiers enfants avec les modules enfants
@@ -382,12 +459,21 @@ export class ProjectComponent implements OnInit {
   async loadModulesWithoutFolder() {
     this.isLoadingModules.set(true);
     try {
-      const user = this.currentUser()
-      if (!user) return
-      this.moduleWithoutFolder.set(await this.httpUserSavedModuleService.getAllUserSavedModules(user.id));
+      const user = this.currentUser();
+      if (!user) return;
+      this.moduleWithoutFolder.set(
+        await this.httpUserSavedModuleService.getAllUserSavedModules(user.id)
+      );
     } catch (error: unknown) {
-      console.error('Erreur lors du chargement des modules sauvegardés:', error);
-      this.messageService.add({ severity: 'error', summary: 'Erreur Modules', detail: 'Impossible de charger les modules sauvegardés.' });
+      console.error(
+        'Erreur lors du chargement des modules sauvegardés:',
+        error
+      );
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur Modules',
+        detail: 'Impossible de charger les modules sauvegardés.',
+      });
       this.moduleWithoutFolder.set([]);
     } finally {
       this.isLoadingModules.set(false);
@@ -412,16 +498,28 @@ export class ProjectComponent implements OnInit {
 
       // Mise à jour du module avec le nouveau folderId
       const updatedModule = { ...dragNode.data, folderId: targetFolderId };
+      console.log(updatedModule);
 
-      this.httpUserSavedModuleService.updateSavedModule(moduleId, updatedModule)
+      this.httpUserSavedModuleService
+        .updateSavedModule(updatedModule.savedModuleId, updatedModule)
         .then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Module déplacé avec succès' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Module déplacé avec succès',
+          });
+          dropNode.expanded = true;
+          this.selectFolder(dropNode);
           // Recharger l'arborescence et les modules
-          this.loadFolders();
-          this.loadModulesWithoutFolder();
+          // this.loadFolders();
+          // this.loadModulesWithoutFolder();
         })
-        .catch(error => {
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de déplacer le module: ' + error });
+        .catch((error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de déplacer le module: ' + error,
+          });
         });
     }
     // Si on déplace un dossier vers un autre dossier (code existant)
@@ -432,14 +530,24 @@ export class ProjectComponent implements OnInit {
       // Mise à jour du dossier parent
       const updatedFolder = { ...dragNode.data, parentFolder: dropFolderId };
 
-      this.httpUserFolderService.updateUserFolder(dragFolderId, updatedFolder)
+      this.httpUserFolderService
+        .updateUserFolder(dragFolderId, updatedFolder)
         .then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Dossier déplacé avec succès' });
-          this.loadFolders(); // Recharger l'arborescence
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Dossier déplacé avec succès',
+          });
+          this.selectFolder(dropNode);
+          // this.loadFolders(); // Recharger l'arborescence
         })
-        .catch(error => {
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de déplacer le dossier: ' + error });
-          this.loadFolders();
+        .catch((error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de déplacer le dossier: ' + error,
+          });
+          // this.loadFolders();
         });
     }
   }
@@ -463,17 +571,26 @@ export class ProjectComponent implements OnInit {
       // Mettre à jour le dossier du module
       const updatedModule = { ...this.draggedModule, folderId: targetFolderId };
 
-      this.httpUserSavedModuleService.updateSavedModule(moduleId, updatedModule)
+      this.httpUserSavedModuleService
+        .updateSavedModule(moduleId, updatedModule)
         .then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Module déplacé avec succès' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Module déplacé avec succès',
+          });
           // Mettre à jour les listes de modules
           this.loadModulesWithoutFolder();
           if (this.selectedFolder()?.data) {
             this.loadModulesForSelectedFolder(this.selectedFolder()!.data);
           }
         })
-        .catch(error => {
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de déplacer le module: ' + error });
+        .catch((error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de déplacer le module: ' + error,
+          });
         });
     }
   }
@@ -491,32 +608,41 @@ export class ProjectComponent implements OnInit {
   }
 
   showNewFolderDialog(parentNode: TreeNode | null): void {
-    this.folderName = "";
+    this.folderName = '';
     this.parentNode = parentNode;
-    this.dialogTitle = "Nouveau dossier";
-    this.dialogAction = "create";
+    this.dialogTitle = 'Nouveau dossier';
+    this.dialogAction = 'create';
     this.dialogVisible = true;
   }
 
   renameFolder(node: TreeNode | null): void {
     if (node) {
-      this.folderName = node.label || "";
+      this.folderName = node.label || '';
       this.selectedNodeForRename = node;
-      this.dialogTitle = "Renommer le dossier";
-      this.dialogAction = "rename";
+      this.dialogTitle = 'Renommer le dossier';
+      this.dialogAction = 'rename';
       this.dialogVisible = true;
     }
   }
 
   deleteFolder(node: TreeNode | null): void {
     if (node && node.data && node.data.folderId) {
-      this.httpUserFolderService.delete(node.data.folderId)
+      this.httpUserFolderService
+        .delete(node.data.folderId)
         .then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Dossier supprimé avec succès' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Dossier supprimé avec succès',
+          });
           this.loadFolders();
         })
-        .catch(error => {
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer le dossier: ' + error });
+        .catch((error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de supprimer le dossier: ' + error,
+          });
         });
     }
   }
@@ -526,13 +652,24 @@ export class ProjectComponent implements OnInit {
 
     const parentFolderId = this.parentNode?.data?.folderId || null;
 
-    this.httpUserFolderService.post(new UserFolder(this.currentUser()!.id, this.folderName, parentFolderId))
+    this.httpUserFolderService
+      .post(
+        new UserFolder(this.currentUser()!.id, this.folderName, parentFolderId)
+      )
       .then(() => {
-        this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Dossier créé avec succès' });
-        this.loadFolders()
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Dossier créé avec succès',
+        });
+        this.loadFolders();
       })
-      .catch(error => {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de créer le dossier: ' + error });
+      .catch((error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de créer le dossier: ' + error,
+        });
       })
       .finally(() => {
         this.dialogVisible = false;
@@ -543,15 +680,27 @@ export class ProjectComponent implements OnInit {
   performRename(): void {
     if (this.selectedNodeForRename?.data?.folderId) {
       const folderId = this.selectedNodeForRename.data.folderId;
-      const updatedFolder = { ...this.selectedNodeForRename.data, name: this.folderName };
+      const updatedFolder = {
+        ...this.selectedNodeForRename.data,
+        name: this.folderName,
+      };
 
-      this.httpUserFolderService.updateUserFolder(folderId, updatedFolder)
+      this.httpUserFolderService
+        .updateUserFolder(folderId, updatedFolder)
         .then(() => {
-          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Dossier renommé avec succès' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Dossier renommé avec succès',
+          });
           this.loadFolders();
         })
-        .catch(error => {
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de renommer le dossier: ' + error });
+        .catch((error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de renommer le dossier: ' + error,
+          });
         })
         .finally(() => {
           this.dialogVisible = false;
@@ -586,7 +735,7 @@ export class ProjectComponent implements OnInit {
           this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { folderId: folderId },
-            queryParamsHandling: 'merge'
+            queryParamsHandling: 'merge',
           });
         }
       }

@@ -40,7 +40,7 @@
     </div>
     <div class="modules-list">
       @if (selectedFolder()) {
-        @for (module of displayedModules(); track module) {
+        @for (module of displayedModules(); track module.savedModuleId) {
           <div
             class="module-item"
             [draggable]="true"

@@ -52,6 +52,13 @@ export class ModuleService {
       return;
     }
 
+    const newVersion = new ModuleVersion()
+    newVersion.creator = user
+    newVersion.moduleId = 0;
+    newVersion.version = 1;
+    newVersion.published = false
+    newVersion.blocks = []
+
     const newModule = new Module();
     newModule.id = 0;
     newModule.title = 'Nouveau Module';
@@ -59,15 +66,16 @@ export class ModuleService {
     newModule.creator = user;
     newModule.isTemplate = false;
     newModule.type = EModuleType.Scenario;
-    newModule.versions = [new ModuleVersion()];
-    newModule.versions[0].creator = user;
+    newModule.versions = [newVersion];
     newModule.accesses = [];
     newModule.tags = [];
     newModule.moduleBlocks = [];
 
-    this.currentModule.set(newModule);
-    console.log("Préparation d'un nouveau module.");
     this.loadingModule.set(false);
+    this.currentModule.set(newModule);
+    this.currentModuleVersion.set(newVersion)
+    console.log("Préparation d'un nouveau module.");
+    
   }
 
   // Mettre à jour le signal
