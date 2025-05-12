@@ -1,11 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { NotificationService } from '../../services/Notification.service';
 import { Router } from '@angular/router';
 import { Notification } from '../../interfaces/Notification';
-import { PopoverModule } from 'primeng/popover';
+import { Popover, PopoverModule } from 'primeng/popover';
 import { CommonModule } from '@angular/common';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
@@ -21,19 +21,14 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.scss'
 })
-export class NotificationBellComponent implements OnInit {
+export class NotificationBellComponent {
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  popover = viewChild<Popover>('op')
 
   // Accéder directement aux signaux
   notifications = this.notificationService.notifications;
   unreadCount = this.notificationService.unreadCount;
-
-  ngOnInit(): void {
-    // Charger les données initiales
-    this.notificationService.loadNotifications();
-    this.notificationService.loadUnreadCount();
-  }
 
   getIconForType(type: string): string {
     switch (type.toUpperCase()) {
@@ -58,7 +53,8 @@ export class NotificationBellComponent implements OnInit {
 
     // Naviguer vers le module si disponible
     if (notification.moduleId) {
-      this.router.navigate(['/modules', notification.moduleId]);
+      this.popover()?.toggle(new MouseEvent(''))
+      this.router.navigate(['/module', notification.moduleId]);
     }
   }
 }

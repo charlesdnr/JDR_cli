@@ -3,22 +3,18 @@
 <div class="notification-bell">
   <p-overlaybadge [value]="unreadCount() > 0 ? unreadCount().toString() : ''" severity="danger">
     <p-button
-            type="button"
             icon="pi pi-bell"
-            class="p-button-rounded p-button-text"
             (click)="op.toggle($event)">
     </p-button>
   </p-overlaybadge>
 
-  <p-popover #op>
-    <ng-template pTemplate>
+  <p-popover #op class="rounded" >
       <div class="notification-header">
         <h3>Notifications</h3>
         @if(unreadCount() > 0) {
         <p-button
           type="button"
           label="Tout marquer comme lu"
-          class="p-button-text p-button-sm"
           (click)="markAllAsRead()"
         />
         }
@@ -48,6 +44,5 @@
         </div>
         } }
       </div>
-    </ng-template>
   </p-popover>
 </div>

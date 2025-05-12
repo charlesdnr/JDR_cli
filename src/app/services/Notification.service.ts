@@ -1,8 +1,8 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Client } from '@stomp/stompjs';
 import { UserHttpService } from './https/user-http.service';
-import { Auth } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../environments/environment';
 import SockJS from 'sockjs-client';
@@ -20,12 +20,14 @@ export class NotificationService {
 
   private apiUrl = environment.apiUrl + 'api/notifications';
   private stompClient: Client | null = null;
+  private firebaseToken = signal<string | null>(null);
 
   // Utilisation des signaux Angular 19
   notifications = signal<Notification[]>([]);
   unreadCount = signal<number>(0);
   isConnected = signal<boolean>(false);
   connectionError = signal<string | null>(null);
+  connectionPending = signal<boolean>(false);
 
   // Signal calculé pour récupérer uniquement les notifications non lues
   unreadNotifications = computed(() =>
@@ -33,14 +35,25 @@ export class NotificationService {
   );
 
   constructor() {
-    // Effet qui gère la connexion/déconnexion WebSocket
-    effect(() => {
-      const currentUser = this.userService.currentJdrUser();
-      if (currentUser) {
-        this.connect();
-        this.loadNotifications();
-        this.loadUnreadCount();
+    onAuthStateChanged(this.auth, async (user) => {
+      if (user) {
+        try {
+          const token = await user.getIdToken();
+          this.firebaseToken.set(token);
+
+          // Only try to connect if we have a user but aren't connected yet
+          const currentUser = this.userService.currentJdrUser();
+          if (currentUser && !this.isConnected() && !this.connectionPending()) {
+            this.connect();
+            this.loadNotifications();
+            this.loadUnreadCount();
+          }
+        } catch (error) {
+          console.error('Error getting Firebase token:', error);
+          this.firebaseToken.set(null);
+        }
       } else {
+        this.firebaseToken.set(null);
         this.disconnect();
         this.notifications.set([]);
         this.unreadCount.set(0);
@@ -49,16 +62,27 @@ export class NotificationService {
   }
 
   async connect(): Promise<void> {
-    if (this.isConnected() || !this.auth.currentUser) return;
+    if (this.isConnected() || this.connectionPending()) return;
+
+    const token = this.firebaseToken();
+    if (!token || !this.auth.currentUser) {
+      this.connectionError.set('No authentication token available');
+      return;
+    }
 
     try {
-      // Récupérer le token Firebase
-      const token = await this.auth.currentUser.getIdToken();
+      this.connectionPending.set(true);
+      console.log('Firebase token available:', !!token);
+      console.log('Auth user available:', !!this.auth.currentUser);
+      console.log('Token length:', token?.length);
 
       this.stompClient = new Client({
         webSocketFactory: () => new SockJS(`${environment.apiUrl}ws`),
         connectHeaders: {
           Authorization: `Bearer ${token}`
+        },
+        debug: (msg: string) => {
+          console.log('STOMP Debug:', msg);
         },
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
@@ -70,20 +94,16 @@ export class NotificationService {
         if (!currentUser) return;
 
         this.isConnected.set(true);
+        this.connectionPending.set(false);
         this.connectionError.set(null);
 
-        // S'abonner au canal de notifications personnel
+        // Subscribe to notification channel
         this.stompClient!.subscribe(`/user/${currentUser.id}/queue/notifications`, (message) => {
           try {
             const notification = JSON.parse(message.body) as Notification;
-
-            // Ajouter la notification au début du tableau
             this.notifications.update(notifications => [notification, ...notifications]);
-
-            // Incrémenter le compteur de non lus
             this.unreadCount.update(count => count + 1);
 
-            // Afficher une notification toast
             this.messageService.add({
               severity: 'info',
               summary: 'Nouvelle notification',
@@ -100,12 +120,14 @@ export class NotificationService {
         console.error('WebSocket STOMP error:', frame);
         this.connectionError.set(`Erreur de connexion: ${frame.headers['message']}`);
         this.isConnected.set(false);
+        this.connectionPending.set(false);
       };
 
       this.stompClient.onWebSocketError = (event) => {
         console.error('WebSocket error:', event);
         this.connectionError.set('Erreur de connexion WebSocket');
         this.isConnected.set(false);
+        this.connectionPending.set(false);
       };
 
       this.stompClient.activate();
@@ -113,6 +135,7 @@ export class NotificationService {
       console.error('Error connecting to WebSocket:', error);
       this.connectionError.set(`Erreur d'authentification: ${error}`);
       this.isConnected.set(false);
+      this.connectionPending.set(false);
     }
   }
 
@@ -142,7 +165,7 @@ export class NotificationService {
     if (!currentUser) return;
 
     try {
-      const response = await firstValueFrom(this.http.get<{count: number}>(`${this.apiUrl}/user/${currentUser.id}/count`));
+      const response = await firstValueFrom(this.http.get<{ count: number }>(`${this.apiUrl}/user/${currentUser.id}/count`));
       this.unreadCount.set(response?.count || 0);
     } catch (error) {
       console.error('Error loading unread count:', error);

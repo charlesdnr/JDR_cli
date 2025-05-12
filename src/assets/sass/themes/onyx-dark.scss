@@ -6,6 +6,7 @@ html[data-theme="dark"] {
 
    $background-color: hsl(221, 39%, 11%);
    $background-color-lighter: hsl(221, 40%, 16%);
+   $background-color-lighter-lighter: hsl(221, 40%, 24%);
    $background-color-transparent: hsla(221, 39%, 11%, 0.233);
    $container-color: mix(white, $background-color, 10%);
    $input-color: mix(white, $container-color, 30%);
