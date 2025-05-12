@@ -34,6 +34,7 @@
   <div class="desktop-menu">
     @if(currentUser()){
     <div class="container-liste">
+      <app-notification-bell></app-notification-bell>
       @for(button of mapButton(); track button){
       <div class="container-button">
         <!-- @if(folders()[0] && folders()[0].folderId){ -->

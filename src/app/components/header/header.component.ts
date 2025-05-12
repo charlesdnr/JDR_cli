@@ -11,6 +11,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { FolderService } from '../../services/folders.service';
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 
 export interface buttonHeader {
   name: string;
@@ -29,6 +30,7 @@ export interface buttonHeader {
     RouterLink,
     TranslateModule,
     TooltipModule,
+    NotificationBellComponent
   ],
   providers: [FolderService],
   templateUrl: './header.component.html',

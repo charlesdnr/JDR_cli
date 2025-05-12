@@ -25,6 +25,7 @@ import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { NotificationService } from '../../services/Notification.service';
 
 @Component({
   selector: 'app-user-avatar-choose',
@@ -47,6 +48,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   private httpAccessRightService = inject(ModuleAccessHttpService);
   private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
+  private notificationService = inject(NotificationService);
 
   currentUser = computed(() => this.userService.currentJdrUser());
   currentModule = this.moduleService.currentModule;
@@ -251,7 +253,6 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
           });
         });
     } else {
-      // Création d'un nouvel accès
       this.httpAccessRightService
         .createModuleAccess(currentMod.id, user.id)
         .then((modd: ModuleAccess) => {

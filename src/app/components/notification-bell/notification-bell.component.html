@@ -1,0 +1,53 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
+<div class="notification-bell">
+  <p-overlaybadge [value]="unreadCount() > 0 ? unreadCount().toString() : ''" severity="danger">
+    <p-button
+            type="button"
+            icon="pi pi-bell"
+            class="p-button-rounded p-button-text"
+            (click)="op.toggle($event)">
+    </p-button>
+  </p-overlaybadge>
+
+  <p-popover #op>
+    <ng-template pTemplate>
+      <div class="notification-header">
+        <h3>Notifications</h3>
+        @if(unreadCount() > 0) {
+        <p-button
+          type="button"
+          label="Tout marquer comme lu"
+          class="p-button-text p-button-sm"
+          (click)="markAllAsRead()"
+        />
+        }
+      </div>
+
+      <div class="notification-list">
+        @if(notifications().length === 0) {
+        <div class="empty-notifications">Vous n'avez pas de notifications</div>
+        } @else { @for(notification of notifications(); track notification.id) {
+        <div
+          class="notification-item"
+          [class.unread]="!notification.read"
+          (click)="onNotificationClick(notification)"
+        >
+          <div
+            class="notification-icon"
+            [ngClass]="notification.type.toLowerCase()"
+          >
+            <i class="pi" [ngClass]="getIconForType(notification.type)"></i>
+          </div>
+          <div class="notification-content">
+            <div class="notification-text">{{ notification.content }}</div>
+            <div class="notification-time">
+              {{ notification.createdAt | date : "short" }}
+            </div>
+          </div>
+        </div>
+        } }
+      </div>
+    </ng-template>
+  </p-popover>
+</div>

@@ -1,0 +1,99 @@
+.notification-bell {
+  position: relative;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--surface-200);
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+  width: 350px;
+  max-width: 90vw;
+}
+
+.notification-item {
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid var(--surface-200);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: var(--surface-100);
+}
+
+.notification-item.unread {
+  background-color: var(--highlight-bg);
+}
+
+.notification-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--surface-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.notification-icon.module_shared {
+  background-color: var(--primary-color);
+  color: var(--primary-color-text);
+}
+
+.notification-icon.module_comment {
+  background-color: var(--info-color);
+  color: var(--info-color-text);
+}
+
+.notification-icon.module_like {
+  background-color: var(--pink-500);
+  color: white;
+}
+
+.notification-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.notification-text {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-time {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.empty-notifications {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-color-secondary);
+}
+
+// Style pour le popover
+::ng-deep .p-popover {
+  min-width: 350px;
+
+  .p-popover-content {
+    padding: 1rem;
+  }
+}
