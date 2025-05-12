@@ -66,6 +66,38 @@
       [fluid]="true"
     />
   </div>
+  <div class="container-label">
+    <label for="tags">Tags</label>
+    <p-autocomplete
+    #autocomplete
+      [(ngModel)]="tagsSearch"
+      (completeMethod)="autoCompleteRes($event.query)"
+      [suggestions]="suggestionsTags()"
+      (onSelect)="onSelect($event.value.name)"
+      (onUnselect)="onUnSelect($event.value.id)"
+      [dropdown]="true"
+      [dropdownMode]="'current'"
+      [forceSelection]="false"
+      (onDropdownClick)="showInitialTags()"
+      (keydown.enter)="onEnterKeyForTags($event)"
+      placeholder="Rechercher ou créer un tag"
+      [multiple]="true"
+      optionLabel="name"
+    >
+    <ng-template pTemplate="selectedItem" style="width: 0%;" >
+    </ng-template>
+  </p-autocomplete>
+    <div class="chips-container">
+      @for (tag of tagsSearch(); track tag.id) {
+        <p-chip 
+          [label]="tag.name" 
+          [removable]="true" 
+          (onRemove)="onUnSelect(tag.id)"
+          class="m-1"
+        ></p-chip>
+      }
+    </div>
+  </div>
   <p-button
     [label]="needToCreate() ? 'Créer' : 'Sauvegarder'"
     [loading]="loadingSave()"

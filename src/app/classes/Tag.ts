@@ -1,17 +1,15 @@
-import { Module } from "./Module";
+import { SimpleModule } from '../interfaces/SimpleModule';
 
 export class Tag {
-  id?: number;
+  id: number;
   name: string;
-  modules?: Module[]; // Simplification, car les modules complets ne sont probablement pas nécessaires côté client
+  modules: SimpleModule[];
 
-  constructor(
-      name: string,
-      modules?: Module[],
-      id?: number
-  ) {
-      this.id = id;
-      this.name = name;
-      this.modules = modules;
+  constructor();
+  constructor(name: string, modules: SimpleModule[], id?: number);
+  constructor(name?: string, modules?: SimpleModule[], id?: number) {
+    this.id = id ?? 0;
+    this.name = name ?? '';
+    this.modules = modules ?? [];
   }
 }

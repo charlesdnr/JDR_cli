@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
 import { Tag } from '../../classes/Tag';
-import { firstValueFrom } from 'rxjs'; // Import nécessaire
+import { firstValueFrom } from 'rxjs';
+import { TagRequest } from '../../interfaces/TagRequest';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TagHttpService extends BaseHttpService {
-
   constructor() {
     super('api/tags');
   }
@@ -22,13 +22,6 @@ export class TagHttpService extends BaseHttpService {
     return this.get<Tag>(id);
   }
 
-  /** GET /api/tags/name/{name} */
-  getTagByName(name: string): Promise<Tag> {
-    // Chemin spécifique
-    const specificUrl = `${this.baseApiUrl}/name/${name}`;
-    return firstValueFrom(this.httpClient.get<Tag>(specificUrl));
-  }
-
   /** GET /api/tags/search/{query} */
   searchTags(query: string): Promise<Tag[]> {
     // Chemin spécifique
@@ -37,20 +30,29 @@ export class TagHttpService extends BaseHttpService {
   }
 
   /** POST /api/tags */
-  createTag(tag: Tag): Promise<Tag> {
-    // Appel standard, T=Tag, B=Tag
-    return this.post<Tag, Tag>(tag);
+  createTag(tag: TagRequest): Promise<Tag> {
+    return this.post<Tag, TagRequest>(tag);
   }
 
   /** DELETE /api/tags/{id} */
   deleteTag(id: number): Promise<void> {
-    // Appel standard, backend renvoie 204 No Content
     return this.delete<void>(id);
   }
 
   /** PUT /api/tags/{id} */
-  updateTag(id: number, tag: Tag): Promise<Tag> {
-    // Appel standard, T=Tag, B=Tag
-    return this.put<Tag, Tag>(tag, id);
+  updateTag(id: number, tag: TagRequest): Promise<Tag> {
+    return this.put<Tag, TagRequest>(tag, id);
+  }
+
+  get15tags(): Promise<Tag[]> {
+    return this.get<Tag[]>('most-used');
+  }
+
+  getTagsByModuleId(moduleId: number): Promise<Tag[]> {
+    return this.get<Tag[]>('module/' + moduleId);
+  }
+
+  deleteModuleOfTags(tagId: number, moduleId: number){
+    return this.delete<void>(tagId + '/modules/' + moduleId)
   }
 }

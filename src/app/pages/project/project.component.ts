@@ -485,6 +485,8 @@ export class ProjectComponent implements OnInit {
   onNodeDrop(event: TreeNodeDropEvent): void {
     const dragNode = event.dragNode;
     const dropNode = event.dropNode;
+    console.log(dropNode)
+    console.log(dragNode)
 
     if (!dragNode || !dropNode || !dragNode.data || !dropNode.data) return;
 
