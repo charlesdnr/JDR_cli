@@ -194,13 +194,14 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       moduleId,
       (accessUpdate) => {
         // Si la mise à jour concerne l'utilisateur actuel, rafraîchir le module
-        if (accessUpdate.userId === currentUser.id) {
-          this.messageService.add({
-            severity: 'info',
-            summary: "Droits d'accès mis à jour",
-            detail: 'Vos permissions ont été modifiées',
-          });
-          this.moduleService.refreshCurrentModule();
+        console.log(accessUpdate)
+        if (accessUpdate.access.user.id === currentUser.id) {
+          // this.messageService.add({
+          //   severity: 'info',
+          //   summary: "Droits d'accès mis à jour",
+          //   detail: 'Vos permissions ont été modifiées',
+          // });
+          this.moduleService.updateModuleAccess(accessUpdate.access);
         }
       }
     );

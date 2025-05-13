@@ -72,9 +72,6 @@ export class NotificationService {
 
     try {
       this.connectionPending.set(true);
-      console.log('Firebase token available:', !!token);
-      console.log('Auth user available:', !!this.auth.currentUser);
-      console.log('Token length:', token?.length);
 
       this.stompClient = new Client({
         webSocketFactory: () => new SockJS(`${environment.apiUrl}ws`),
@@ -223,6 +220,7 @@ export class NotificationService {
       (message) => {
         try {
           const data = JSON.parse(message.body);
+          console.log(data)
           callback(data);
         } catch (error) {
           console.error("Erreur lors du traitement des données de mise à jour d'accès:", error);
