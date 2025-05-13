@@ -1,11 +1,10 @@
+import { Position } from "./IPosition";
+
 export interface CursorPosition {
   userId: number;
   username: string;
   blockId: number;
-  position: {
-    x: number;
-    y: number;
-  };
+  position: Position;
   selectionStart?: number;
   selectionEnd?: number;
   userColor: string;

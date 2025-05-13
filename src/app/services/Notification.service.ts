@@ -274,10 +274,9 @@ export class NotificationService {
     return this.stompClient.subscribe(
       `/module/${moduleId}/cursors`,
       (message) => {
-        console.log('cursor :', message)
+
         try {
           const cursorPosition = JSON.parse(message.body) as CursorPosition;
-
           // Ignorer notre propre curseur
           if (cursorPosition.userId === currentUser.id) return;
 
