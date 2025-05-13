@@ -34,11 +34,12 @@
     @if(isParagraphBlock(block)) {
     <app-paragraph-block
       [paragraphBlock]="asParagraphBlock(block)"
+      [isReadOnly]="isReadOnly()"
     ></app-paragraph-block>
     } @else if(isMusicBlock(block)) {
-    <app-music-block [musicBlock]="asMusicBlock(block)"></app-music-block>
+    <app-music-block [musicBlock]="asMusicBlock(block)" [isReadOnly]="isReadOnly()"></app-music-block>
     } @else if(isStatBlock(block)) {
-    <app-stat-block [statBlock]="asStatBlock(block)"></app-stat-block>
+    <app-stat-block [statBlock]="asStatBlock(block)" [isReadOnly]="isReadOnly()"></app-stat-block>
     } @else if(isModuleBlock(block)) {
     <div class="module-block"></div>
     }

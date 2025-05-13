@@ -1,4 +1,68 @@
 <div class="container-parametres">
+  @if(isReadOnly()) {
+  <div class="read">
+    <div class="param-section">
+      <h3>Version</h3>
+      <p>{{ currentVersion().version }}</p>
+    </div>
+
+    <div class="param-section">
+      <h3>{{ "Titre" | translate }}</h3>
+      <p>{{ currentModule().title }}</p>
+    </div>
+
+    <div class="param-section">
+      <h3>{{ "Description" | translate }}</h3>
+      <p class="description-text">{{ currentModule().description }}</p>
+    </div>
+
+    <div class="param-section">
+      <h3>{{ "Système de jeu" | translate }}</h3>
+      <p>{{ getGameSystemName(currentVersion().gameSystemId ?? 0) }}</p>
+    </div>
+
+    <div class="param-section">
+      <h3>Tags</h3>
+      <div class="tags-readonly">
+        @for (tag of tagsSearch(); track tag.id) {
+        <p-chip [label]="tag.name" class="m-1"></p-chip>
+        } @if(tagsSearch().length === 0) {
+        <p class="no-tags">Aucun tag</p>
+        }
+      </div>
+    </div>
+
+    <div class="param-section">
+      <h3>Statut</h3>
+      <p>
+        @if(currentVersion().published) {
+        <i class="pi pi-globe"></i> Ce module est public } @else {
+        <i class="pi pi-eye-slash"></i> Ce module est privé }
+      </p>
+    </div>
+
+    <div class="param-section">
+      <h3>Collaborateurs</h3>
+      <p-avatar-group>
+        @for(user of selectedUsers(); track user){ @if(getImageForUser(user)){
+        <p-avatar
+          [image]="getImageForUser(user)"
+          size="normal"
+          shape="circle"
+          [pTooltip]="user.email"
+        />
+        } @else {
+        <p-avatar
+          icon="pi pi-user"
+          size="normal"
+          shape="circle"
+          [pTooltip]="user.email"
+        />
+        } }
+      </p-avatar-group>
+    </div>
+  </div>
+  } @else {
   <div class="container-label">
     <label for="versions">Version du module</label>
     <p-select
@@ -133,12 +197,15 @@
     pTooltip="Bientot disponible !"
     tooltipPosition="top"
   ></p-button> -->
+  }
 </div>
+@if(!isReadOnly()){
 <p-button
   [fluid]="true"
-  [disabled]="needToCreate() || isReadOnly()"
+  [disabled]="needToCreate() || isReadOnly()"
   [label]="'Supprimer'"
   icon="pi pi-trash"
   (onClick)="deleteRequested.emit()"
   severity="danger"
 />
+}

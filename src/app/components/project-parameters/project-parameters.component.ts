@@ -33,16 +33,14 @@ import { ModuleService } from '../../services/module.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TreeSelectModule } from 'primeng/treeselect';
-import {
-  AutoComplete,
-  AutoCompleteDropdownClickEvent,
-  AutoCompleteModule,
-} from 'primeng/autocomplete';
+import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
 import { TagHttpService } from '../../services/https/tag-http.service';
 import { Tag } from '../../classes/Tag';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TagRequest } from '../../interfaces/TagRequest';
 import { ChipModule } from 'primeng/chip';
+import { AvatarGroupModule } from 'primeng/avatargroup';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-project-parameters',
@@ -58,6 +56,8 @@ import { ChipModule } from 'primeng/chip';
     TreeSelectModule,
     AutoCompleteModule,
     ChipModule,
+    AvatarModule,
+    AvatarGroupModule,
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss',
@@ -81,6 +81,8 @@ export class ProjectParametersComponent implements OnInit {
   currentVersion = model.required<ModuleVersion>();
   versions = computed(() => this.currentModule().versions);
   gameSystems = signal<GameSystem[]>([]);
+
+  
 
   currentUser = input<User | null>(null);
   loadingSave = input<boolean>(false);
@@ -193,8 +195,15 @@ export class ProjectParametersComponent implements OnInit {
   isReadOnly = input<boolean>(false);
   canPublish = input<boolean>(true);
   canInvite = input<boolean>(true);
+  selectedUsers = signal<User[]>([])
 
   async ngOnInit(): Promise<void> {
+    if (this.currentModule()) {
+      const usersWithAccess = this.currentModule()!.accesses.map(
+        (access) => access.user
+      );
+      this.selectedUsers.set(usersWithAccess);
+    }
     this.getTagsForModule();
     this.loadTags();
     await this.loadFolders();
@@ -224,6 +233,14 @@ export class ProjectParametersComponent implements OnInit {
       this.createNewTag(value);
     }
   }
+  getImageForUser(user: User): string | undefined {
+    // console.log(user)
+    return '';
+  }
+  getGameSystemName(id: number){
+    return this.gameSystems().find(g => g.id === id)?.name
+  }
+
   onSelect(value: string) {
     if (value) {
       const tagReq: TagRequest = { name: value, moduleIds: [] };
@@ -558,7 +575,7 @@ export class ProjectParametersComponent implements OnInit {
   }
 
   published() {
-    if (!this.canPublish()) return; 
+    if (!this.canPublish()) return;
     this.currentVersion().published = !this.currentVersion().published;
     this.loadingPublished.set(true);
     this.httpModuleVersionService

@@ -40,3 +40,35 @@
     font-size: 2rem;
   }
 }
+.music-block-readonly {
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: 0 0 8px 8px;
+  border: 1px solid var(--neutral-color-transparent);
+  
+  .block-title {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .music-label {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  audio {
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+  
+  .music-description {
+    padding: 1rem;
+    background-color: var(--background-color-lighter);
+    border-radius: 8px;
+    font-style: italic;
+  }
+}

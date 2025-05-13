@@ -124,3 +124,17 @@
 }
 
 
+.readonly-block {
+  box-shadow: none;
+  border: none;
+  margin-bottom: 1.5rem;
+  
+  .block-header {
+    background-color: var(--primary-color-transparent-50);
+    border-radius: 8px 8px 0 0;
+    
+    .texte {
+      font-weight: 600;
+    }
+  }
+}

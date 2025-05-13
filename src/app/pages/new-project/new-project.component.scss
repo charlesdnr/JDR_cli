@@ -102,6 +102,18 @@
   align-items: center;
 }
 
+.readonly-toolbar {
+  .p-tabs-tab:last-child {
+    display: none;
+  }
+}
+
+.readonly-editor {
+  background-color: var(--background-color-lighter);
+  padding: 2rem;
+  border-radius: 8px;
+}
+
 .read-only-notice {
   background-color: rgba(var(--danger-color-rgb), 0.15);
   color: var(--danger-color);
@@ -111,6 +123,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 2rem;
   width: fit-content;
 }

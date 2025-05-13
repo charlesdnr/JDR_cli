@@ -10,4 +10,5 @@ import { AudioplayerComponent } from '../../audioplayer/audioplayer.component';
 })
 export class MusicBlockComponent {
   musicBlock = input.required<MusicBlock>();
+  isReadOnly = input<boolean>(false);
 }

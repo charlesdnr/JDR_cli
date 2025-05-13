@@ -113,13 +113,17 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   isReadOnly = computed(() => !this.userRights().canEdit);
   canPublish = computed(() => this.userRights().canPublish);
   canInvite = computed(() => this.userRights().canInvite);
+  canView = computed(() => this.userRights().canView);
 
-  constructor(){ 
+  constructor() {
     effect(() => {
-      if(this.notificationService.isConnected() == true && this.currentModule()?.id){
-        this.subscribeToAccessChanges(this.currentModule()!.id)
+      if (
+        this.notificationService.isConnected() == true &&
+        this.currentModule()?.id
+      ) {
+        this.subscribeToAccessChanges(this.currentModule()!.id);
       }
-    })
+    });
   }
 
   ngOnInit() {
@@ -151,6 +155,16 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                 } else {
                   // Si la version spécifiée n'existe pas, sélectionner la première par défaut
                   this.selectDefaultVersionAndUpdateURL();
+                }
+
+                if (!this.canView()) {
+                  this.router.navigate(['/home']);
+                  this.messageService.add({
+                    severity: 'info',
+                    summary: 'Accès refusé',
+                    detail: "Vous n'avez pas accès à ce module.",
+                  });
+                  return;
                 }
               } else if (module && module.versions.length > 0) {
                 // Si aucun versionId n'est spécifié, sélectionner la première version
@@ -194,7 +208,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       moduleId,
       (accessUpdate) => {
         // Si la mise à jour concerne l'utilisateur actuel, rafraîchir le module
-        console.log(accessUpdate)
+        console.log(accessUpdate);
         if (accessUpdate.access.user.id === currentUser.id) {
           // this.messageService.add({
           //   severity: 'info',

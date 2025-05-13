@@ -1,19 +1,40 @@
-<div class="text-block">
-  <div class="basic-block">
-    <div class="container-label">
-      <label for="title"> {{ "Titre" | translate }} </label>
-      <input type="text" [(ngModel)]="paragraphBlock().title" pInputText placeholder="La folle aventure..." />
-    </div>
-    <div class="container-label">
-      <label for="style">Style</label>
-      <p-select id="style" [(ngModel)]="paragraphBlock().style" [options]="options" optionValue="value" optionLabel="label" />
-    </div>
-  </div>
-  <div class="container-label">
-    <label for="paragraph"> {{ "Pararagraphe" | translate }} </label>
-    <p-editor
-      id="paragraph"
-      [(ngModel)]="paragraphBlock().paragraph"
-    ></p-editor>
-  </div>
+@if(isReadOnly()) {
+<div class="text-block-readonly">
+  <h3 class="block-title">{{ paragraphBlock().title }}</h3>
+  <div class="block-content" [innerHTML]="paragraphBlock().paragraph"></div>
+  @if(paragraphBlock().style) {
+  <div class="block-style">{{ paragraphBlock().style }}</div>
+  }
 </div>
+} @else {
+  <div class="text-block">
+    <div class="basic-block">
+      <div class="container-label">
+        <label for="title"> {{ "Titre" | translate }} </label>
+        <input
+          type="text"
+          [(ngModel)]="paragraphBlock().title"
+          pInputText
+          placeholder="La folle aventure..."
+        />
+      </div>
+      <div class="container-label">
+        <label for="style">Style</label>
+        <p-select
+          id="style"
+          [(ngModel)]="paragraphBlock().style"
+          [options]="options"
+          optionValue="value"
+          optionLabel="label"
+        />
+      </div>
+    </div>
+    <div class="container-label">
+      <label for="paragraph"> {{ "Pararagraphe" | translate }} </label>
+      <p-editor
+        id="paragraph"
+        [(ngModel)]="paragraphBlock().paragraph"
+      ></p-editor>
+    </div>
+  </div>
+}

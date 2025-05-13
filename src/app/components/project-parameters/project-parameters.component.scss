@@ -33,3 +33,43 @@
     padding-bottom: 5px;
   }
 }
+.param-section {
+  
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 1px solid var(--neutral-color);
+    padding-bottom: 0.5rem;
+  }
+  
+  p {
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: var(--background-color-lighter-lighter);
+  }
+  
+  .description-text {
+    white-space: pre-line;
+    line-height: 1.6;
+  }
+  
+  .tags-readonly {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--padding);
+    padding-top: var(--padding);
+  }
+  
+  .no-tags {
+    font-style: italic;
+    color: var(--font-color);
+  }
+}
+
+.read {
+  display: flex;
+  flex-direction: column;
+}

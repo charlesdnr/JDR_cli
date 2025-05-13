@@ -105,7 +105,10 @@
   --p-button-success-border-color: var(--success-color);
 
   //select
-  --p-select-disabled-background: light-dark(rgba(239, 239, 239, 0.3), rgba(19, 1, 1, 0.3));
+  --p-select-disabled-background: light-dark(
+    rgba(239, 239, 239, 0.3),
+    rgba(19, 1, 1, 0.3)
+  );
   --p-select-focus-border-color: var(--primary-color);
   --p-select-option-selected-focus-background: var(
     --primary-color-transparent-50
@@ -183,8 +186,16 @@
 
   // dark mode
   --p-surface-0: var(--background-color-lighter);
-  --p-button-text-danger-hover-background: color-mix(in srgb, var(--p-red-400), transparent 96%);
-  --p-button-text-help-hover-background: color-mix(in srgb,var(--p-purple-400),transparent 96%);
+  --p-button-text-danger-hover-background: color-mix(
+    in srgb,
+    var(--p-red-400),
+    transparent 96%
+  );
+  --p-button-text-help-hover-background: color-mix(
+    in srgb,
+    var(--p-purple-400),
+    transparent 96%
+  );
   --p-toast-success-detail-color: var(--font-color);
   --p-toast-error-detail-color: var(--font-color);
   --p-confirmdialog-icon-color: var(--font-color);
@@ -234,7 +245,9 @@
   --p-autocomplete-color: var(--font-color);
   --p-autocomplete-option-focus-color: var(--font-color);
   --p-autocomplete-option-focus-background: var(--background-color-lighter);
-  --p-autocomplete-option-selected-focus-background: var(--background-color-lighter);
+  --p-autocomplete-option-selected-focus-background: var(
+    --background-color-lighter
+  );
   --p-autocomplete-option-selected-background: var(--background-color-lighter);
   --p-chip-background: var(--background-color);
   --p-chip-color: var(--font-color);
@@ -245,7 +258,6 @@
 
   --neutral-color-transparent: rgba(var(--neutral-color-rgb), 0.2); // Exemple
   --font-secondary-color: var(--neutral-color);
-
 
   // treeselect
   --p-tree-node-toggle-button-color: var(--font-color);
@@ -387,7 +399,7 @@ body.resizing [contenteditable="true"] {
 
 .read-only-container {
   position: relative;
-  
+
   &::after {
     content: "Lecture seule";
     position: absolute;
@@ -403,8 +415,21 @@ body.resizing [contenteditable="true"] {
     opacity: 0;
     transition: opacity 0.2s;
   }
-  
+
   &:hover::after {
     opacity: 1;
   }
+}
+
+.read-only-notice {
+  background-color: rgba(var(--danger-color-rgb), 0.15);
+  color: var(--danger-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  width: fit-content;
 }

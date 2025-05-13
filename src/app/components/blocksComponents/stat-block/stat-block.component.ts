@@ -13,4 +13,5 @@ import { InputNumberModule } from 'primeng/inputnumber';
 })
 export class StatBlockComponent {
   statBlock = input.required<StatBlock>();
+  isReadOnly = input<boolean>(false);
 }

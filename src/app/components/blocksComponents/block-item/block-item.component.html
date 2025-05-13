@@ -1,8 +1,10 @@
 <div class="block-container" cdkDrag [cdkDragData]="block()">
   <div class="block-header">
+    @if(!isReadOnly()) {
     <div class="block-controls-left">
       <i class="pi pi-bars" cdkDragHandle aria-hidden="true"></i>
     </div>
+    }
     <div class="texte">
       <i
         [class]="getIconByType(block()?.type ?? 'stat')"
@@ -36,11 +38,15 @@
   </div>
   <ng-content></ng-content>
 
-  <div *cdkDragPreview class="block-preview">
-    <div class="block-preview-content">
-      {{ getBlockPreview(block()?.type ?? "stat") }}
+  @if(!isReadOnly()) {
+    <div *cdkDragPreview class="block-preview">
+      <div class="block-preview-content">
+        {{ getBlockPreview(block()?.type ?? "stat") }}
+      </div>
     </div>
-  </div>
+
+    <div *cdkDragPlaceholder class="block-placeholder"></div>
+  }
 
   <div *cdkDragPlaceholder class="block-placeholder"></div>
 </div>

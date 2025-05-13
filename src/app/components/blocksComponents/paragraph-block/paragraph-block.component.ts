@@ -22,6 +22,7 @@ import { EditorModule } from 'primeng/editor';
 })
 export class ParagraphBlockComponent {
   paragraphBlock = input.required<ParagraphBlock>();
+  isReadOnly = input<boolean>(false);
   options = [
     { label: 'Introduction', value: 'Introduction' },
     { label: 'Clarification', value: 'Clarification' },
