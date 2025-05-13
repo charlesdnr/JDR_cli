@@ -199,7 +199,7 @@
   ></p-button> -->
   }
 </div>
-@if(!isReadOnly()){
+@if(!isReadOnly() && currentUser()?.id === currentModule().creator.id){
 <p-button
   [fluid]="true"
   [disabled]="needToCreate() || isReadOnly()"

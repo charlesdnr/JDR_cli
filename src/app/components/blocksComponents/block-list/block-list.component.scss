@@ -64,3 +64,71 @@
   gap: var(--padding);
   padding: var(--padding);
 }
+
+
+.remote-cursor {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  transition: transform 0.1s ease;
+
+  .cursor-pointer {
+    width: 2px;
+    height: 20px;
+    background-color: var(--user-color, #3B82F6);
+    position: absolute;
+    animation: blink 1s infinite;
+  }
+
+  .cursor-label {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    background-color: var(--user-color, #3B82F6);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.9;
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// Ajoutons aussi un style pour les utilisateurs actifs
+.active-users {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+  }
+}
+
+// Ajouter également une classe pour mettre en évidence le contenu en cours d'édition
+.content-being-edited {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  animation: highlight-edit 2s infinite;
+}
+
+@keyframes highlight-edit {
+  0%, 100% { background-color: rgba(59, 130, 246, 0.1); }
+  50% { background-color: rgba(59, 130, 246, 0.2); }
+}

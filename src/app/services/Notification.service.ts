@@ -8,6 +8,8 @@ import { environment } from '../../environments/environment';
 import SockJS from 'sockjs-client';
 import { firstValueFrom } from 'rxjs';
 import { Notification } from '../interfaces/Notification';
+import { ModuleUpdateDTO } from '../interfaces/ModuleUpdateDTO';
+import { CursorPosition } from '../interfaces/CursorPosition';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +35,11 @@ export class NotificationService {
   unreadNotifications = computed(() =>
     this.notifications().filter(notification => !notification.read)
   );
+
+  private activeCursors = signal<Map<number, CursorPosition>>(new Map());
+
+  // Exposer les curseurs actifs pour les composants
+  userCursors = computed(() => Array.from(this.activeCursors().values()));
 
   constructor() {
     onAuthStateChanged(this.auth, async (user) => {
@@ -214,7 +221,7 @@ export class NotificationService {
       console.error("WebSocket non connecté. Impossible de s'abonner aux mises à jour d'accès.");
       return;
     }
-  
+
     const subscription = this.stompClient.subscribe(
       `/module/${moduleId}/access-updates`,
       (message) => {
@@ -227,7 +234,89 @@ export class NotificationService {
         }
       }
     );
-  
+
     return subscription;
+  }
+
+  // Méthode pour s'abonner aux mises à jour du module en temps réel
+  subscribeToModuleUpdates(moduleId: number, callback: (data: ModuleUpdateDTO) => void): StompSubscription | undefined {
+    if (!this.stompClient || !this.isConnected()) {
+      console.error("WebSocket non connecté. Impossible de s'abonner aux mises à jour du module.");
+      return undefined;
+    }
+
+    return this.stompClient.subscribe(
+      `/module/${moduleId}/updates`,
+      (message) => {
+        console.log('module :', message)
+        try {
+          const data = JSON.parse(message.body);
+          callback(data);
+        } catch (error) {
+          console.error("Erreur lors du traitement des mises à jour du module:", error);
+        }
+      }
+    );
+  }
+
+  subscribeToModuleCursors(moduleId: number): StompSubscription | undefined {
+    if (!this.stompClient || !this.isConnected()) {
+      console.error("WebSocket non connecté. Impossible de s'abonner aux curseurs.");
+      return undefined;
+    }
+
+    const currentUser = this.userService.currentJdrUser();
+    if (!currentUser) return undefined;
+
+    // Nettoyer la map des curseurs existants
+    this.activeCursors.set(new Map());
+
+    return this.stompClient.subscribe(
+      `/module/${moduleId}/cursors`,
+      (message) => {
+        console.log('cursor :', message)
+        try {
+          const cursorPosition = JSON.parse(message.body) as CursorPosition;
+
+          // Ignorer notre propre curseur
+          if (cursorPosition.userId === currentUser.id) return;
+
+          // Mettre à jour la map des curseurs actifs
+          this.activeCursors.update(cursors => {
+            const newCursors = new Map(cursors);
+            newCursors.set(cursorPosition.userId, cursorPosition);
+            return newCursors;
+          });
+        } catch (error) {
+          console.error("Erreur lors du traitement de la position du curseur:", error);
+        }
+      }
+    );
+  }
+
+  // Méthode pour envoyer la position du curseur
+  sendCursorPosition(moduleId: number, cursorPosition: CursorPosition): void {
+    if (!this.stompClient || !this.isConnected()) {
+      console.error("WebSocket non connecté. Impossible d'envoyer la position du curseur.");
+      return;
+    }
+
+    this.stompClient.publish({
+      destination: `/app/module/${moduleId}/cursor`,
+      body: JSON.stringify(cursorPosition)
+    });
+  }
+
+  // Méthode pour envoyer une mise à jour du module
+  sendModuleUpdate(moduleId: number, update: ModuleUpdateDTO): void {
+    if (!this.stompClient || !this.isConnected()) {
+      console.error("WebSocket non connecté. Impossible d'envoyer la mise à jour du module.");
+      return;
+    }
+
+    this.stompClient.publish({
+      destination: `/app/module/${moduleId}/update`,
+      body: JSON.stringify(update)
+    });
   }
 }

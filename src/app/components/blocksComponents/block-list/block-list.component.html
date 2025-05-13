@@ -25,6 +25,7 @@
   </div>
   }
   <app-block-item
+    [attr.data-block-id]="block.id"
     [isReadOnly]="isReadOnly()"
     [block]="block"
     [enum]="EBlockType"
@@ -37,9 +38,15 @@
       [isReadOnly]="isReadOnly()"
     ></app-paragraph-block>
     } @else if(isMusicBlock(block)) {
-    <app-music-block [musicBlock]="asMusicBlock(block)" [isReadOnly]="isReadOnly()"></app-music-block>
+    <app-music-block
+      [musicBlock]="asMusicBlock(block)"
+      [isReadOnly]="isReadOnly()"
+    ></app-music-block>
     } @else if(isStatBlock(block)) {
-    <app-stat-block [statBlock]="asStatBlock(block)" [isReadOnly]="isReadOnly()"></app-stat-block>
+    <app-stat-block
+      [statBlock]="asStatBlock(block)"
+      [isReadOnly]="isReadOnly()"
+    ></app-stat-block>
     } @else if(isModuleBlock(block)) {
     <div class="module-block"></div>
     }
@@ -52,5 +59,15 @@
     </div>
   </div>
   }
+</div>
+} @for(cursor of otherUserCursors(); track cursor.userId) {
+<div
+  class="remote-cursor"
+  [style.left.px]="cursor.position.x"
+  [style.top.px]="cursor.position.y"
+  [style.--user-color]="cursor.userColor"
+>
+  <div class="cursor-pointer"></div>
+  <div class="cursor-label">{{ cursor.username }}</div>
 </div>
 }
