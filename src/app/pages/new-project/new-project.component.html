@@ -62,9 +62,21 @@
       [(activeIconElement)]="activeIconElement"
       [(dragPosition)]="dragPosition"
       [isReadOnly]="isReadOnly()"
+      (blockCursorPosition)="onBlockCursorPosition($event)"
     ></app-block-list>
     }
   </div>
 </div>
 }
 <p-confirmDialog />
+@for(cursor of otherUserCursors(); track cursor.userId) {
+  <div
+    class="remote-cursor"
+    [style.left.px]="cursor.position.x"
+    [style.top.px]="cursor.position.y"
+    [style.--user-color]="cursor.userColor"
+  >
+    <div class="cursor-pointer"></div>
+    <div class="cursor-label">{{ cursor.username }}</div>
+  </div>
+}

@@ -5,6 +5,7 @@ export interface CursorPosition {
   username: string;
   blockId: number;
   position: Position;
+  elementId?: string;
   selectionStart?: number;
   selectionEnd?: number;
   userColor: string;

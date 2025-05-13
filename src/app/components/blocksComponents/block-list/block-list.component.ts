@@ -1,4 +1,4 @@
-import { Component, effect, ElementRef, HostListener, inject, input, model, NgZone, OnDestroy, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, input, model, NgZone, OnDestroy, output, signal, viewChild } from '@angular/core';
 import { StatBlockComponent } from '../stat-block/stat-block.component';
 import { BlockItemComponent } from '../block-item/block-item.component';
 import { MusicBlockComponent } from '../music-block/music-block.component';
@@ -16,7 +16,6 @@ import { AiConfigComponent } from '../../ai-config/ai-config.component';
 import { EBlockType } from '../../../enum/BlockType';
 import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { NotificationService } from '../../../services/Notification.service';
-import { StompSubscription } from '@stomp/stompjs';
 import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
 import { CursorPosition } from '../../../interfaces/CursorPosition';
 
@@ -49,208 +48,53 @@ export class BlockListComponent implements OnDestroy {
   insertPosition = model<number | null>(null);
   activeIconElement = model<HTMLElement | null>(null);
   dragPosition = model<{ x: number, y: number }>();
+
+  blockCursorPosition = output<{
+    blockId: number,
+    position: DOMRect,
+    elementId: string
+  }>();
+
   loadingBlock = this.moduleService.loadingModule.asReadonly();
 
   EBlockType = EBlockType;
 
   otherUserCursors = this.notificationService.userCursors;
   activeUsers = signal<Set<number>>(new Set());
-  cursorUpdateInterval: any;
-  updateThrottleTimeout: any;
+  updateThrottleTimeout = 0;
 
-  private cursorPosition = signal<{ x: number, y: number } | null>(null);
-  private lastSentPosition = signal<string>(''); // Pour éviter d'envoyer des positions identiques
-  private mouseInContainer = signal<boolean>(false);
-
-  private documentMouseTracking = signal<boolean>(false);
-  private scrollPosition = signal<{ x: number, y: number }>({ x: 0, y: 0 });
-  private pageCoords = signal<{ x: number, y: number } | null>(null);
-
-  private cursorSubscription: StompSubscription | undefined;
-  private updateSubscription: StompSubscription | undefined;
-
-  constructor() {
-    effect(() => {
-      const module = this.moduleService.currentModule();
-      if (!module || module.id === 0 || this.isReadOnly()) return;
-
-      // Établir les connections WebSocket si nécessaire
-      if (!this.notificationService.isConnected()) {
-        this.notificationService.connect().then(() => {
-          this.setupCollaborativeFunctions(module.id);
-        });
-      } else {
-        this.setupCollaborativeFunctions(module.id);
-      }
-    })
-
-    effect(() => {
-      const scrollHandler = () => {
-        this.scrollPosition.set({
-          x: window.scrollX,
-          y: window.scrollY
-        });
-        // Forcer une mise à jour de la position du curseur lorsque la page défile
-        if (this.pageCoords()) {
-          this.updateCursorFromPageCoords();
-        }
-      };
-
-      window.addEventListener('scroll', scrollHandler, { passive: true });
-
-      return () => {
-        window.removeEventListener('scroll', scrollHandler);
-      };
-    });
-
-    effect(() => {
-      const coords = this.pageCoords();
-      if (coords) {
-        this.updateCursorFromPageCoords();
-      }
-    });
-
-    effect(() => {
-      console.log(this.otherUserCursors())
-    })
-
-    effect(() => {
-      const position = this.cursorPosition();
-      const cursorPositionStr = position ? `${position.x},${position.y}` : '';
-
-      // Éviter d'envoyer des positions identiques
-      if (position && cursorPositionStr !== this.lastSentPosition()) {
-        this.lastSentPosition.set(cursorPositionStr);
-        this.sendCursorPositionData(position);
-      }
-    });
-  }
-
-  private updateCursorFromPageCoords(): void {
-    const coords = this.pageCoords();
-    if (!coords || this.isReadOnly()) return;
-
-    // Calculer la position réelle par rapport à la fenêtre (ajustée avec le défilement)
-    const adjustedPosition = {
-      x: coords.x,
-      y: coords.y
-    };
-
-    if (adjustedPosition.x !== 0 && adjustedPosition.y !== 0) {
-      this.cursorPosition.set(adjustedPosition);
+  onBlockCursorPosition(event: {
+    blockId: number,
+    position: DOMRect,
+    elementId: string,
+    caretData?: {
+      left: number,
+      top: number
     }
-
-    // Également essayer de trouver un bloc à cette position
-    this.tryFindBlockAtPosition(coords);
-  }
-
-  // Nouvelle méthode pour essayer de trouver un bloc à une position donnée
-  private tryFindBlockAtPosition(coords: { x: number, y: number }): void {
-    if (!this.blocksContainerRef()) return;
-
-    const container = this.blocksContainerRef()!.nativeElement;
-    const blockElements = Array.from(container.querySelectorAll('.block-container'));
-
-    // Vérifier si la position est à l'intérieur d'un bloc
-    for (const element of blockElements) {
-      const rect = element.getBoundingClientRect();
-      if (
-        coords.x >= rect.left &&
-        coords.x <= rect.right &&
-        coords.y >= rect.top &&
-        coords.y <= rect.bottom
-      ) {
-        // Si on trouve un bloc, mettre à jour l'ID de bloc dans le signal
-        const blockId = element.getAttribute('data-block-id');
-        if (blockId) {
-          // Utiliser ces infos pour la prochaine mise à jour de position
-          console.log(`Curseur dans le bloc ${blockId}`);
-          break;
-        }
-      }
-    }
-  }
-
-  setupCollaborativeFunctions(moduleId: number): void {
-    // S'abonner aux curseurs des autres utilisateurs
-    this.cursorSubscription = this.notificationService.subscribeToModuleCursors(moduleId);
-
-    // S'abonner aux mises à jour du contenu
-    this.updateSubscription = this.notificationService.subscribeToModuleUpdates(
-      moduleId,
-      (update) => this.handleModuleUpdate(update)
-    );
-
-    // Configurer l'envoi périodique de la position du curseur (moins fréquent)
-    this.cursorUpdateInterval = setInterval(() => {
-      if (this.mouseInContainer()) {
-        this.updateCursorPosition();
-      }
-    }, 500);
-
-    // Activer le suivi de la souris au niveau du document entier
-    this.documentMouseTracking.set(true);
-
-    // Ajouter un gestionnaire pour suivre le mouvement de la souris sur tout le document
-    this.zone.runOutsideAngular(() => {
-      document.addEventListener('mousemove', this.handleDocumentMouseMove);
-    });
-  }
-
-  private handleDocumentMouseMove = (e: MouseEvent): void => {
-    if (!this.documentMouseTracking() || this.isReadOnly()) return;
-
-    // Mettre à jour les coordonnées de la page
-    this.pageCoords.set({ x: e.clientX, y: e.clientY });
-
-    // Conversion de type pour e.target
-    const target = e.target as Node;
-
-    // Utiliser zone.run pour que les changements déclenchent la détection de changements
-    if (this.blocksContainerRef()?.nativeElement.contains(target)) {
-      this.zone.run(() => {
-        this.mouseInContainer.set(true);
-      });
-    }
-  };
-
-  // Gestion des mises à jour reçues
-  handleModuleUpdate(update: ModuleUpdateDTO): void {
-    // Ignorer nos propres mises à jour
+  }) {
     const currentUser = this.userService.currentJdrUser();
-    if (currentUser && update.userId === currentUser.id) return;
+    const module = this.moduleService.currentModule();
 
-    // Trouver le bloc concerné
-    const blockIndex = this.blocks().findIndex(b => b.id === update.blockId);
-    if (blockIndex === -1) return;
+    // Transmettre au composant parent avec les données précises du caret
+    this.blockCursorPosition.emit(event);
 
-    const block = this.blocks()[blockIndex];
+    // Utiliser également ces informations pour les mises à jour collaboratives
+    if (module && module.id && currentUser) {
+      const cursorPosition: CursorPosition = {
+        userId: currentUser.id || 0,
+        username: currentUser.username || 'Utilisateur',
+        blockId: event.blockId,
+        position: event.caretData ?
+          { x: event.caretData.left, y: event.caretData.top } :
+          { x: event.position.left, y: event.position.top },
+        elementId: event.elementId,
+        userColor: this.getUserColor(currentUser.id || 0),
+        timestamp: Date.now()
+      };
 
-    // Appliquer la mise à jour selon le type d'opération
-    if (block instanceof ParagraphBlock) {
-      switch (update.operation) {
-        case 'insert':
-          // Insérer du contenu
-          this.updateBlockContent(blockIndex, update.content);
-          break;
-        case 'delete':
-          // Supprimer du contenu
-          this.updateBlockContent(blockIndex, update.content);
-          break;
-        case 'update':
-          // Remplacer tout le contenu
-          this.updateBlockContent(blockIndex, update.content);
-          break;
-      }
+      this.notificationService.sendCursorPosition(module.id, cursorPosition);
     }
-
-    // Ajouter l'utilisateur à la liste des utilisateurs actifs
-    this.activeUsers.update(users => {
-      const newUsers = new Set(users);
-      newUsers.add(update.userId);
-      return newUsers;
-    });
-  };
+  }
 
   // Méthode utilitaire pour mettre à jour un bloc
   updateBlockContent(blockIndex: number, content: string): void {
@@ -273,31 +117,6 @@ export class BlockListComponent implements OnDestroy {
     });
   };
 
-  // Nouvelle méthode pour gérer les interactions avec le document
-  onDocumentInteraction(event: Event): void {
-    if (this.isReadOnly()) return;
-
-    // Mise à jour de la position du curseur
-    this.updateCursorPosition();
-  }
-
-  // Nouvelle méthode pour suivre le mouvement de la souris
-  onMouseMove(event: MouseEvent): void {
-    if (this.isReadOnly()) return;
-
-    this.mouseInContainer.set(true);
-
-    // Ne pas mettre à jour à chaque mouvement pour éviter trop d'envois
-    // Utiliser un throttle pour limiter les mises à jour
-    if (this.updateThrottleTimeout) {
-      clearTimeout(this.updateThrottleTimeout);
-    }
-
-    this.updateThrottleTimeout = setTimeout(() => {
-      this.updateCursorPosition();
-    }, 100); // 100ms de throttle
-  }
-
   // Nouvelle méthode pour gérer les changements de contenu
   onContentChange(event: Event): void {
     if (this.isReadOnly()) return;
@@ -314,147 +133,14 @@ export class BlockListComponent implements OnDestroy {
 
       if (!blockId) return;
 
-      // Mise à jour du curseur après modification du contenu
-      this.updateCursorPosition();
       this.sendContentUpdate(blockId, target);
     }, 300);
   }
 
-  // Méthode améliorée pour le calcul de la position du curseur
-  updateCursorPosition(): void {
-    if (this.isReadOnly()) return;
 
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) {
-      // Si pas de sélection, utiliser les coordonnées de la page
-      return;
-    }
-
-    const range = selection.getRangeAt(0);
-    const blockElement = this.getBlockElementFromSelection(range);
-
-    if (!blockElement) return;
-
-    // Calculer la position RÉELLE du curseur par rapport à la fenêtre
-    const rects = range.getClientRects();
-
-    // S'il n'y a pas de rectangle, on utilise la position de l'élément parent
-    if (!rects || rects.length === 0) {
-      const blockRect = blockElement.getBoundingClientRect();
-      this.cursorPosition.set({
-        x: blockRect.left,
-        y: blockRect.top
-      });
-      return;
-    }
-
-    // Utiliser le premier rectangle du range (position du curseur)
-    const rect = rects[0];
-
-    // Positions ajustées par rapport à la fenêtre
-    const adjustedPosition = {
-      x: rect.left,
-      y: rect.top
-    };
-
-    this.cursorPosition.set(adjustedPosition);
-  }
-
-  // Méthode modifiée pour envoyer les données du curseur
-  sendCursorPositionData(position: { x: number, y: number }): void {
-    const currentUser = this.userService.currentJdrUser();
-    const module = this.moduleService.currentModule();
-    if (!currentUser || !module || module.id === 0) return;
-
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const blockElement = this.getBlockElementFromSelection(range);
-
-    if (!blockElement) return;
-
-    const blockId = this.getBlockIdFromElement(blockElement);
-
-    const cursorPosition: CursorPosition = {
-      userId: currentUser.id,
-      username: currentUser.username || 'Utilisateur',
-      blockId: blockId || 0,
-      position: position,
-      selectionStart: this.getTextPosition(range.startContainer, range.startOffset),
-      selectionEnd: this.getTextPosition(range.endContainer, range.endOffset),
-      userColor: this.getUserColor(currentUser.id),
-      timestamp: Date.now()
-    };
-
-    this.notificationService.sendCursorPosition(module.id, cursorPosition);
-  }
-
-  // Amélioration du calcul de la position du texte
-  getTextPosition(node: Node, offset: number): number {
-    if (node.nodeType !== Node.TEXT_NODE) {
-      return offset;
-    }
-
-    // Pour les nœuds texte, calculer la position absolue en incluant les nœuds précédents
-    let position = offset;
-
-    // Trouver le conteneur éditable parent
-    let currentNode: Node | null = node;
-    let editableParent: HTMLElement | null = null;
-
-    while (currentNode && !editableParent) {
-      if (currentNode instanceof HTMLElement &&
-        (currentNode.isContentEditable ||
-          currentNode.tagName === 'TEXTAREA' ||
-          currentNode.tagName === 'INPUT')) {
-        editableParent = currentNode;
-      }
-      currentNode = currentNode.parentNode;
-    }
-
-    if (!editableParent) return offset;
-
-    // Calculer la position en parcourant tous les nœuds précédents
-    const treeWalker = document.createTreeWalker(
-      editableParent,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    let currentTextNode = treeWalker.nextNode();
-    while (currentTextNode && currentTextNode !== node) {
-      position += (currentTextNode.textContent || '').length;
-      currentTextNode = treeWalker.nextNode();
-    }
-
-    return position;
-  }
-
-  // Gestion du départ de la souris du conteneur
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
-    this.mouseInContainer.set(false);
-  }
-
-  // Nettoyage lors de la destruction du composant
   ngOnDestroy(): void {
-    // Arrêter l'envoi périodique de la position du curseur
-    if (this.cursorUpdateInterval) {
-      clearInterval(this.cursorUpdateInterval);
-    }
-
     if (this.updateThrottleTimeout) {
       clearTimeout(this.updateThrottleTimeout);
-    }
-
-    // Se désabonner des websockets
-    if (this.cursorSubscription) {
-      this.cursorSubscription.unsubscribe();
-    }
-
-    if (this.updateSubscription) {
-      this.updateSubscription.unsubscribe();
     }
   }
 
@@ -819,25 +505,6 @@ export class BlockListComponent implements OnDestroy {
   @HostListener('document:mousemove', ['$event'])
   onDocumentMouseMove(event: MouseEvent): void {
     if (!this.isDraggingIcon()) {
-      // Logique de suivi du curseur
-      if (!this.isReadOnly()) {
-        this.pageCoords.set({ x: event.clientX, y: event.clientY });
-
-        // Vérifier si nous sommes dans le conteneur - conversion de type pour event.target
-        const target = event.target as Node;
-        if (this.blocksContainerRef()?.nativeElement.contains(target)) {
-          this.mouseInContainer.set(true);
-
-          // Ajouter un délai pour éviter trop de mises à jour
-          if (this.updateThrottleTimeout) {
-            clearTimeout(this.updateThrottleTimeout);
-          }
-
-          this.updateThrottleTimeout = setTimeout(() => {
-            this.updateCursorPosition();
-          }, 50); // throttle à 50ms
-        }
-      }
       return;
     }
 

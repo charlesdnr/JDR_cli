@@ -1,4 +1,3 @@
-<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
 @if(loadingBlock()){
 <div class="container-skeleton">
   <p-skeleton height="12rem" />
@@ -15,9 +14,6 @@
   (cdkDropListDropped)="onDrop($event)"
   cdkDropListOrientation="vertical"
   [class.highlight-drop-zone]="isDraggingIcon()"
-  (mouseup)="onDocumentInteraction($event)"
-  (click)="onDocumentInteraction($event)"
-  (keyup)="onDocumentInteraction($event)"
   (input)="onContentChange($event)"
 >
   <!-- Les blocs existants -->
@@ -41,6 +37,7 @@
     <app-paragraph-block
       [paragraphBlock]="asParagraphBlock(block)"
       [isReadOnly]="isReadOnly()"
+      (cursorPositionChanged)="onBlockCursorPosition($event)"
     ></app-paragraph-block>
     } @else if(isMusicBlock(block)) {
     <app-music-block
@@ -64,15 +61,5 @@
     </div>
   </div>
   }
-</div>
-} @for(cursor of otherUserCursors(); track cursor.userId) {
-<div
-  class="remote-cursor"
-  [style.left.px]="cursor.position.x"
-  [style.top.px]="cursor.position.y"
-  [style.--user-color]="cursor.userColor"
->
-  <div class="cursor-pointer"></div>
-  <div class="cursor-label">{{ cursor.username }}</div>
 </div>
 }

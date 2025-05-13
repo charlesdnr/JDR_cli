@@ -2,6 +2,7 @@
   display: flex;
   height: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .container-edit {
@@ -125,4 +126,69 @@
   gap: 8px;
   margin-bottom: 2rem;
   width: fit-content;
+}
+
+
+.remote-cursor {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  transition: transform 0.1s ease;
+
+  .cursor-pointer {
+    width: 2px;
+    height: 20px;
+    background-color: var(--user-color, #3B82F6);
+    position: absolute;
+    animation: blink 1s infinite;
+  }
+
+  .cursor-label {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    background-color: var(--user-color, #3B82F6);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.9;
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.remote-cursor {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  transition:
+    left 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0),
+    top 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0);
+
+  .cursor-pointer {
+    width: 2px;
+    height: var(--caret-height, 20px);
+    background-color: var(--user-color, #3B82F6);
+    position: absolute;
+    animation: blink 1s infinite;
+  }
+
+  .cursor-label {
+    position: absolute;
+    top: calc(-25px - 0.5 * var(--caret-height, 20px));
+    left: 0;
+    background-color: var(--user-color, #3B82F6);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.9;
+    transform: translateX(-50%);
+  }
 }

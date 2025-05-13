@@ -6,6 +6,7 @@ import {
   signal,
   OnDestroy,
   effect,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
@@ -43,6 +44,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { NotificationService } from '../../services/Notification.service';
 import { StompSubscription } from '@stomp/stompjs';
+import { CursorPosition } from '../../interfaces/CursorPosition';
+import { ModuleUpdateDTO } from '../../interfaces/ModuleUpdateDTO';
 
 @Component({
   selector: 'app-new-project',
@@ -115,6 +118,19 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   canInvite = computed(() => this.userRights().canInvite);
   canView = computed(() => this.userRights().canView);
 
+  otherUserCursors = this.notificationService.userCursors;
+  private cursorSubscription: StompSubscription | undefined;
+  private updateSubscription: StompSubscription | undefined;
+
+  private cursorPositionsMap = new Map<number, {
+    current: { x: number, y: number },
+    target: { x: number, y: number }
+  }>();
+  private animationFrameId: number | null = null;
+
+  // Pour le suivi du curseur
+  private mouseMoveThrottle = 0;
+
   constructor() {
     effect(() => {
       if (
@@ -124,6 +140,192 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         this.subscribeToAccessChanges(this.currentModule()!.id);
       }
     });
+
+    effect(() => {
+      const module = this.currentModule();
+      if (!module || module.id === 0 || this.isReadOnly()) return;
+
+      // Établir les connections WebSocket si nécessaire
+      if (!this.notificationService.isConnected()) {
+        this.notificationService.connect().then(() => {
+          this.setupCollaborativeFunctions(module.id);
+        });
+      } else {
+        this.setupCollaborativeFunctions(module.id);
+      }
+    });
+  }
+
+  setupCollaborativeFunctions(moduleId: number): void {
+    // S'abonner aux curseurs des autres utilisateurs
+    this.cursorSubscription = this.notificationService.subscribeToModuleCursors(moduleId);
+
+    // S'abonner aux mises à jour du contenu
+    this.updateSubscription = this.notificationService.subscribeToModuleUpdates(
+      moduleId,
+      (update) => this.handleModuleUpdate(update)
+    );
+
+    this.startCursorAnimation();
+  }
+
+  private startCursorAnimation(): void {
+    const animate = () => {
+      this.updateCursorPositions();
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  private updateCursorPositions(): void {
+    // Mettre à jour la position du curseur avec interpolation
+    this.notificationService.userCursors().forEach(cursor => {
+      // Ignorer notre propre curseur
+      if (cursor.userId === this.currentUser()?.id) return;
+
+      // Récupérer ou créer l'entrée dans la map
+      if (!this.cursorPositionsMap.has(cursor.userId)) {
+        this.cursorPositionsMap.set(cursor.userId, {
+          current: { x: cursor.position.x, y: cursor.position.y },
+          target: { x: cursor.position.x, y: cursor.position.y }
+        });
+        return;
+      }
+
+      // Mettre à jour la position cible
+      const positions = this.cursorPositionsMap.get(cursor.userId)!;
+      positions.target = { x: cursor.position.x, y: cursor.position.y };
+
+      // Interpolation fluide
+      positions.current.x += (positions.target.x - positions.current.x) * 0.3;
+      positions.current.y += (positions.target.y - positions.current.y) * 0.3;
+
+      // Mettre à jour les coordonnées CSS dans le DOM directement pour éviter les cycles de détection
+      const cursorElement = document.querySelector(`.remote-cursor[data-user-id="${cursor.userId}"]`);
+      if (cursorElement) {
+        (cursorElement as HTMLElement).style.left = `${positions.current.x}px`;
+        (cursorElement as HTMLElement).style.top = `${positions.current.y}px`;
+      }
+    });
+  }
+
+  // Ajouter ceci à votre classe NewProjectComponent
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    // Gestion du drag & drop (garder votre code existant)
+    if (this.isDraggingIcon()) {
+      this.dragPosition = { x: event.clientX, y: event.clientY };
+      // Autre logique existante pour le drag...
+      return;
+    }
+
+    // Si en lecture seule ou pas de module actif, ne rien faire
+    if (this.isReadOnly() || !this.currentModule()?.id) return;
+
+    // Throttle pour limiter les envois
+    if (this.mouseMoveThrottle) {
+      window.clearTimeout(this.mouseMoveThrottle);
+    }
+
+    this.mouseMoveThrottle = window.setTimeout(() => {
+      this.sendCursorPosition(event.clientX, event.clientY);
+    }, 50); // 50ms de throttle pour éviter trop d'envois
+  }
+
+  private sendCursorPosition(x: number, y: number): void {
+    const currentUser = this.currentUser();
+    const module = this.currentModule();
+    if (!currentUser || !module || module.id === 0) return;
+
+    const cursorPosition: CursorPosition = {
+      userId: currentUser.id,
+      username: currentUser.username || 'Utilisateur',
+      blockId: 0, // Pas important dans ce cas
+      position: { x, y },
+      userColor: this.getUserColor(currentUser.id),
+      timestamp: Date.now()
+    };
+
+    this.notificationService.sendCursorPosition(module.id, cursorPosition);
+  }
+
+  // Gestion des mises à jour reçues du WebSocket
+  handleModuleUpdate(update: ModuleUpdateDTO): void {
+    // Ignorer nos propres mises à jour
+    const currentUser = this.userService.currentJdrUser();
+    if (currentUser && update.userId === currentUser.id) return;
+
+    // Trouver le bloc concerné dans le module actuel
+    const version = this.currentVersion();
+    if (!version || !version.blocks) return;
+
+    const blockIndex = version.blocks.findIndex(b => b.id === update.blockId);
+    if (blockIndex === -1) return;
+
+    const block = version.blocks[blockIndex];
+
+    // Appliquer la mise à jour selon le type d'opération
+    if (block instanceof ParagraphBlock) {
+      switch (update.operation) {
+        case 'insert':
+        case 'delete':
+        case 'update':
+          // Mise à jour du contenu du bloc
+          this.updateBlockContent(blockIndex, update.content);
+          break;
+      }
+    }
+  }
+
+  // Méthode utilitaire pour mettre à jour un bloc
+  updateBlockContent(blockIndex: number, content: string): void {
+    const version = this.currentVersion();
+    if (!version || !version.blocks) return;
+
+    const block = version.blocks[blockIndex];
+
+    if (block instanceof ParagraphBlock) {
+      block.paragraph = content;
+    } else if (block instanceof StatBlock) {
+      // Mise à jour selon le type de bloc
+    }
+
+    // Forcer la mise à jour du signal
+    this.moduleService.currentModuleVersion.update(version => {
+      if (!version) return undefined;
+
+      const updatedBlocks = [...version.blocks];
+      updatedBlocks[blockIndex] = block;
+
+      return { ...version, blocks: updatedBlocks };
+    });
+  }
+
+  onBlockCursorPosition(event: { blockId: number, position: DOMRect, elementId: string }) {
+    const cursorPosition: CursorPosition = {
+      userId: this.currentUser()?.id || 0,
+      username: this.currentUser()?.username || 'Utilisateur',
+      blockId: event.blockId,
+      position: {
+        x: event.position.left,
+        y: event.position.top
+      },
+      elementId: event.elementId,
+      userColor: this.getUserColor(this.currentUser()?.id || 0),
+      timestamp: Date.now()
+    };
+
+    // Envoyer la position via le service de notification
+    if (this.currentModule()?.id) {
+      this.notificationService.sendCursorPosition(this.currentModule()!.id, cursorPosition);
+    }
+  }
+
+  // Méthode d'aide pour générer une couleur unique pour chaque utilisateur
+  getUserColor(userId: number): string {
+    const hue = (userId * 137) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
   }
 
   ngOnInit() {
@@ -259,6 +461,18 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.cursorSubscription) {
+      this.cursorSubscription.unsubscribe();
+    }
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
+    if (this.mouseMoveThrottle) {
+      window.clearTimeout(this.mouseMoveThrottle);
+    }
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
     }
   }
 
@@ -536,8 +750,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                       index,
                       this.currentUser()!,
                       (block as MusicBlock).label ||
-                        block.title ||
-                        'Ambiance musicale',
+                      block.title ||
+                      'Ambiance musicale',
                       (block as MusicBlock).src || ''
                     );
                     break;
