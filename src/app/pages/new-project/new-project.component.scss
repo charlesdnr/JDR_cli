@@ -101,3 +101,16 @@
   justify-content: space-around;
   align-items: center;
 }
+
+.read-only-notice {
+  background-color: rgba(var(--danger-color-rgb), 0.15);
+  color: var(--danger-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  width: fit-content;
+}

@@ -18,6 +18,9 @@
           (deleteRequested)="deleteModule()"
           [currentVersion]="currentVersion()!"
           (currentVersionChange)="this.updateCurrentVersion($event)"
+          [isReadOnly]="isReadOnly()"
+          [canPublish]="canPublish()"
+          [canInvite]="canInvite()"
         ></app-project-parameters>
         }
       </p-tabpanel>
@@ -35,7 +38,11 @@
 </div>
 <div class="container-edit">
   <div class="editor">
-    @if($currentBlocks && $currentBlocks.length === 0 && !isDraggingIcon()){
+    @if(isReadOnly()) {
+    <div class="read-only-notice">
+      <i class="pi pi-lock"></i> Mode lecture seule
+    </div>
+    } @if($currentBlocks && $currentBlocks.length === 0 && !isDraggingIcon()){
     <div class="container-empty">
       <ng-lottie height="30rem" [options]="options" />
       <h1>{{ "Glisse et dépose un block pour commencer !" | translate }}</h1>
@@ -52,6 +59,7 @@
       [(insertPosition)]="insertPosition"
       [(activeIconElement)]="activeIconElement"
       [(dragPosition)]="dragPosition"
+      [isReadOnly]="isReadOnly()"
     ></app-block-list>
     }
   </div>

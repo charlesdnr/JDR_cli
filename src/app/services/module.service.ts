@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, WritableSignal } from '@angular/core';
+import { Injectable, signal, inject, WritableSignal, computed } from '@angular/core';
 import { Module } from '../classes/Module';
 import { ModuleVersion } from '../classes/ModuleVersion';
 import { ModuleAccess } from '../classes/ModuleAccess';
@@ -17,6 +17,52 @@ export class ModuleService {
 
   currentModuleVersion = signal<ModuleVersion | undefined>(this.currentModule()?.versions[0]);
   loadingModule = signal<boolean>(false);
+
+  userAccessRights = computed(() => {
+    const module = this.currentModule();
+    const currentUser = this.userHttpService.currentJdrUser();
+    
+    // Valeurs par défaut (aucun droit)
+    const defaultRights = {
+      canView: false,
+      canEdit: false,
+      canPublish: false,
+      canInvite: false,
+      isCreator: false
+    };
+    
+    if (!module || !currentUser) {
+      return defaultRights;
+    }
+    
+    // Si l'utilisateur est le créateur, il a tous les droits
+    if (module.creator && module.creator.id === currentUser.id) {
+      return {
+        canView: true,
+        canEdit: true,
+        canPublish: true,
+        canInvite: true,
+        isCreator: true
+      };
+    }
+    
+    // Sinon, vérifier les droits d'accès spécifiques
+    const userAccess = module.accesses.find(access => 
+      access.user && access.user.id === currentUser.id
+    );
+    
+    if (!userAccess) {
+      return defaultRights;
+    }
+    
+    return {
+      canView: userAccess.canView,
+      canEdit: userAccess.canEdit,
+      canPublish: userAccess.canPublish,
+      canInvite: userAccess.canInvite,
+      isCreator: false
+    };
+  });
 
 
   // Charger un module par son ID (utilisé par le composant lors de la navigation vers /module/:id)

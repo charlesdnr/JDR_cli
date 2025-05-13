@@ -1,3 +1,5 @@
+import { NotificationType } from "../enum/NotificationType";
+
 export interface Notification {
   id: number;
   type: string;

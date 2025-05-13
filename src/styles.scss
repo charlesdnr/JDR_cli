@@ -379,3 +379,32 @@ body.resizing [contenteditable="true"] {
   flex-direction: column;
   gap: calc(var(--padding) / 4);
 }
+.read-only-element {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.read-only-container {
+  position: relative;
+  
+  &::after {
+    content: "Lecture seule";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(var(--danger-color-rgb), 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  &:hover::after {
+    opacity: 1;
+  }
+}

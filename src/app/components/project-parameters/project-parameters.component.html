@@ -5,6 +5,7 @@
       [filter]="true"
       fluid
       [options]="versions()"
+      [disabled]="isReadOnly()"
       optionLabel="version"
       [(ngModel)]="currentVersion"
     >
@@ -29,6 +30,7 @@
       type="text"
       pInputText
       [(ngModel)]="currentModule().title"
+      [disabled]="isReadOnly()"
       autocomplete="false"
     />
   </div>
@@ -40,6 +42,7 @@
       type="text"
       pTextarea
       [(ngModel)]="currentModule().description"
+      [disabled]="isReadOnly()"
       autocomplete="false"
     ></textarea>
   </div>
@@ -48,6 +51,7 @@
     <p-select
       [options]="gameSystems()"
       [loading]="gameLoading"
+      [disabled]="isReadOnly()"
       [(ngModel)]="currentGameSystem"
       optionLabel="name"
       placeholder="Selectionner un jeux"
@@ -69,8 +73,9 @@
   <div class="container-label">
     <label for="tags">Tags</label>
     <p-autocomplete
-    #autocomplete
+      #autocomplete
       [(ngModel)]="tagsSearch"
+      [disabled]="isReadOnly()"
       (completeMethod)="autoCompleteRes($event.query)"
       [suggestions]="suggestionsTags()"
       (onSelect)="onSelect($event.value.name)"
@@ -84,29 +89,30 @@
       [multiple]="true"
       optionLabel="name"
     >
-    <ng-template pTemplate="selectedItem" style="width: 0%;" >
-    </ng-template>
-  </p-autocomplete>
+      <ng-template pTemplate="selectedItem" style="width: 0%"> </ng-template>
+    </p-autocomplete>
     <div class="chips-container">
       @for (tag of tagsSearch(); track tag.id) {
-        <p-chip 
-          [label]="tag.name" 
-          [removable]="true" 
-          (onRemove)="onUnSelect(tag.id)"
-          class="m-1"
-        ></p-chip>
+      <p-chip
+        [label]="tag.name"
+        [removable]="true"
+        [removable]="!isReadOnly()"
+        (onRemove)="onUnSelect(tag.id)"
+        class="m-1"
+      ></p-chip>
       }
     </div>
   </div>
   <p-button
     [label]="needToCreate() ? 'Créer' : 'Sauvegarder'"
     [loading]="loadingSave()"
+    [disabled]="isReadOnly()"
     icon="pi pi-save"
     (onClick)="save()"
     severity="success"
   />
   <p-button
-    [disabled]="needToCreate()"
+    [disabled]="needToCreate() || !canPublish()"
     (onClick)="published()"
     [loading]="loadingPublished()"
     [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
@@ -115,7 +121,7 @@
   />
   @if(!currentVersion().published){
   <div class="container-label">
-    <app-user-avatar-choose />
+    <app-user-avatar-choose [disabled]="!canInvite()" />
   </div>
   }
   <!-- <p-button
@@ -130,7 +136,7 @@
 </div>
 <p-button
   [fluid]="true"
-  [disabled]="needToCreate()"
+  [disabled]="needToCreate() || isReadOnly()"
   [label]="'Supprimer'"
   icon="pi pi-trash"
   (onClick)="deleteRequested.emit()"

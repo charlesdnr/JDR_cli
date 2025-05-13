@@ -33,7 +33,11 @@ import { ModuleService } from '../../services/module.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TreeSelectModule } from 'primeng/treeselect';
-import { AutoComplete, AutoCompleteDropdownClickEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import {
+  AutoComplete,
+  AutoCompleteDropdownClickEvent,
+  AutoCompleteModule,
+} from 'primeng/autocomplete';
 import { TagHttpService } from '../../services/https/tag-http.service';
 import { Tag } from '../../classes/Tag';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -53,7 +57,7 @@ import { ChipModule } from 'primeng/chip';
     TooltipModule,
     TreeSelectModule,
     AutoCompleteModule,
-    ChipModule
+    ChipModule,
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss',
@@ -186,6 +190,10 @@ export class ProjectParametersComponent implements OnInit {
   tagsSearch = signal<Tag[]>([]);
   suggestionsTags = signal<Tag[]>([]);
 
+  isReadOnly = input<boolean>(false);
+  canPublish = input<boolean>(true);
+  canInvite = input<boolean>(true);
+
   async ngOnInit(): Promise<void> {
     this.getTagsForModule();
     this.loadTags();
@@ -216,32 +224,46 @@ export class ProjectParametersComponent implements OnInit {
       this.createNewTag(value);
     }
   }
-  onSelect(value: string){
-    if(value){
+  onSelect(value: string) {
+    if (value) {
       const tagReq: TagRequest = { name: value, moduleIds: [] };
       tagReq.moduleIds.push(this.currentModule().id);
       this.tagsHttpService
         .createTag(tagReq)
         .then((newTag) => {
-          let actualTag = this.tagsSearch().find(tag => tag.name == value)
-          if(actualTag)
-            actualTag = newTag;
-            this.tagsSearch().map(tag => {
-              if(tag.name == actualTag?.name)
-                tag = actualTag
-            })
-          this.messageService.add({ severity: 'success', summary: 'Tags', detail: 'Tag ajouté avec succés' })
+          let actualTag = this.tagsSearch().find((tag) => tag.name == value);
+          if (actualTag) actualTag = newTag;
+          this.tagsSearch().map((tag) => {
+            if (tag.name == actualTag?.name) tag = actualTag;
+          });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Tags',
+            detail: 'Tag ajouté avec succés',
+          });
         })
         .catch((error: HttpErrorResponse) => {
-          this.messageService.add({ severity: 'error', summary: 'Tags', detail: "Erreur lors de l'ajout du tag : " + error.message })
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Tags',
+            detail: "Erreur lors de l'ajout du tag : " + error.message,
+          });
           console.log(error);
         });
     }
   }
 
-  onUnSelect(id: number){
-    if(id){
-      this.tagsHttpService.deleteModuleOfTags(id, this.currentModule().id).then(() => this.messageService.add({ severity: 'success', summary: 'Tags', detail: 'Tag supprimé avec succés' }))
+  onUnSelect(id: number) {
+    if (id) {
+      this.tagsHttpService
+        .deleteModuleOfTags(id, this.currentModule().id)
+        .then(() =>
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Tags',
+            detail: 'Tag supprimé avec succés',
+          })
+        );
     }
   }
 
@@ -262,7 +284,11 @@ export class ProjectParametersComponent implements OnInit {
       .createTag(tagReq)
       .then((newTag) => {
         this.addTag(newTag);
-        this.messageService.add({ severity: 'success', summary: 'Tags', detail: 'Tag créé et ajouté avec succés' })
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Tags',
+          detail: 'Tag créé et ajouté avec succés',
+        });
       })
       .catch((error: HttpErrorResponse) => {
         console.log(error);
@@ -303,6 +329,7 @@ export class ProjectParametersComponent implements OnInit {
   }
 
   save(): void {
+    if (this.isReadOnly()) return;
     this.saveRequested.emit();
   }
 
@@ -531,6 +558,7 @@ export class ProjectParametersComponent implements OnInit {
   }
 
   published() {
+    if (!this.canPublish()) return; 
     this.currentVersion().published = !this.currentVersion().published;
     this.loadingPublished.set(true);
     this.httpModuleVersionService

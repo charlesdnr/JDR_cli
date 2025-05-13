@@ -36,6 +36,7 @@ export class BlockListComponent {
 
   blocksContainerRef = viewChild<ElementRef<HTMLElement>>('blocksContainer');
   blocks = input.required<Block[]>();
+  isReadOnly = input<boolean>(false);
   isDraggingIcon = model<boolean>(false);
   isOverDropZone = model<boolean>(false);
   draggedIconType = model<EBlockType | null>(null);
@@ -48,6 +49,7 @@ export class BlockListComponent {
 
   // Nouvelle méthode - Gérer directement le drop
   onDrop(event: CdkDragDrop<Block[]>): void {
+    if (this.isReadOnly()) return;
     console.log("BlockListComponent.onDrop appelé", event);
 
     const version = this.moduleService.currentModuleVersion();
@@ -152,6 +154,7 @@ export class BlockListComponent {
   }
 
   onRemoveBlock(blockId: number): void {
+    if (this.isReadOnly()) return; 
     const version = this.moduleService.currentModuleVersion();
     if (!version || !version.blocks) return;
 
@@ -257,6 +260,7 @@ export class BlockListComponent {
   }
 
   addBlock(type: EBlockType, position?: number): void {
+    if (this.isReadOnly()) return;
     const user = this.userService.currentJdrUser();
     const version = this.moduleService.currentModuleVersion();
     console.log(version)

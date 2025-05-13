@@ -1,6 +1,6 @@
 @let $currentModule = currentModule(); @if($currentModule){
 <p-button
-  [disabled]="$currentModule.id === 0"
+  [disabled]="$currentModule.id === 0 || disabled()"
   (click)="op.toggle($event)"
   icon="pi pi-share-alt"
   label="Partager"

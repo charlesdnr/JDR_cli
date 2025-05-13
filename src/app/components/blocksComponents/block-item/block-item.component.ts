@@ -24,6 +24,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class BlockItemComponent {
   block = input.required<Block | null>();
   enum = input.required<typeof EBlockType>();
+  isReadOnly = input<boolean>(false);
 
   removeBlock = output<number>();
   generateAIContent = output<{ blockId: number, blockType: string }>();

@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BaseHttpService } from './base-http.service';
 import { ModuleRequest } from '../../classes/ModuleRequest';
 import { Module } from '../../classes/Module';
+import { UserHttpService } from './user-http.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModuleHttpService extends BaseHttpService {
+  private authService = inject(UserHttpService);
 
   constructor() {
     super('api/modules');
@@ -31,7 +33,7 @@ export class ModuleHttpService extends BaseHttpService {
   /** PUT /api/modules/{id} */
   updateModule(id: number, moduleRequest: ModuleRequest): Promise<Module> {
     // Appel standard, T=ModuleResponse, B=ModuleRequest
-    return this.put<Module, ModuleRequest>(moduleRequest, id);
+    return this.put<Module, ModuleRequest>(moduleRequest, id+`/currentUser/${this.authService.currentJdrUser()?.id}`);
   }
 
   /** DELETE /api/modules/{id} */

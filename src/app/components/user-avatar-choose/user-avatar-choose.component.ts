@@ -54,6 +54,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   currentModule = this.moduleService.currentModule;
 
   label = input<string>("Droit d'accés");
+  disabled = input<boolean>(false);
   searchResults = signal<User[]>([]);
   selectedUsers = signal<User[]>([])
   filterText = '';
@@ -209,11 +210,11 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
       if (access.canView !== view) this.createOrUpdateAccessRight(user, AccessRight.VIEW);
     } else {
       // par défaut on lui met view
-      this.createOrUpdateAccessRight(user, AccessRight.VIEW)
+      this.createOrUpdateAccessRight(user)
     }
   }
 
-  createOrUpdateAccessRight(user: User, accessRight: AccessRight) {
+  createOrUpdateAccessRight(user: User, accessRight?: AccessRight) {
     const currentMod = this.currentModule();
     if (!currentMod || !currentMod.id) {
       console.error('Aucun module courant ou ID de module trouvé');
@@ -224,7 +225,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
       (moduleAccess: ModuleAccess) => moduleAccess.user.id === user.id
     );
 
-    if (moduleAcess && moduleAcess.id) {
+    if (moduleAcess && moduleAcess.id && accessRight) {
       // Mise à jour d'un accès existant
       this.httpAccessRightService
         .toggleAccessRight(moduleAcess.id, accessRight)
@@ -255,13 +256,6 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
     } else {
       this.httpAccessRightService
         .createModuleAccess(currentMod.id, user.id)
-        .then((modd: ModuleAccess) => {
-          if (!modd || !modd.id) {
-            throw new Error('Le module access créé n\'a pas d\'ID');
-          }
-
-          return this.httpAccessRightService.toggleAccessRight(modd.id, accessRight);
-        })
         .then((mod) => {
           // Mettre à jour les deux états en une seule opération
           this.currentModule.update((moduleUpd) => {

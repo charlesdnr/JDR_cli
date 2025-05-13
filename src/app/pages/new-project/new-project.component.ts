@@ -5,12 +5,11 @@ import {
   inject,
   signal,
   OnDestroy,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
-import {
-  DragDropModule,
-} from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProjectParametersComponent } from '../../components/project-parameters/project-parameters.component';
 import { Block } from '../../classes/Block';
@@ -42,6 +41,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
+import { NotificationService } from '../../services/Notification.service';
+import { StompSubscription } from '@stomp/stompjs';
 
 @Component({
   selector: 'app-new-project',
@@ -74,13 +75,14 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   currentModule = this.moduleService.currentModule;
   loadingModuleState = this.moduleService.loadingModule;
   currentUser = computed(() => this.userService.currentJdrUser());
   currentGameSystem = signal<GameSystem | undefined>(undefined);
   currentVersion = this.moduleService.currentModuleVersion;
-  blocks = computed(() => this.currentVersion()?.blocks)
+  blocks = computed(() => this.currentVersion()?.blocks);
 
   ref: DynamicDialogRef | undefined;
 
@@ -105,6 +107,20 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   loadingSave = signal(false);
 
   private routeSubscription: Subscription | undefined;
+  private subscription: StompSubscription | undefined;
+
+  userRights = computed(() => this.moduleService.userAccessRights());
+  isReadOnly = computed(() => !this.userRights().canEdit);
+  canPublish = computed(() => this.userRights().canPublish);
+  canInvite = computed(() => this.userRights().canInvite);
+
+  constructor(){ 
+    effect(() => {
+      if(this.notificationService.isConnected() == true && this.currentModule()?.id){
+        this.subscribeToAccessChanges(this.currentModule()!.id)
+      }
+    })
+  }
 
   ngOnInit() {
     this.initializeAvailableBlocks();
@@ -117,15 +133,17 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         const moduleId = parseInt(moduleIdParam, 10);
         if (!isNaN(moduleId)) {
           // Chargement du module
-          this.moduleService.loadModuleById(moduleId).then(() => {
+          this.moduleService.loadModuleById(moduleId).then(async () => {
             // Une fois le module chargé, récupérer le paramètre de requête versionId
-            this.route.queryParamMap.subscribe(queryParams => {
+            this.route.queryParamMap.subscribe((queryParams) => {
               const versionIdParam = queryParams.get('versionId');
               const module = this.currentModule();
 
               if (versionIdParam && module) {
                 const versionId = parseInt(versionIdParam, 10);
-                const selectedVersion = module.versions.find(v => v.id === versionId);
+                const selectedVersion = module.versions.find(
+                  (v) => v.id === versionId
+                );
 
                 if (selectedVersion) {
                   // Si la version spécifiée existe, la définir comme courante
@@ -156,6 +174,38 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     });
   }
 
+  private subscribeToAccessChanges(moduleId: number): void {
+    // S'assurer d'être connecté au WebSocket
+    if (!this.notificationService.isConnected()) {
+      this.notificationService.connect().then(() => {
+        this.setupAccessSubscription(moduleId);
+      });
+    } else {
+      this.setupAccessSubscription(moduleId);
+    }
+  }
+
+  private setupAccessSubscription(moduleId: number): void {
+    const currentUser = this.userService.currentJdrUser();
+    if (!currentUser) return;
+
+    // Utiliser la méthode du NotificationService pour s'abonner
+    this.subscription = this.notificationService.subscribeToModuleAccessUpdates(
+      moduleId,
+      (accessUpdate) => {
+        // Si la mise à jour concerne l'utilisateur actuel, rafraîchir le module
+        if (accessUpdate.userId === currentUser.id) {
+          this.messageService.add({
+            severity: 'info',
+            summary: "Droits d'accès mis à jour",
+            detail: 'Vos permissions ont été modifiées',
+          });
+          this.moduleService.refreshCurrentModule();
+        }
+      }
+    );
+  }
+
   selectDefaultVersionAndUpdateURL() {
     const module = this.currentModule();
     if (module && module.versions && module.versions.length > 0) {
@@ -164,15 +214,12 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
       // Mise à jour de l'URL avec le paramètre de requête pour la version par défaut
       if (module.id && defaultVersion.id) {
-        this.router.navigate(
-          [],
-          {
-            relativeTo: this.route,
-            queryParams: { versionId: defaultVersion.id },
-            queryParamsHandling: 'merge', // préserve les autres paramètres
-            replaceUrl: true
-          }
-        );
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { versionId: defaultVersion.id },
+          queryParamsHandling: 'merge', // préserve les autres paramètres
+          replaceUrl: true,
+        });
       }
     }
   }
@@ -182,21 +229,21 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
     // Mise à jour de l'URL pour refléter la nouvelle version sélectionnée
     if (version.id) {
-      this.router.navigate(
-        [],
-        {
-          relativeTo: this.route,
-          queryParams: { versionId: version.id },
-          queryParamsHandling: 'merge',
-          replaceUrl: true
-        }
-      );
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { versionId: version.id },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
     }
   }
 
   ngOnDestroy() {
     if (this.routeSubscription) {
       this.routeSubscription.unsubscribe();
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
@@ -222,7 +269,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   startIconDrag(event: { event: Event; blockType: EBlockType }) {
-    console.log(this.currentModule())
+    console.log(this.currentModule());
     if (this.isDraggingIcon()) return;
 
     let clientX = 0,
@@ -247,8 +294,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       this.activeIconElement?.classList.add('active-drag');
     }
   }
-
-
 
   getBlockPreview(type: EBlockType): string | undefined {
     switch (type) {
@@ -317,7 +362,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
           detail: 'Module créé avec succès !',
         });
         this.moduleService.setCurrentModule(savedModule);
-        this.moduleService.currentModuleVersion.set(this.moduleService.currentModule()?.versions[0])
+        this.moduleService.currentModuleVersion.set(
+          this.moduleService.currentModule()?.versions[0]
+        );
         this.router.navigate(['/module', savedModule.id], { replaceUrl: true });
       } else {
         // Mise à jour
@@ -541,9 +588,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
           severity: 'danger',
         },
         accept: () => {
-          if(this.currentModule()?.id)
-            this.acceptDelete(this.currentModule()!.id)
-        }
+          if (this.currentModule()?.id)
+            this.acceptDelete(this.currentModule()!.id);
+        },
       });
     } else {
       this.messageService.add({

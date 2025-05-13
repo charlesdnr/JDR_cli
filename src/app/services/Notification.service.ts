@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Client } from '@stomp/stompjs';
+import { Client, StompSubscription } from '@stomp/stompjs';
 import { UserHttpService } from './https/user-http.service';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { MessageService } from 'primeng/api';
@@ -210,5 +210,26 @@ export class NotificationService {
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
+  }
+
+  subscribeToModuleAccessUpdates(moduleId: number, callback: (data: any) => void) {
+    if (!this.stompClient || !this.isConnected()) {
+      console.error("WebSocket non connecté. Impossible de s'abonner aux mises à jour d'accès.");
+      return;
+    }
+  
+    const subscription = this.stompClient.subscribe(
+      `/module/${moduleId}/access-updates`,
+      (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          callback(data);
+        } catch (error) {
+          console.error("Erreur lors du traitement des données de mise à jour d'accès:", error);
+        }
+      }
+    );
+  
+    return subscription;
   }
 }
