@@ -1,28 +1,79 @@
-<div class="left">
-  <div class="first">
-    <h1>
-      {{ "Bienvenue" }}
-    </h1>
-    @if(currentUser()?.username){
-    <h1 style="color: var(--primary-color)">
-      {{ currentUser()?.username + ',' }}
-    </h1>
-    } @else {
-    <h1>,</h1>
-    }
+<div class="container-first">
+  <div class="left">
+    <div class="first">
+      <h1>
+        {{ "Bienvenue" }}
+      </h1>
+      @if(currentUser()?.username){
+      <h1 style="color: var(--primary-color)">
+        {{ currentUser()?.username + ',' }}
+      </h1>
+      } @else {
+      <h1>,</h1>
+      }
+    </div>
+    <h1>{{ "Libère ton imagination," }}</h1>
+    <h1>{{ "construis ton monde \n avec l'IA" }}</h1>
+    <div class="container-button">
+      <p-button
+        label="Créer un projet"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        routerLink="/new-module"
+      />
+      <button>{{ "Explorer les projets" | translate }}</button>
+    </div>
   </div>
-  <h1>{{ "Libère ton imagination," }}</h1>
-  <h1>{{ "construis ton monde \n avec l'IA" }}</h1>
-  <div class="container-button">
-    <p-button
-      label="Créer un projet"
-      icon="pi pi-arrow-right"
-      iconPos="right"
-      routerLink="/new-module"
-    />
-    <button>{{ "Explorer les projets" | translate }}</button>
+  <div class="right">
+    <img src="assets/images/home.png" alt="image de page home" />
   </div>
 </div>
-<div class="right">
-  <img src="assets/images/home.png" alt="image de page home" />
+<div class="popular-modules">
+  <div class="section">
+    <h2>Modules les plus sauvegardés</h2>
+    @if(loadingModules()) {
+      <div class="loading-modules">
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+      </div>
+    } @else {
+      <div class="modules-grid">
+        @for(module of mostSavedModules(); track module.id) {
+          <div class="module-card">
+            <app-module-viewer [moduleId]="module.id" />
+          </div>
+        }
+        @if(mostSavedModules().length === 0) {
+          <div class="no-modules">
+            <p>Aucun module disponible pour le moment</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+  
+  <div class="section">
+    <h2>Modules les plus récents</h2>
+    @if(loadingModules()) {
+      <div class="loading-modules">
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+      </div>
+    } @else {
+      <div class="modules-grid">
+        @for(module of mostRecentModules(); track module.id) {
+          <div class="module-card">
+            <app-module-viewer [moduleId]="module.id" />
+          </div>
+        }
+        @if(mostRecentModules().length === 0) {
+          <div class="no-modules">
+            <p>Aucun module disponible pour le moment</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
 </div>

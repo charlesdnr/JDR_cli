@@ -14,7 +14,6 @@
   (cdkDropListDropped)="onDrop($event)"
   cdkDropListOrientation="vertical"
   [class.highlight-drop-zone]="isDraggingIcon()"
-  (input)="onContentChange($event)"
 >
   <!-- Les blocs existants -->
   @for(block of blocks(); track block?.id; let i = $index) {
@@ -37,7 +36,6 @@
     <app-paragraph-block
       [paragraphBlock]="asParagraphBlock(block)"
       [isReadOnly]="isReadOnly()"
-      (cursorPositionChanged)="onBlockCursorPosition($event)"
     ></app-paragraph-block>
     } @else if(isMusicBlock(block)) {
     <app-music-block

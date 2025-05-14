@@ -233,7 +233,7 @@ export class NotificationService {
           console.error("Erreur lors du traitement des données de mise à jour d'accès:", error);
         }
       }
-    );
+    );  
 
     return subscription;
   }

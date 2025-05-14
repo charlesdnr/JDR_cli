@@ -48,7 +48,6 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   private httpAccessRightService = inject(ModuleAccessHttpService);
   private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
-  private notificationService = inject(NotificationService);
 
   currentUser = computed(() => this.userService.currentJdrUser());
   currentModule = this.moduleService.currentModule;

@@ -91,14 +91,17 @@
           [showClear]="false"
           [showToggleAll]="false"
           [showHeader]="false"
+          [disabled]="user.id === currentModule()?.creator?.id"
         />
         }
-        <p-button
-          icon="pi pi-times"
-          styleClass="p-button-danger p-button-text"
-          (onClick)="removeUser(user)"
-          pTooltip="Supprimer"
-        ></p-button>
+        @if(user.id !== currentModule()?.creator?.id){
+          <p-button
+            icon="pi pi-times"
+            styleClass="p-button-danger p-button-text"
+            (onClick)="removeUser(user)"
+            pTooltip="Supprimer"
+          ></p-button>
+        }
       </div>
     </div>
     }

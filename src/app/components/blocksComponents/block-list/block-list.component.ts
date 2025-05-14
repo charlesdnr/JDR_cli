@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject, input, model, NgZone, OnDestroy, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, input, model, NgZone, signal, viewChild } from '@angular/core';
 import { StatBlockComponent } from '../stat-block/stat-block.component';
 import { BlockItemComponent } from '../block-item/block-item.component';
 import { MusicBlockComponent } from '../music-block/music-block.component';
@@ -17,7 +17,6 @@ import { EBlockType } from '../../../enum/BlockType';
 import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { NotificationService } from '../../../services/Notification.service';
 import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
-import { CursorPosition } from '../../../interfaces/CursorPosition';
 
 @Component({
   selector: 'app-block-list',
@@ -32,7 +31,7 @@ import { CursorPosition } from '../../../interfaces/CursorPosition';
   templateUrl: './block-list.component.html',
   styleUrl: './block-list.component.scss',
 })
-export class BlockListComponent implements OnDestroy {
+export class BlockListComponent {
   private moduleService = inject(ModuleService);
   private userService = inject(UserHttpService);
   private dialogService = inject(DialogService);
@@ -49,12 +48,6 @@ export class BlockListComponent implements OnDestroy {
   activeIconElement = model<HTMLElement | null>(null);
   dragPosition = model<{ x: number, y: number }>();
 
-  blockCursorPosition = output<{
-    blockId: number,
-    position: DOMRect,
-    elementId: string
-  }>();
-
   loadingBlock = this.moduleService.loadingModule.asReadonly();
 
   EBlockType = EBlockType;
@@ -63,132 +56,6 @@ export class BlockListComponent implements OnDestroy {
   activeUsers = signal<Set<number>>(new Set());
   updateThrottleTimeout = 0;
 
-  onBlockCursorPosition(event: {
-    blockId: number,
-    position: DOMRect,
-    elementId: string,
-    caretData?: {
-      left: number,
-      top: number
-    }
-  }) {
-    const currentUser = this.userService.currentJdrUser();
-    const module = this.moduleService.currentModule();
-
-    // Transmettre au composant parent avec les données précises du caret
-    this.blockCursorPosition.emit(event);
-
-    // Utiliser également ces informations pour les mises à jour collaboratives
-    if (module && module.id && currentUser) {
-      const cursorPosition: CursorPosition = {
-        userId: currentUser.id || 0,
-        username: currentUser.username || 'Utilisateur',
-        blockId: event.blockId,
-        position: event.caretData ?
-          { x: event.caretData.left, y: event.caretData.top } :
-          { x: event.position.left, y: event.position.top },
-        elementId: event.elementId,
-        userColor: this.getUserColor(currentUser.id || 0),
-        timestamp: Date.now()
-      };
-
-      this.notificationService.sendCursorPosition(module.id, cursorPosition);
-    }
-  }
-
-  // Méthode utilitaire pour mettre à jour un bloc
-  updateBlockContent(blockIndex: number, content: string): void {
-    const block = this.blocks()[blockIndex];
-
-    if (block instanceof ParagraphBlock) {
-      block.paragraph = content;
-    } else if (block instanceof StatBlock) {
-      // Mettre à jour selon le type de bloc
-    }
-
-    // Forcer la mise à jour du signal
-    this.moduleService.currentModuleVersion.update(version => {
-      if (!version) return undefined;
-
-      const updatedBlocks = [...version.blocks];
-      updatedBlocks[blockIndex] = block;
-
-      return { ...version, blocks: updatedBlocks };
-    });
-  };
-
-  // Nouvelle méthode pour gérer les changements de contenu
-  onContentChange(event: Event): void {
-    if (this.isReadOnly()) return;
-
-    // Annuler tout délai précédent
-    if (this.updateThrottleTimeout) {
-      clearTimeout(this.updateThrottleTimeout);
-    }
-
-    // Throttle pour limiter les mises à jour
-    this.updateThrottleTimeout = setTimeout(() => {
-      const target = event.target as HTMLElement;
-      const blockId = this.getBlockIdFromElement(target);
-
-      if (!blockId) return;
-
-      this.sendContentUpdate(blockId, target);
-    }, 300);
-  }
-
-
-  ngOnDestroy(): void {
-    if (this.updateThrottleTimeout) {
-      clearTimeout(this.updateThrottleTimeout);
-    }
-  }
-
-  getBlockIdFromElement(element: HTMLElement): number | null {
-    // Remonter dans le DOM pour trouver l'ID de bloc
-    const blockElement = element.closest('.block-container');
-    if (!blockElement) return null;
-
-    const blockId = blockElement.getAttribute('data-block-id');
-    return blockId ? parseInt(blockId, 10) : null;
-  }
-
-  // Méthode améliorée pour trouver l'élément de bloc à partir d'une sélection
-  getBlockElementFromSelection(range: Range): HTMLElement | null {
-    let current: Node | null = range.commonAncestorContainer;
-
-    // Si le nœud actuel est un nœud texte, obtenir son élément parent
-    if (current.nodeType === Node.TEXT_NODE) {
-      current = current.parentElement;
-    }
-
-    // Remonter dans l'arbre DOM pour trouver l'élément avec la classe 'block-container'
-    while (current) {
-      if (current instanceof HTMLElement) {
-        if (current.classList.contains('block-container')) {
-          return current;
-        }
-
-        // Vérifier également si c'est à l'intérieur d'un composant de bloc
-        const blockContainer = current.closest('.block-container');
-        if (blockContainer) {
-          return blockContainer as HTMLElement;
-        }
-      }
-
-      // Passer à l'élément parent
-      current = current.parentElement;
-    }
-
-    return null;
-  }
-
-
-  getUserColor(userId: number): string {
-    // Générer une couleur unique basée sur l'ID utilisateur
-    const hue = (userId * 137) % 360; // Formule pour distribuer les couleurs
-    return `hsl(${hue}, 70%, 50%)`;
-  }
 
   // Nouvelle méthode - Gérer directement le drop
   onDrop(event: CdkDragDrop<Block[]>): void {

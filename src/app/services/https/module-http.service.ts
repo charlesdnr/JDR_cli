@@ -3,6 +3,7 @@ import { BaseHttpService } from './base-http.service';
 import { ModuleRequest } from '../../classes/ModuleRequest';
 import { Module } from '../../classes/Module';
 import { UserHttpService } from './user-http.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +41,16 @@ export class ModuleHttpService extends BaseHttpService {
   deleteModule(id: number): Promise<void> {
     // Appel standard, le backend renvoie 204 No Content
     return this.delete<void>(id);
+  }
+
+  getMostSavedModules(page: number = 0, limit: number = 10): Promise<Module[]> {
+    const url = `${this.baseApiUrl}/most-saved?page=${page}&limit=${limit}`;
+    return firstValueFrom(this.httpClient.get<Module[]>(url));
+  }
+  
+  /** GET /api/modules/most-recent */
+  getMostRecentModules(page: number = 0, limit: number = 10): Promise<Module[]> {
+    const url = `${this.baseApiUrl}/most-recent?page=${page}&limit=${limit}`;
+    return firstValueFrom(this.httpClient.get<Module[]>(url));
   }
 }

@@ -229,7 +229,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
 
     this.mouseMoveThrottle = window.setTimeout(() => {
-      this.sendCursorPosition(event.clientX, event.clientY);
+      this.sendCursorPosition(event.clientX, event.clientY - 90);
     }, 50); // 50ms de throttle pour éviter trop d'envois
   }
 
