@@ -409,4 +409,3 @@ FodyWeavers.xsd
 .runtimeconfig.json
 
 src/environments/environment.secret.ts
-.vercel
