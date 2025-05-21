@@ -24,7 +24,8 @@
       "dom"
     ],
     "types": [
-      "sockjs-client"
+      "sockjs-client",
+      "node"
     ]
   },
   "angularCompilerOptions": {

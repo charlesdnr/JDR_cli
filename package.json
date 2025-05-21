@@ -11,7 +11,8 @@
     "lint": "ng lint",
     "type-check": "tsc --noEmit",
     "sonar": "sonar-scanner",
-    "cypress": "npx cypress run --config-file=./cypress.config.js"
+    "cypress": "npx cypress run --config-file=./cypress.config.js",
+    "vercel-build": "node setup-env.js && npm run build"
   },
   "private": true,
   "dependencies": {
@@ -45,6 +46,7 @@
     "@angular-devkit/build-angular": "^19.2.6",
     "@angular/cli": "^19.2.6",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^22.15.21",
     "@types/sockjs-client": "^1.5.4",
     "angular-eslint": "19.3.0",
     "cypress": "^13.16.0",
@@ -57,6 +59,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "puppeteer": "^23.9.0",
     "sonarqube-scanner": "^4.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "~5.5.2",
     "typescript-eslint": "8.18.0"
   }
