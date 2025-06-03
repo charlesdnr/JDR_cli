@@ -1,3 +1,4 @@
+// src/app/components/blocksComponents/block-list/block-list.component.ts
 import { Component, ElementRef, HostListener, inject, input, model, NgZone, signal, viewChild } from '@angular/core';
 import { StatBlockComponent } from '../stat-block/stat-block.component';
 import { BlockItemComponent } from '../block-item/block-item.component';
@@ -17,6 +18,8 @@ import { EBlockType } from '../../../enum/BlockType';
 import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { NotificationService } from '../../../services/Notification.service';
 import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
+import { ConflictDTO } from '../../../interfaces/conflict/ConflictDTO'; // Added
+import { ResourceType } from '../../../enum/ResourceType'; // Added
 
 @Component({
   selector: 'app-block-list',
@@ -51,6 +54,7 @@ export class BlockListComponent {
   loadingBlock = this.moduleService.loadingModule.asReadonly();
 
   EBlockType = EBlockType;
+  activeConflicts = input<ConflictDTO[]>([]); // Added Input
 
   otherUserCursors = this.notificationService.userCursors;
   activeUsers = signal<Set<number>>(new Set());
@@ -88,6 +92,7 @@ export class BlockListComponent {
         if (versionIndex !== -1) {
           versions[versionIndex] = { ...versions[versionIndex], blocks: [...currentBlocks] };
         } else if (versions.length > 0) {
+          // This case should ideally not happen if version.id is always set for existing versions
           versions[0] = { ...versions[0], blocks: [...currentBlocks] };
         }
 
@@ -105,7 +110,6 @@ export class BlockListComponent {
     if (this.isOverDropZone()) {
       const insertPosition = this.calculateInsertPosition(event);
 
-      // Appeler la méthode addBlock du BlockListComponent
       this.addBlock(
         this.draggedIconType() || EBlockType.paragraph,
         insertPosition
@@ -114,19 +118,15 @@ export class BlockListComponent {
     this.endIconDrag();
   };
 
-  // Méthode manquante - Envoyer une mise à jour de contenu
   sendContentUpdate(blockId: number, element: HTMLElement): void {
     const currentUser = this.userService.currentJdrUser();
     const module = this.moduleService.currentModule();
     if (!currentUser || !module || module.id === 0) return;
 
-    // Détecter le type d'opération (insert, delete, update)
     const content = element.textContent || '';
     const block = this.blocks().find(b => b.id === blockId);
 
     if (!block) return;
-
-    // Déterminer le type d'opération en comparant avec le contenu précédent
     let operation: 'insert' | 'delete' | 'update' = 'update';
 
     if (block instanceof ParagraphBlock) {
@@ -143,15 +143,14 @@ export class BlockListComponent {
       blockId: blockId,
       operation: operation,
       content: content,
-      startPosition: 0, // Ces positions devront être calculées avec précision
+      startPosition: 0,
       timestamp: Date.now()
     };
-
     this.notificationService.sendModuleUpdate(module.id, update);
   }
 
   calculateInsertPosition(event: MouseEvent): number {
-    const currentBlocks = this.blocks(); // Utilise currentVersion signal
+    const currentBlocks = this.blocks();
     if (!currentBlocks) return 0;
     if (!this.blocksContainerRef()) return currentBlocks.length;
 
@@ -163,7 +162,6 @@ export class BlockListComponent {
 
     if (blockElements.length === 0) return 0;
 
-    // Logique existante pour calculer la position
     for (let i = 0; i < blockElements.length; i++) {
       const blockRect = blockElements[i].getBoundingClientRect();
       if (event.clientY < blockRect.top) return i;
@@ -214,39 +212,30 @@ export class BlockListComponent {
 
     this.moduleService.currentModule.update((mod) => {
       if (!mod) return null;
-
       const versions = [...mod.versions];
       const versionIndex = versions.findIndex((v) => v.id === version.id);
-
       if (versionIndex !== -1) {
         versions[versionIndex] = { ...versions[versionIndex], blocks: [...currentBlocks] };
       } else if (versions.length > 0) {
         versions[0] = { ...versions[0], blocks: [...currentBlocks] };
       }
-
       return { ...mod, versions };
     });
   }
 
-  // Nouvelle méthode - Gérer directement la génération IA
   onGenerateAI(event: { blockId: number, blockType: string }): void {
+    if (this.isReadOnly()) return;
     this.dialogService
       .open(AiConfigComponent, {
-        showHeader: false,
-        width: '60rem',
-        modal: true,
-        inputValues: {
-          type: event.blockType,
-        },
+        showHeader: false, width: '60rem', modal: true,
+        data: { type: event.blockType }, // Correctly pass data
       })
       .onClose.subscribe((response: string) => {
         if (!response || response.length === 0) return;
-
         this.processAIResponse(event.blockId, event.blockType, response);
       });
   }
 
-  // Nouvelle méthode - Traiter la réponse IA
   private processAIResponse(blockId: number, blockType: string, response: string): void {
     const version = this.moduleService.currentModuleVersion();
     if (!version || !version.blocks) return;
@@ -273,44 +262,20 @@ export class BlockListComponent {
         });
       }
     }
-    // TODO ajouter block statistique
   }
 
-  // Méthodes d'aide pour gérer les différents types de blocs
-  isParagraphBlock(block: Block): boolean {
-    return block?.type === EBlockType.paragraph;
-  }
-
-  isMusicBlock(block: Block): boolean {
-    return block?.type === EBlockType.music;
-  }
-
-  isStatBlock(block: Block): boolean {
-    return block?.type === EBlockType.stat;
-  }
-
-  isModuleBlock(block: Block): boolean {
-    return block?.type === EBlockType.module;
-  }
-
-  asParagraphBlock(block: Block): ParagraphBlock {
-    return block as ParagraphBlock;
-  }
-
-  asMusicBlock(block: Block): MusicBlock {
-    return block as MusicBlock;
-  }
-
-  asStatBlock(block: Block): StatBlock {
-    return block as StatBlock;
-  }
+  isParagraphBlock(block: Block): boolean { return block?.type === EBlockType.paragraph; }
+  isMusicBlock(block: Block): boolean { return block?.type === EBlockType.music; }
+  isStatBlock(block: Block): boolean { return block?.type === EBlockType.stat; }
+  isModuleBlock(block: Block): boolean { return block?.type === EBlockType.module; }
+  asParagraphBlock(block: Block): ParagraphBlock { return block as ParagraphBlock; }
+  asMusicBlock(block: Block): MusicBlock { return block as MusicBlock; }
+  asStatBlock(block: Block): StatBlock { return block as StatBlock; }
 
   addBlock(type: EBlockType, position?: number): void {
     if (this.isReadOnly()) return;
     const user = this.userService.currentJdrUser();
     const version = this.moduleService.currentModuleVersion();
-    console.log(version)
-
     if (!user || !version) {
       console.error("Impossible d'ajouter un bloc: utilisateur ou version non disponible.");
       return;
@@ -318,67 +283,45 @@ export class BlockListComponent {
 
     let newBlock: Block | null = null;
     const currentVersionId = version.id ?? 0;
-    const currentBlocks = [...(version.blocks || [])]; // Copie explicite
+    const currentBlocks = [...(version.blocks || [])];
     const blockOrder = position !== undefined ? position : currentBlocks.length;
     const blockTitle = this.getBlockPreview(type) ?? 'Nouveau Bloc';
 
     switch (type) {
-      case EBlockType.paragraph:
-        newBlock = new ParagraphBlock(currentVersionId, blockTitle, blockOrder, user);
-        break;
-      case EBlockType.module:
-        newBlock = new IntegratedModuleBlock(currentVersionId, blockTitle, blockOrder, user);
-        break;
-      case EBlockType.music:
-        newBlock = new MusicBlock(currentVersionId, blockTitle, blockOrder, user);
-        break;
-      case EBlockType.stat:
-        newBlock = new StatBlock(currentVersionId, blockTitle, blockOrder, user);
-        break;
-      default:
-        console.warn(`Type de bloc ${type} non géré.`);
-        return;
+      case EBlockType.paragraph: newBlock = new ParagraphBlock(currentVersionId, blockTitle, blockOrder, user); break;
+      case EBlockType.module: newBlock = new IntegratedModuleBlock(currentVersionId, blockTitle, blockOrder, user); break;
+      case EBlockType.music: newBlock = new MusicBlock(currentVersionId, blockTitle, blockOrder, user); break;
+      case EBlockType.stat: newBlock = new StatBlock(currentVersionId, blockTitle, blockOrder, user); break;
+      default: console.warn(`Type de bloc ${type} non géré.`); return;
     }
-
     newBlock.id = Date.now() + Math.random();
 
     const newBlocks = [...currentBlocks];
     newBlocks.splice(blockOrder, 0, newBlock);
-    newBlocks.forEach((block, index) => (block.blockOrder = index));
+    newBlocks.forEach((b, index) => (b.blockOrder = index));
 
     this.moduleService.currentModuleVersion.update((ver) => {
       if (!ver) return undefined;
       return { ...ver, blocks: [...newBlocks] };
     });
-
     this.moduleService.currentModule.update((mod) => {
       if (!mod) return null;
-
       const versions = [...mod.versions];
       const versionIndex = versions.findIndex((v) => v.id === version.id);
-
       if (versionIndex !== -1) {
-        // Créer une nouvelle référence pour la version modifiée
         versions[versionIndex] = { ...versions[versionIndex], blocks: [...newBlocks] };
       } else if (versions.length > 0) {
         versions[0] = { ...versions[0], blocks: [...newBlocks] };
       }
-
       return { ...mod, versions };
     });
   }
 
-
   @HostListener('document:mousemove', ['$event'])
   onDocumentMouseMove(event: MouseEvent): void {
-    if (!this.isDraggingIcon()) {
-      return;
-    }
-
-    // Logique existante pour le glisser-déposer d'icônes
+    if (!this.isDraggingIcon()) return;
     this.dragPosition.set({ x: event.clientX, y: event.clientY });
     this.checkIfOverDropZone(event);
-
     if (this.isOverDropZone()) {
       this.insertPosition.set(this.calculateInsertPosition(event));
     } else {
@@ -392,7 +335,6 @@ export class BlockListComponent {
     this.draggedIconType.set(null);
     this.isOverDropZone.set(false);
     this.insertPosition.set(null);
-
     if (this.activeIconElement()) {
       this.activeIconElement()!.classList.remove('active-drag');
       this.activeIconElement.set(null);
@@ -400,37 +342,32 @@ export class BlockListComponent {
   }
 
   checkIfOverDropZone(event: MouseEvent) {
-    if (!(this.blocksContainerRef() != undefined)) {
+    if (!(this.blocksContainerRef())) {
       this.isOverDropZone.set(false);
       return;
     }
-
     const rect = this.blocksContainerRef()!.nativeElement.getBoundingClientRect();
-    const isOver =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom;
-
+    const isOver = event.clientX >= rect.left && event.clientX <= rect.right &&
+                   event.clientY >= rect.top && event.clientY <= rect.bottom;
     if (isOver !== this.isOverDropZone()) {
       this.isOverDropZone.set(isOver);
     }
   }
 
   getBlockPreview(type: EBlockType): string | undefined {
+    // ... (implementation remains the same)
     switch (type) {
-      case EBlockType.paragraph:
-        return 'Paragraphe';
-      case EBlockType.music:
-        return 'Audio';
-      case EBlockType.module:
-        return 'Module';
-      case EBlockType.stat:
-        return 'Statistique';
-      case EBlockType.picture:
-        return 'Image';
-      default:
-        return undefined;
+      case EBlockType.paragraph: return 'Paragraphe';
+      case EBlockType.music: return 'Audio';
+      case EBlockType.module: return 'Module';
+      case EBlockType.stat: return 'Statistique';
+      case EBlockType.picture: return 'Image';
+      default: return undefined;
     }
+  }
+
+  // New method to get conflict for a specific block
+  getBlockConflict(blockId: number): ConflictDTO | null {
+    return this.activeConflicts().find(c => c.resourceType === ResourceType.BLOCK && c.resourceId === blockId) || null;
   }
 }

@@ -1,12 +1,13 @@
+// src/app/components/blocksComponents/block-item/block-item.component.scss
 .block-container {
   background-color: var(--background-color-lighter);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; // Added border-color
   position: relative;
   width: 100%;
-  // min-height: 180px !important;
+  border: 2px solid transparent; // Base border for smooth transition
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -33,6 +34,12 @@
   ::ng-deep .p-select {
     background-color: var(--background-color);
   }
+
+  // Styling for conflicting blocks
+  &.conflicting {
+    border-color: var(--warn-color) !important;
+    box-shadow: 0 0 8px rgba(var(--warn-color-rgb), 0.4); // Use RGB version for opacity
+  }
 }
 
 .block-header {
@@ -53,44 +60,14 @@
     i {
       font-size: 1rem;
     }
+    .conflict-indicator { // Style for the conflict icon in the header
+      color: var(--warn-color);
+      font-size: 1.1rem; // Slightly larger
+    }
   }
 }
 
-.block-controls-left {
-  cursor: grab;
-  padding: 0 5px;
-
-  &:active {
-    cursor: grabbing;
-  }
-
-  i {
-    font-size: 0.9rem;
-  }
-}
-
-.block-controls {
-  cursor: pointer;
-  display: flex;
-  gap: calc(var(--padding) / 2);
-}
-
-.block-preview {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  min-width: 200px;
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .block-preview-content {
-    padding: 10px 15px;
-    font-weight: 500;
-    color: var(--primary-color);
-  }
-}
+// ... rest of the SCSS ...
 
 .block-placeholder {
   background-color: rgba(59, 130, 246, 0.15);

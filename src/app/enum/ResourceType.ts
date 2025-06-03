@@ -1,0 +1,6 @@
+export enum ResourceType {
+  MODULE = 'MODULE',
+  MODULE_VERSION = 'MODULE_VERSION',
+  BLOCK = 'BLOCK',
+  MODULE_METADATA = 'MODULE_METADATA',
+}

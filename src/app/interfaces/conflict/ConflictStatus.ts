@@ -1,0 +1,6 @@
+export enum ConflictStatus {
+  DETECTED = 'DETECTED',
+  REVIEWING = 'REVIEWING',
+  RESOLVED = 'RESOLVED',
+  CANCELLED = 'CANCELLED',
+}

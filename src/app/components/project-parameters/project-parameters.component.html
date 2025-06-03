@@ -82,6 +82,7 @@
           text
           size="small"
           icon="pi pi-plus"
+          [disabled]="isReadOnly()"
         />
       </ng-template>
     </p-select>
@@ -126,7 +127,7 @@
     <label for="stockage">{{ "Stocker dans" | translate }}</label>
     <p-treeselect
       [options]="treeNode()"
-      [disabled]="needToCreate()"
+      [disabled]="needToCreate() || isReadOnly()"
       metaKeySelection="true"
       [loading]="folderLoading"
       [(ngModel)]="selectedFolder"
@@ -140,10 +141,10 @@
       #autocomplete
       [(ngModel)]="tagsSearch"
       [disabled]="isReadOnly()"
-      (completeMethod)="autoCompleteRes($event.query)"
+      (completeMethod)="autoCompleteRes($event)"
       [suggestions]="suggestionsTags()"
-      (onSelect)="onSelect($event.value.name)"
-      (onUnselect)="onUnSelect($event.value.id)"
+      (onSelect)="onSelectTag($event.value)"
+      (onUnselect)="onUnselectTag($event.value.id)"
       [dropdown]="true"
       [dropdownMode]="'current'"
       [forceSelection]="false"
@@ -152,6 +153,7 @@
       placeholder="Rechercher ou créer un tag"
       [multiple]="true"
       optionLabel="name"
+      appendTo="body"
     >
       <ng-template pTemplate="selectedItem" style="width: 0%"> </ng-template>
     </p-autocomplete>
@@ -159,9 +161,8 @@
       @for (tag of tagsSearch(); track tag.id) {
       <p-chip
         [label]="tag.name"
-        [removable]="true"
         [removable]="!isReadOnly()"
-        (onRemove)="onUnSelect(tag.id)"
+        (onRemove)="onUnselectTag(tag.id)"
         class="m-1"
       ></p-chip>
       }
@@ -176,7 +177,7 @@
     severity="success"
   />
   <p-button
-    [disabled]="needToCreate() || !canPublish()"
+    [disabled]="needToCreate() || !canPublish() || isReadOnly()"
     (onClick)="published()"
     [loading]="loadingPublished()"
     [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
@@ -185,19 +186,9 @@
   />
   @if(!currentVersion().published){
   <div class="container-label">
-    <app-user-avatar-choose [disabled]="!canInvite()" />
+    <app-user-avatar-choose [disabled]="!canInvite() || isReadOnly()" />
   </div>
-  }
-  <!-- <p-button
-    label="Générer avec l'IA"
-    icon="pi pi-sparkles"
-    styleClass="p-button-help p-button-raised"
-    (onClick)="generateCompleteModule()"
-    [disabled]="true"
-    pTooltip="Bientot disponible !"
-    tooltipPosition="top"
-  ></p-button> -->
-  }
+  } }
 </div>
 @if(!isReadOnly() && currentUser()?.id === currentModule().creator.id){
 <p-button

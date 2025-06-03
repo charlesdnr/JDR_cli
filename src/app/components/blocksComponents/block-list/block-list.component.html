@@ -6,7 +6,7 @@
   <p-skeleton height="12rem" />
 </div>
 } @else {
-  <div
+<div
   #blocksContainer
   class="blocks-container"
   cdkDropList
@@ -15,7 +15,6 @@
   cdkDropListOrientation="vertical"
   [class.highlight-drop-zone]="isDraggingIcon()"
 >
-  <!-- Les blocs existants -->
   @for(block of blocks(); track block?.id; let i = $index) {
   @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {
   <div class="block-placeholder">
@@ -31,6 +30,7 @@
     [enum]="EBlockType"
     (removeBlock)="onRemoveBlock($event)"
     (generateAIContent)="onGenerateAI($event)"
+    [conflict]="getBlockConflict(block.id!)"
   >
     @if(isParagraphBlock(block)) {
     <app-paragraph-block

@@ -1,10 +1,60 @@
 @let $module = currentModule(); @let $currentBlocks = blocks(); @if($module){
 <div class="toolbar">
+  <div
+    class="lock-status-bar"
+    [class.locked]="!isLockedByCurrentUser() && currentModule()?.id !== 0"
+    [class.editable]="isLockedByCurrentUser() || currentModule()?.id === 0"
+  >
+    <i
+      [class]="
+        isLockedByCurrentUser() || currentModule()?.id === 0
+          ? 'pi pi-lock-open'
+          : 'pi pi-lock'
+      "
+    ></i>
+    <span>{{
+      lockStatusMessage() ||
+        (isEffectivelyReadOnly() && currentModule()?.id !== 0
+          ? "Mode lecture seule"
+          : "Édition activée")
+    }}</span>
+    @if (isLoadingLock()) {
+    <p-progressSpinner
+      styleClass="w-1rem h-1rem"
+      strokeWidth="8"
+      animationDuration=".5s"
+    ></p-progressSpinner>
+    } @if (!isLockedByCurrentUser() && currentLockToken() === null &&
+    !isLoadingLock() && currentModule()?.id !== 0) {
+    <p-button
+      label="Tenter de prendre la main"
+      (click)="attemptLockAcquisition()"
+      [loading]="isLoadingLock()"
+      size="small"
+      severity="help"
+      styleClass="p-button-sm"
+    ></p-button>
+    }
+  </div>
+
   <p-tabs value="0">
     <p-tablist>
-      <p-tab value="0"> {{ "Paramètres" | translate }} </p-tab>
-      @if(!isReadOnly()) {
-        <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
+      <p-tab value="0">
+        {{ "Paramètres" | translate }}
+        @if (hasParameterTabConflicts()) {
+        <p-badge
+          [value]="parameterTabConflictsCount()"
+          severity="danger"
+        ></p-badge>
+        }
+      </p-tab>
+      @if(!isEffectivelyReadOnly() || currentModule()?.id === 0) {
+      <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
+      } @if (activeConflicts().length > 0) {
+      <p-tab value="2">
+        Conflits
+        <p-badge [value]="activeConflicts().length" severity="danger"></p-badge>
+      </p-tab>
       }
     </p-tablist>
     <p-tabpanels>
@@ -20,9 +70,9 @@
           (deleteRequested)="deleteModule()"
           [currentVersion]="currentVersion()!"
           (currentVersionChange)="this.updateCurrentVersion($event)"
-          [isReadOnly]="isReadOnly()"
-          [canPublish]="canPublish()"
-          [canInvite]="canInvite()"
+          [isReadOnly]="isEffectivelyReadOnly()"
+          [canPublish]="canPublish() && !isEffectivelyReadOnly()"
+          [canInvite]="canInvite() && !isEffectivelyReadOnly()"
         ></app-project-parameters>
         }
       </p-tabpanel>
@@ -35,14 +85,74 @@
           (blockDragStarted)="startIconDrag($event)"
         ></app-block-types-toolbar>
       </p-tabpanel>
+      @if (activeConflicts().length > 0) {
+      <p-tabpanel value="2">
+        <div class="conflicts-panel">
+          <h3>Conflits Actifs ({{ activeConflicts().length }})</h3>
+          @if (isLoadingConflicts()) {
+          <p-progressSpinner
+            styleClass="w-2rem h-2rem"
+            strokeWidth="6"
+          ></p-progressSpinner>
+          } @else if (activeConflicts().length === 0) {
+          <p>Aucun conflit détecté pour ce module.</p>
+          } @else {
+          <ul>
+            @for(conflict of activeConflicts(); track conflict.conflictId) {
+            <li
+              class="conflict-item"
+              (click)="openConflictResolutionDialog(conflict)"
+              role="button"
+              tabindex="0"
+            >
+              <div class="conflict-header">
+                <div>
+                  <i class="pi pi-exclamation-triangle p-mr-2"></i>
+                  <strong
+                    >{{ conflict.resourceType }}: {{ conflict.resourceId }} -
+                    {{ conflict.type }}</strong
+                  >
+                </div>
+                <span class="conflict-date">{{
+                  conflict.conflictCreatedAt | date : "short"
+                }}</span>
+              </div>
+              <p class="conflict-description">{{ conflict.description }}</p>
+              <div class="conflict-users">
+                @if(conflict.conflictingUsername) {
+                <span
+                  >Conflit avec:
+                  <strong>{{ conflict.conflictingUsername }}</strong></span
+                >
+                }
+              </div>
+              <p-button
+                label="Résoudre"
+                icon="pi pi-wrench"
+                (click)="
+                  openConflictResolutionDialog(conflict);
+                  $event.stopPropagation()
+                "
+                class="p-button-sm p-button-warning"
+                [disabled]="isEffectivelyReadOnly()"
+              ></p-button>
+            </li>
+            }
+          </ul>
+          }
+        </div>
+      </p-tabpanel>
+      }
     </p-tabpanels>
   </p-tabs>
 </div>
 <div class="container-edit">
   <div class="editor">
-    @if(isReadOnly()) {
+    @if(isEffectivelyReadOnly() && currentModule()?.id !== 0 &&
+    !isLoadingLock()) {
     <div class="read-only-notice">
-      <i class="pi pi-lock"></i> Mode lecture seule
+      <i class="pi pi-lock"></i>
+      {{ lockStatusMessage() || "Mode lecture seule activé." }}
     </div>
     } @if($currentBlocks && $currentBlocks.length === 0 && !isDraggingIcon()){
     <div class="container-empty">
@@ -61,21 +171,28 @@
       [(insertPosition)]="insertPosition"
       [(activeIconElement)]="activeIconElement"
       [(dragPosition)]="dragPosition"
-      [isReadOnly]="isReadOnly()"
+      [isReadOnly]="isEffectivelyReadOnly()"
+      [activeConflicts]="activeConflicts()"
     ></app-block-list>
     }
   </div>
 </div>
 }
 <p-confirmDialog />
-@for(cursor of otherUserCursors(); track cursor.userId) {
-  <div
-    class="remote-cursor"
-    [style.left.px]="cursor.position.x"
-    [style.top.px]="cursor.position.y"
-    [style.--user-color]="cursor.userColor"
-  >
-    <div class="cursor-pointer"></div>
-    <div class="cursor-label">{{ cursor.username }}</div>
-  </div>
-}
+@for(cursor of otherUserCursors(); track cursor.userId){ @if(cursor.userId !==
+currentUser()?.id) {
+<div
+  class="remote-cursor"
+  [attr.data-user-id]="cursor.userId"
+  [style.left.px]="
+    cursorPositionsMap.get(cursor.userId)?.current?.x || cursor.position.x
+  "
+  [style.top.px]="
+    cursorPositionsMap.get(cursor.userId)?.current?.y || cursor.position.y
+  "
+  [style.--user-color]="cursor.userColor"
+>
+  <div class="cursor-pointer"></div>
+  <div class="cursor-label">{{ cursor.username }}</div>
+</div>
+} }
