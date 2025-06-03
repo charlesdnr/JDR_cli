@@ -4,8 +4,11 @@ import {
   inject,
   provideAppInitializer,
   provideZoneChangeDetection,
+  LOCALE_ID,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 
 import { routes } from './app.routes';
 import {
@@ -32,6 +35,9 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
 import { dateFormatInterceptor } from './interceptors/DateFormat.interceptor';
+
+// Enregistrer la locale française
+registerLocaleData(localeFr);
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (
   http: HttpClient
@@ -77,6 +83,8 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() =>
       initializeTranslateFactory(inject(TranslateService))()
     ),
+    // Fournir la locale française par défaut
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
     DialogService,
     MessageService,
     ConfirmationService,
