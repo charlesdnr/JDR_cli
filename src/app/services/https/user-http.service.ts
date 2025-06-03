@@ -94,7 +94,7 @@ export class UserHttpService extends BaseHttpService {
     return null;
   }
 
-  private saveUserToSession(user: User): void {
+  saveUserToSession(user: User): void {
     if (typeof sessionStorage === 'undefined') return;
     try {
       sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));

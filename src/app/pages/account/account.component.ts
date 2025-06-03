@@ -73,7 +73,7 @@ export class AccountComponent implements OnInit {
     if(!user?.id) return
     this.userService.put(this.currentUser(), user.id).then(() => {
       // Mettre à jour l'username original après sauvegarde
-      if (user?.username) {
+      if (user) {
         this.originalUsername.set(user.username);
       }
       this.messageService.add({
@@ -81,6 +81,9 @@ export class AccountComponent implements OnInit {
         summary: 'Success',
         detail: 'Sauvegarder avec succés',
       });
+      console.log(user)
+      this.userService.updateCurrentUserSignal(user);
+      this.userService.saveUserToSession(user);
     }).catch((err: HttpErrorResponse) =>
       this.messageService.add({
         severity: 'error',
