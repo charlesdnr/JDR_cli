@@ -53,4 +53,5 @@ export class ModuleHttpService extends BaseHttpService {
     const url = `${this.baseApiUrl}/most-recent?page=${page}&limit=${limit}`;
     return firstValueFrom(this.httpClient.get<Module[]>(url));
   }
+
 }

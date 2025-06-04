@@ -1,22 +1,40 @@
-import { Component, ElementRef, HostListener, inject, input, model, NgZone, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  model,
+  NgZone,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { StatBlockComponent } from '../stat-block/stat-block.component';
 import { BlockItemComponent } from '../block-item/block-item.component';
 import { MusicBlockComponent } from '../music-block/music-block.component';
 import { ParagraphBlockComponent } from '../paragraph-block/paragraph-block.component';
-import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { PictureBlockComponent } from '../picture-block/picture-block.component';
+import {
+  DragDropModule,
+  CdkDragDrop,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { Block } from '../../../classes/Block';
 import { ParagraphBlock } from '../../../classes/ParagraphBlock';
 import { MusicBlock } from '../../../classes/MusicBlock';
 import { StatBlock } from '../../../classes/StatBlock';
+import { PictureBlock } from '../../../classes/PictureBlock';
+import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ModuleService } from '../../../services/module.service';
 import { UserHttpService } from '../../../services/https/user-http.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AiConfigComponent } from '../../ai-config/ai-config.component';
 import { EBlockType } from '../../../enum/BlockType';
-import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { NotificationService } from '../../../services/Notification.service';
 import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
+import { ModuleBlockComponent } from '../moduleblock/moduleblock.component';
+import { Picture } from '../../../classes/Picture';
 
 @Component({
   selector: 'app-block-list',
@@ -26,7 +44,9 @@ import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
     ParagraphBlockComponent,
     MusicBlockComponent,
     StatBlockComponent,
-    SkeletonModule
+    PictureBlockComponent,
+    ModuleBlockComponent,
+    SkeletonModule,
   ],
   templateUrl: './block-list.component.html',
   styleUrl: './block-list.component.scss',
@@ -46,7 +66,7 @@ export class BlockListComponent {
   draggedIconType = model<EBlockType | null>(null);
   insertPosition = model<number | null>(null);
   activeIconElement = model<HTMLElement | null>(null);
-  dragPosition = model<{ x: number, y: number }>();
+  dragPosition = model<{ x: number; y: number }>();
 
   loadingBlock = this.moduleService.loadingModule.asReadonly();
 
@@ -56,15 +76,14 @@ export class BlockListComponent {
   activeUsers = signal<Set<number>>(new Set());
   updateThrottleTimeout = 0;
 
-
   // Nouvelle méthode - Gérer directement le drop
   onDrop(event: CdkDragDrop<Block[]>): void {
     if (this.isReadOnly()) return;
-    console.log("BlockListComponent.onDrop appelé", event);
+    console.log('BlockListComponent.onDrop appelé', event);
 
     const version = this.moduleService.currentModuleVersion();
     if (!version) {
-      console.error("Version actuelle non définie");
+      console.error('Version actuelle non définie');
       return;
     }
 
@@ -86,7 +105,10 @@ export class BlockListComponent {
         const versionIndex = versions.findIndex((v) => v.id === version.id);
 
         if (versionIndex !== -1) {
-          versions[versionIndex] = { ...versions[versionIndex], blocks: [...currentBlocks] };
+          versions[versionIndex] = {
+            ...versions[versionIndex],
+            blocks: [...currentBlocks],
+          };
         } else if (versions.length > 0) {
           versions[0] = { ...versions[0], blocks: [...currentBlocks] };
         }
@@ -94,7 +116,7 @@ export class BlockListComponent {
         return { ...mod, versions };
       });
     } catch (error) {
-      console.error("Erreur dans onDrop:", error);
+      console.error('Erreur dans onDrop:', error);
     }
   }
 
@@ -122,7 +144,7 @@ export class BlockListComponent {
 
     // Détecter le type d'opération (insert, delete, update)
     const content = element.textContent || '';
-    const block = this.blocks().find(b => b.id === blockId);
+    const block = this.blocks().find((b) => b.id === blockId);
 
     if (!block) return;
 
@@ -144,7 +166,7 @@ export class BlockListComponent {
       operation: operation,
       content: content,
       startPosition: 0, // Ces positions devront être calculées avec précision
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.notificationService.sendModuleUpdate(module.id, update);
@@ -204,7 +226,9 @@ export class BlockListComponent {
     const version = this.moduleService.currentModuleVersion();
     if (!version || !version.blocks) return;
 
-    const currentBlocks = version.blocks.filter(block => block.id !== blockId);
+    const currentBlocks = version.blocks.filter(
+      (block) => block.id !== blockId
+    );
     currentBlocks.forEach((block, idx) => (block.blockOrder = idx));
 
     this.moduleService.currentModuleVersion.update((ver) => {
@@ -219,7 +243,10 @@ export class BlockListComponent {
       const versionIndex = versions.findIndex((v) => v.id === version.id);
 
       if (versionIndex !== -1) {
-        versions[versionIndex] = { ...versions[versionIndex], blocks: [...currentBlocks] };
+        versions[versionIndex] = {
+          ...versions[versionIndex],
+          blocks: [...currentBlocks],
+        };
       } else if (versions.length > 0) {
         versions[0] = { ...versions[0], blocks: [...currentBlocks] };
       }
@@ -229,7 +256,7 @@ export class BlockListComponent {
   }
 
   // Nouvelle méthode - Gérer directement la génération IA
-  onGenerateAI(event: { blockId: number, blockType: string }): void {
+  onGenerateAI(event: { blockId: number; blockType: string }): void {
     this.dialogService
       .open(AiConfigComponent, {
         showHeader: false,
@@ -247,13 +274,17 @@ export class BlockListComponent {
   }
 
   // Nouvelle méthode - Traiter la réponse IA
-  private processAIResponse(blockId: number, blockType: string, response: string): void {
+  private processAIResponse(
+    blockId: number,
+    blockType: string,
+    response: string
+  ): void {
     const version = this.moduleService.currentModuleVersion();
     if (!version || !version.blocks) return;
 
     if (blockType === EBlockType.paragraph) {
       const blocks = [...version.blocks];
-      const index = blocks.findIndex(block => block.id === blockId);
+      const index = blocks.findIndex((block) => block.id === blockId);
 
       if (index !== -1) {
         const block = blocks[index] as ParagraphBlock;
@@ -262,7 +293,9 @@ export class BlockListComponent {
         this.moduleService.currentModule.update((mod) => {
           if (!mod) return null;
 
-          const versionIndex = mod.versions.findIndex((v) => v.id === version.id);
+          const versionIndex = mod.versions.findIndex(
+            (v) => v.id === version.id
+          );
           if (versionIndex !== -1) {
             mod.versions[versionIndex].blocks = blocks;
           } else if (mod.versions.length > 0) {
@@ -293,6 +326,10 @@ export class BlockListComponent {
     return block?.type === EBlockType.module;
   }
 
+  isPictureBlock(block: Block): boolean {
+    return block?.type === EBlockType.picture;
+  }
+
   asParagraphBlock(block: Block): ParagraphBlock {
     return block as ParagraphBlock;
   }
@@ -305,14 +342,24 @@ export class BlockListComponent {
     return block as StatBlock;
   }
 
+  asModuleBlock(block: Block): IntegratedModuleBlock {
+    return block as IntegratedModuleBlock;
+  }
+
+  asPictureBlock(block: Block): PictureBlock {
+    return block as PictureBlock;
+  }
+
   addBlock(type: EBlockType, position?: number): void {
     if (this.isReadOnly()) return;
     const user = this.userService.currentJdrUser();
     const version = this.moduleService.currentModuleVersion();
-    console.log(version)
+    console.log(version);
 
     if (!user || !version) {
-      console.error("Impossible d'ajouter un bloc: utilisateur ou version non disponible.");
+      console.error(
+        "Impossible d'ajouter un bloc: utilisateur ou version non disponible."
+      );
       return;
     }
 
@@ -324,16 +371,46 @@ export class BlockListComponent {
 
     switch (type) {
       case EBlockType.paragraph:
-        newBlock = new ParagraphBlock(currentVersionId, blockTitle, blockOrder, user);
+        newBlock = new ParagraphBlock(
+          currentVersionId,
+          blockTitle,
+          blockOrder,
+          user
+        );
         break;
       case EBlockType.module:
-        newBlock = new IntegratedModuleBlock(currentVersionId, blockTitle, blockOrder, user);
+        newBlock = new IntegratedModuleBlock(
+          currentVersionId,
+          blockTitle,
+          blockOrder,
+          user
+        );
         break;
       case EBlockType.music:
-        newBlock = new MusicBlock(currentVersionId, blockTitle, blockOrder, user);
+        newBlock = new MusicBlock(
+          currentVersionId,
+          blockTitle,
+          blockOrder,
+          user
+        );
         break;
       case EBlockType.stat:
-        newBlock = new StatBlock(currentVersionId, blockTitle, blockOrder, user);
+        newBlock = new StatBlock(
+          currentVersionId,
+          blockTitle,
+          blockOrder,
+          user
+        );
+        break;
+      case EBlockType.picture:
+        newBlock = new PictureBlock(
+          '',
+          new Picture(),
+          currentVersionId,
+          blockTitle,
+          blockOrder,
+          user
+        );
         break;
       default:
         console.warn(`Type de bloc ${type} non géré.`);
@@ -359,7 +436,10 @@ export class BlockListComponent {
 
       if (versionIndex !== -1) {
         // Créer une nouvelle référence pour la version modifiée
-        versions[versionIndex] = { ...versions[versionIndex], blocks: [...newBlocks] };
+        versions[versionIndex] = {
+          ...versions[versionIndex],
+          blocks: [...newBlocks],
+        };
       } else if (versions.length > 0) {
         versions[0] = { ...versions[0], blocks: [...newBlocks] };
       }
@@ -367,7 +447,6 @@ export class BlockListComponent {
       return { ...mod, versions };
     });
   }
-
 
   @HostListener('document:mousemove', ['$event'])
   onDocumentMouseMove(event: MouseEvent): void {
@@ -405,7 +484,8 @@ export class BlockListComponent {
       return;
     }
 
-    const rect = this.blocksContainerRef()!.nativeElement.getBoundingClientRect();
+    const rect =
+      this.blocksContainerRef()!.nativeElement.getBoundingClientRect();
     const isOver =
       event.clientX >= rect.left &&
       event.clientX <= rect.right &&

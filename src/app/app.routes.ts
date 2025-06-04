@@ -6,11 +6,13 @@ import { AccountComponent } from './pages/account/account.component';
 import { ProjectComponent } from './pages/project/project.component';
 import { NewProjectComponent } from './pages/new-project/new-project.component';
 import { PasswordResetComponent } from './components/password-reset/password-reset.component';
+import { ExploreComponent } from './components/explore/explore.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'auth/:config', component: AuthComponent },
   { path: 'home', component: HomeComponent },
+  { path: 'explore', component: ExploreComponent },
   { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
   { path: 'new-module', component: NewProjectComponent, canActivate: [authGuard] },
