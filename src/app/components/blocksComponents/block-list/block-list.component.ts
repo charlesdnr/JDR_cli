@@ -404,7 +404,7 @@ export class BlockListComponent {
         break;
       case EBlockType.picture:
         newBlock = new PictureBlock(
-          '',
+          'Nouvelle image',
           new Picture(),
           currentVersionId,
           blockTitle,

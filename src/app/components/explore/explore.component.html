@@ -7,8 +7,8 @@
         @if(!loading()) {
           <div class="stats">
             <span class="stat-item">
-              <strong>{{ displayedModules().length }}</strong> 
-              {{ displayedModules().length === 1 ? 'module trouvé' : 'modules trouvés' }}
+              <strong>{{ totalElements() }}</strong> 
+              {{ totalElements() === 1 ? 'module trouvé' : 'modules trouvés' }}
             </span>
           </div>
         }
@@ -92,19 +92,36 @@
             <p-chip
               [label]="tag.name"
               [removable]="false"
-              (onClick)="onTagToggle(tag)"
+              (click)="onTagToggle(tag)"
               [styleClass]="isTagSelected(tag) ? 'selected-tag' : 'clickable-tag'"
             />
           }
         </div>
       </div>
+
+      <!-- Tags sélectionnés -->
+      @if(selectedTags().length > 0) {
+        <div class="selected-tags">
+          <label>Tags sélectionnés:</label>
+          <div class="tags-container">
+            @for(tag of selectedTags(); track tag.id) {
+              <p-chip
+                [label]="tag.name"
+                [removable]="true"
+                (onRemove)="onTagToggle(tag)"
+                styleClass="selected-tag"
+              />
+            }
+          </div>
+        </div>
+      }
     </div>
   
     <!-- Liste des modules -->
     <div class="modules-section">
       @if(loading()) {
         <div class="loading-grid">
-          @for(i of [1,2,3,4,5,6]; track i) {
+          @for(i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
             <p-skeleton height="250px" width="100%" />
           }
         </div>
@@ -132,7 +149,13 @@
                 @if(module.tags.length > 0) {
                   <div class="module-tags">
                     @for(tag of module.tags.slice(0, 3); track tag.id) {
-                      <span class="tag-badge">{{ tag.name }}</span>
+                      <span 
+                        class="tag-badge"
+                        (click)="onTagToggle(tag)"
+                        [style.cursor]="'pointer'"
+                      >
+                        {{ tag.name }}
+                      </span>
                     }
                     @if(module.tags.length > 3) {
                       <span class="tag-badge more">+{{ module.tags.length - 3 }}</span>
@@ -155,6 +178,26 @@
               </div>
             </div>
           }
+        </div>
+      }
+
+      <!-- Pagination -->
+      @if(!loading() && totalElements() > pageSize()) {
+        <div class="pagination-section">
+          <p-paginator
+            [rows]="pageSize()"
+            [totalRecords]="totalElements()"
+            [first]="currentPage() * pageSize()"
+            (onPageChange)="onPageChange($event)"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Page {currentPage} sur {totalPages}"
+            [showFirstLastIcon]="true"
+            [showPageLinks]="true"
+            [pageLinkSize]="5"
+          />
+          <div class="pagination-info">
+            {{ getPaginationInfo() }}
+          </div>
         </div>
       }
     </div>
