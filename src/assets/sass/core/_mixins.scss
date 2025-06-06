@@ -314,10 +314,12 @@ Fichier contenant toutes les mixins SASS
 
 /// Mixin pour flexbox responsive
 @mixin flex-responsive($direction: row, $wrap: wrap, $gap: var.$gap) {
-   display: flex;
-   flex-direction: $direction;
-   flex-wrap: $wrap;
-   gap: $gap;
+   & {
+      display: flex;
+      flex-direction: $direction;
+      flex-wrap: $wrap;
+      gap: $gap;
+   }
    
    @include respond-to('mobile') {
       flex-direction: column;
@@ -340,7 +342,9 @@ Fichier contenant toutes les mixins SASS
 
 /// Mixin pour les espacements responsifs
 @mixin spacing-responsive($property: padding, $base-value: var.$padding) {
-   #{$property}: $base-value;
+   & {
+      #{$property}: $base-value;
+   }
    
    @include respond-to('mobile') {
       #{$property}: var.$padding-mobile;
@@ -386,76 +390,74 @@ Fichier contenant toutes les mixins SASS
 ///
 /// @access private
 @mixin export-vars() {
-   & {
-      --color-sheme: #{var.$color-sheme};
+   --color-sheme: #{$color-sheme};
 
-      --primary-color: #{var.$primary-color};
-      --primary-color-transparent-50: #{var.$primary-color-transparent-50};
-      --secondary-color: #{var.$secondary-color};
-      --third-color: #{var.$third-color};
+   --primary-color: #{$primary-color};
+   --primary-color-transparent-50: #{$primary-color-transparent-50};
+   --secondary-color: #{var.$secondary-color};
+   --third-color: #{var.$third-color};
 
-      --background-color: #{var.$background-color};
-      --background-color-lighter: #{var.$background-color-lighter};
-      --background-color-lighter-lighter: #{var.$background-color-lighter-lighter};
-      --background-color-transparent: #{var.$background-color-transparent};
-      --container-color: #{var.$container-color};
-      --input-color: #{var.$input-color};
+   --background-color: #{$background-color};
+   --background-color-lighter: #{$background-color-lighter};
+   --background-color-lighter-lighter: #{$background-color-lighter-lighter};
+   --background-color-transparent: #{$background-color-transparent};
+   --container-color: #{$container-color};
+   --input-color: #{$input-color};
 
-      --font-familly: #{var.$font-familly};
-      --font-color: #{var.$font-color};
-      --font-secondary-color: #{var.$font-secondary-color};
-      --font-disabled-color: #{var.$font-disabled-color};
-      --font-color-invert: #{var.$font-color-invert};
-      --placeholder-color: #{var.$placeholder-color};
+   --font-familly: #{var.$font-familly};
+   --font-color: #{$font-color};
+   --font-secondary-color: #{var.$font-secondary-color};
+   --font-disabled-color: #{$font-disabled-color};
+   --font-color-invert: #{$font-color-invert};
+   --placeholder-color: #{$placeholder-color};
 
-      --danger-color: #{var.$danger-color};
-      --success-color: #{var.$success-color};
-      --warn-color: #{var.$warn-color};
-      --info-color: #{var.$info-color};
-      --neutral-color: #{var.$neutral-color};
-      --disabled-color: #{var.$disabled-color};
+   --danger-color: #{$danger-color};
+   --success-color: #{$success-color};
+   --warn-color: #{$warn-color};
+   --info-color: #{$info-color};
+   --neutral-color: #{$neutral-color};
+   --disabled-color: #{$disabled-color};
 
-      --padding: #{var.$padding};
-      --padding-mobile: #{var.$padding-mobile};
-      --padding-small: #{var.$padding-small};
-      --margin: #{var.$margin};
-      --margin-mobile: #{var.$margin-mobile};
-      --gap: #{var.$gap};
-      --gap-mobile: #{var.$gap-mobile};
+   --padding: #{var.$padding};
+   --padding-mobile: #{var.$padding-mobile};
+   --padding-small: #{var.$padding-small};
+   --margin: #{var.$margin};
+   --margin-mobile: #{var.$margin-mobile};
+   --gap: #{var.$gap};
+   --gap-mobile: #{var.$gap-mobile};
 
-      --radius: #{var.$radius};
-      --radius-mobile: #{var.$radius-mobile};
-      --radius-small: #{var.$radius-small};
-      --inner-radius: #{var.$inner-radius};
+   --radius: #{var.$radius};
+   --radius-mobile: #{var.$radius-mobile};
+   --radius-small: #{var.$radius-small};
+   --inner-radius: #{var.$inner-radius};
 
-      --inputs-size: #{var.$inputs-size};
-      --inputs-size-mobile: #{var.$inputs-size-mobile};
-      --inputs-size-small: #{var.$inputs-size-small};
-      --icons-size: #{var.$icons-size};
-      --icons-size-mobile: #{var.$icons-size-mobile};
-      --icons-size-small: #{var.$icons-size-small};
+   --inputs-size: #{var.$inputs-size};
+   --inputs-size-mobile: #{var.$inputs-size-mobile};
+   --inputs-size-small: #{var.$inputs-size-small};
+   --icons-size: #{var.$icons-size};
+   --icons-size-mobile: #{var.$icons-size-mobile};
+   --icons-size-small: #{var.$icons-size-small};
 
-      --font-size-xs: #{var.$font-size-xs};
-      --font-size-sm: #{var.$font-size-sm};
-      --font-size-base: #{var.$font-size-base};
-      --font-size-lg: #{var.$font-size-lg};
-      --font-size-xl: #{var.$font-size-xl};
-      --font-size-2xl: #{var.$font-size-2xl};
-      --font-size-3xl: #{var.$font-size-3xl};
+   --font-size-xs: #{var.$font-size-xs};
+   --font-size-sm: #{var.$font-size-sm};
+   --font-size-base: #{var.$font-size-base};
+   --font-size-lg: #{var.$font-size-lg};
+   --font-size-xl: #{var.$font-size-xl};
+   --font-size-2xl: #{var.$font-size-2xl};
+   --font-size-3xl: #{var.$font-size-3xl};
 
-      --header-height: #{var.$header-height};
-      --header-height-mobile: #{var.$header-height-mobile};
-      --sidebar-width: #{var.$sidebar-width};
-      --sidebar-width-collapsed: #{var.$sidebar-width-collapsed};
+   --header-height: #{var.$header-height};
+   --header-height-mobile: #{var.$header-height-mobile};
+   --sidebar-width: #{var.$sidebar-width};
+   --sidebar-width-collapsed: #{var.$sidebar-width-collapsed};
 
-      --container-padding: #{var.$container-padding};
-      --container-padding-mobile: #{var.$container-padding-mobile};
-      --container-padding-small: #{var.$container-padding-small};
-      --container-max-width: #{var.$container-max-width};
+   --container-padding: #{var.$container-padding};
+   --container-padding-mobile: #{var.$container-padding-mobile};
+   --container-padding-small: #{var.$container-padding-small};
+   --container-max-width: #{var.$container-max-width};
 
-      --transition-duration: #{var.$transition-duration};
-      --animation-duration: #{var.$animation-duration};
+   --transition-duration: #{var.$transition-duration};
+   --animation-duration: #{var.$animation-duration};
 
-      --box-shadow: #{var.$box-shadow};
-   }
+   --box-shadow: #{var.$box-shadow};
 }

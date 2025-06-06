@@ -1,101 +1,227 @@
 @let $currentUser = currentUser(); @if($currentUser){
-<div class="container-account">
-  <div class="container-square">
-    <div class="left rounded">
-      <div class="upsquare"></div>
-      <div class="picture-container">
-        <img
-          class="profile-picture"
-          [src]="'assets/images/default-avatar.png'"
-          alt="Photo de profil"
-        />
-      </div>
-      <div class="downsquare">
-        <h2>{{ "Photo" | translate }}</h2>
-        <p class="subtitle">
-          {{ "Télécharger un Photo jusqu'à 2mb" | translate }}
-        </p>
-        <div class="button-group">
-          <p-button
-            (onClick)="uploadPhoto()"
-            label="{{ 'Télécharger une Photo' | translate }}"
-            icon="pi pi-upload"
-            severity="secondary"
-          />
-          <p-button
-            (onClick)="deletePhoto()"
-            label="{{ 'Supprimer ma photo' | translate }}"
-            icon="pi pi-trash"
-            severity="danger"
-            styleClass="p-button-danger"
-          />
+<div class="profile-container">
+  <!-- Profile Hero Section -->
+  <div class="profile-hero">
+    <div class="hero-background">
+      <div class="gradient-overlay"></div>
+      <div class="animated-particles"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="profile-header">
+        <div class="profile-avatar-section">
+          <div class="avatar-container">
+            <img
+              class="profile-avatar"
+              [src]="getCurrentProfileImage()"
+              [alt]="$currentUser.username"
+            />
+            <div class="avatar-overlay"></div>
+            <div class="avatar-actions">
+              <div class="upload-wrapper">
+                <p-fileUpload
+                  mode="basic"
+                  chooseLabel=""
+                  accept="image/*"
+                  maxFileSize="5000000"
+                  (onSelect)="onProfileImageSelect($event)"
+                  [showUploadButton]="false"
+                  [auto]="true"
+                  styleClass="avatar-upload-btn"
+                  [disabled]="uploadingProfileImage()"
+                >
+                  <ng-template pTemplate="basicbutton">
+                    <button 
+                      class="avatar-edit-btn" 
+                      pTooltip="Changer la photo de profil"
+                      [disabled]="uploadingProfileImage()"
+                    >
+                      @if (uploadingProfileImage()) {
+                        <i class="pi pi-spin pi-spinner"></i>
+                      } @else {
+                        <i class="pi pi-camera"></i>
+                      }
+                    </button>
+                  </ng-template>
+                </p-fileUpload>
+              </div>
+              @if (profileImageUrl() || profileImagePreview()) {
+                <button 
+                  class="avatar-delete-btn" 
+                  (click)="deletePhoto()" 
+                  pTooltip="Supprimer la photo"
+                  [disabled]="uploadingProfileImage()"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              }
+            </div>
+            <div class="status-indicator online"></div>
+          </div>
+        </div>
+        
+        <div class="profile-info">
+          <div class="name-section">
+            <h1 class="profile-name">{{editableUsername() || $currentUser.username}}</h1>
+            <div class="profile-badges">
+              <span class="badge member">{{ 'Membre depuis' | translate }} {{memberSince()}}</span>
+            </div>
+          </div>
+          
+          <p class="profile-bio">{{ 'Passionné de jeux de rôle et créateur de modules immersifs' | translate }}</p>
+          
+          <div class="profile-stats-summary">
+            <div class="stat-item">
+              <span class="stat-value">{{userStats().modulesCreated}}</span>
+              <span class="stat-label">{{ 'Modules créés' | translate }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{userStats().followers}}</span>
+              <span class="stat-label">{{ 'Abonnés' | translate }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="right card rounded">
-      <div class="info-form">
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="username">{{ "Nom d'utilisateur" | translate }}</label>
-            <input
-              id="username"
-              type="text"
-              pInputText
-              [(ngModel)]="$currentUser.username"
-            />
+  </div>
+
+  <!-- Profile Content -->
+  <div class="profile-content">
+    <div class="content-grid">
+      <!-- Left Column: Info & Settings -->
+      <div class="left-column">
+        <!-- Account Information -->
+        <div class="info-card">
+          <div class="card-header">
+            <h3><i class="pi pi-user"></i> {{ 'Informations du compte' | translate }}</h3>
           </div>
-          <div class="form-field"></div>
-          <div class="form-field email-field">
-            <label for="email">{{ "Email" | translate }}</label>
-            <input
-              [disabled]="true"
-              id="email"
-              type="email"
-              pInputText
-              [ngModel]="$currentUser.email"
-            />
-          </div>
-          <div class="form-field"></div>
-          <div class="form-field password-field">
-            <label for="password">{{ "Mot de passe" | translate }}</label>
-            <p-inputgroup>
-              <input
-                pInputText
-                [disabled]="true"
-                id="password"
-                [ngModel]="'••••••••••••'"
-              />
-              <p-inputgroup-addon>
+          <div class="card-content">
+            <!-- Suppression de la section photo de profil redondante -->
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="username">{{ "Nom d'utilisateur" | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="pi pi-user"></i>
+                  <input
+                    id="username"
+                    type="text"
+                    pInputText
+                    [ngModel]="editableUsername()"
+                    (ngModelChange)="editableUsername.set($event)"
+                    class="modern-input"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-field">
+                <label for="email">{{ "Email" | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="pi pi-envelope"></i>
+                  <input
+                    [disabled]="true"
+                    id="email"
+                    type="email"
+                    pInputText
+                    [ngModel]="$currentUser.email"
+                    class="modern-input disabled"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-field">
+                <label for="password">{{ "Mot de passe" | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="pi pi-lock"></i>
+                  <input
+                    pInputText
+                    [disabled]="true"
+                    id="password"
+                    [ngModel]="'••••••••••••'"
+                    class="modern-input disabled"
+                  />
+                  <button class="input-action-btn" (click)="changePassword()" pTooltip="Changer le mot de passe">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <div class="form-buttons">
                 <p-button
-                pTooltip="Changer le mot de passe"
-                (onClick)="changePassword()"
-                icon="pi pi-pencil"
-                severity="secondary"
-                variant="text"
-              />
-              </p-inputgroup-addon>
-            </p-inputgroup>
+                  icon="pi pi-times"
+                  (onClick)="cancelChanges()"
+                  label="Annuler"
+                  severity="secondary"
+                  [disabled]="!hasChanges()"
+                  styleClass="cancel-btn"
+                />
+                <p-button
+                  icon="pi pi-save"
+                  (onClick)="saveUser()"
+                  [label]="'Sauvegarder les modifications' | translate"
+                  severity="success"
+                  [disabled]="!hasChanges()"
+                  styleClass="save-btn"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="action-buttons">
-          <div class="first">
-            <p-button
-              icon="pi pi-save"
-              (onClick)="saveUser()"
-              [label]="'Sauvegarder' | translate"
-              severity="success"
-            />
+        <!-- Preferences Card -->
+        <div class="preferences-card">
+          <div class="card-header">
+            <h3><i class="pi pi-cog"></i> {{ 'Préférences' | translate }}</h3>
           </div>
-          <p-button
-            (onClick)="deleteAccount()"
-            icon="pi pi-trash"
-            [label]="'Supprimer mon compte' | translate"
-            severity="danger"
-            styleClass="p-button-danger"
-          />
+          <div class="card-content">
+            <div class="preference-item">
+              <div class="preference-info">
+                <span class="preference-label">{{ 'Notifications par email' | translate }}</span>
+                <span class="preference-desc">{{ 'Recevoir des notifications pour les nouvelles activités' | translate }}</span>
+              </div>
+              <p-toggleButton 
+                [ngModel]="userPreferences().emailNotifications" 
+                (ngModelChange)="updatePreference('emailNotifications', $event)"
+                onIcon="pi pi-check" 
+                offIcon="pi pi-times"
+                styleClass="preference-toggle"
+              />
+            </div>
+            
+            <div class="preference-item">
+              <div class="preference-info">
+                <span class="preference-label">{{ 'Profil public' | translate }}</span>
+                <span class="preference-desc">{{ 'Permettre aux autres utilisateurs de voir votre profil' | translate }}</span>
+              </div>
+              <p-toggleButton 
+                [ngModel]="userPreferences().publicProfile" 
+                (ngModelChange)="updatePreference('publicProfile', $event)"
+                onIcon="pi pi-check" 
+                offIcon="pi pi-times"
+                styleClass="preference-toggle"
+              />
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="danger-zone">
+    <div class="danger-header">
+      <h3><i class="pi pi-exclamation-triangle"></i> {{ 'Zone de danger' | translate }}</h3>
+      <p>{{ 'Ces actions sont irréversibles. Procédez avec prudence.' | translate }}</p>
+    </div>
+    <div class="danger-actions">
+      <p-button
+        (onClick)="deleteAccount()"
+        icon="pi pi-trash"
+        [label]="'Supprimer définitivement mon compte' | translate"
+        severity="danger"
+        styleClass="danger-btn"
+      />
     </div>
   </div>
 </div>

@@ -2,8 +2,11 @@
 
 .picture-block {
   @include spacing-responsive(padding, var(--padding));
-  min-height: 200px;
   @include flex-responsive(column, nowrap, var(--gap));
+  
+  & {
+    min-height: 200px;
+  }
   
   @include respond-to('mobile') {
     min-height: 150px;

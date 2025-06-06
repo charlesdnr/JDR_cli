@@ -1,7 +1,7 @@
 <header class="modern-header">
   <!-- Arrière-plan avec effet de flou -->
   <div class="header-backdrop"></div>
-  
+
   <div class="header-container">
     <!-- Logo et nom -->
     <div class="brand" routerLink="/home">
@@ -13,8 +13,8 @@
     <div class="search-container">
       <div class="search-input-wrapper">
         <i class="pi pi-search search-icon"></i>
-        <input 
-          type="text" 
+        <input
+          type="text"
           [placeholder]="'Rechercher des modules, créateurs...' | translate"
           class="search-input"
         />
@@ -27,56 +27,64 @@
     <!-- Navigation desktop -->
     <nav class="desktop-nav">
       @if(currentUser()) {
-        <div class="nav-items">
-          <app-notification-bell class="notification-bell"></app-notification-bell>
-          
-          @for(button of mapButton(); track button) {
-            <a 
-              [routerLink]="[button.link]"
-              [queryParams]="button.name === 'Projets' && folders()[0].folderId ? {folderId: folders()[0].folderId} : null"
-              class="nav-item"
-              [pTooltip]="button.name"
-              tooltipPosition="bottom"
-              appendTo="body"
-            >
-              <span class="material-symbols-outlined">{{ button.icon }}</span>
-              <span class="nav-label">{{ button.name }}</span>
-            </a>
-          }
-          
-          <div class="user-menu">
-            <div 
-              class="user-avatar clickable"
-              routerLink="/account"
-              [pTooltip]="'Mon profil'"
-              tooltipPosition="bottom"
-            >
-              <span>{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
-            </div>
-            <button 
-              class="logout-btn"
-              (click)="logout($event)"
-              [pTooltip]="'Se déconnecter'"
-              tooltipPosition="bottom"
-            >
-              <i class="pi pi-sign-out"></i>
-            </button>
+      <div class="nav-items">
+        <app-notification-bell
+          class="notification-bell"
+        ></app-notification-bell>
+
+        @for(button of mapButton(); track button) {
+        <a
+          [routerLink]="[button.link]"
+          [queryParams]="
+            button.name === 'Projets' && folders()[0]?.folderId
+              ? { folderId: folders()[0]?.folderId }
+              : null
+          "
+          class="nav-item"
+          [pTooltip]="button.name"
+          tooltipPosition="bottom"
+          appendTo="body"
+        >
+          <span class="material-symbols-outlined">{{ button.icon }}</span>
+          <span class="nav-label">{{ button.name }}</span>
+        </a>
+        }
+
+        <div class="user-menu">
+          <div
+            class="user-avatar clickable"
+            routerLink="/account"
+            [pTooltip]="'Mon profil'"
+            tooltipPosition="bottom"
+          >
+            <span>{{
+              currentUser()?.username?.charAt(0)?.toUpperCase() || "U"
+            }}</span>
           </div>
+          <button
+            class="logout-btn"
+            (click)="logout($event)"
+            [pTooltip]="'Se déconnecter'"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-sign-out"></i>
+          </button>
         </div>
+      </div>
       } @else {
-        <div class="auth-buttons">
-          <button class="btn-secondary" routerLink="/auth/login">
-            {{ "Se connecter" | translate }}
-          </button>
-          <button class="btn-primary" routerLink="/auth/register">
-            {{ "S'enregistrer" | translate }}
-          </button>
-        </div>
+      <div class="auth-buttons">
+        <button class="btn-secondary" routerLink="/auth/login">
+          {{ "Se connecter" | translate }}
+        </button>
+        <button class="btn-primary" routerLink="/auth/register">
+          {{ "S'enregistrer" | translate }}
+        </button>
+      </div>
       }
     </nav>
 
     <!-- Bouton menu mobile -->
-    <button 
+    <button
       class="mobile-menu-btn"
       (click)="toggleMobileMenu()"
       [attr.aria-expanded]="isMobileMenuOpen()"
@@ -92,40 +100,58 @@
   <div class="mobile-menu" [class.active]="isMobileMenuOpen()">
     <div class="mobile-menu-content">
       @if(currentUser()) {
-        <div class="mobile-user-info" routerLink="/account" (click)="toggleMobileMenu()">
-          <div class="user-avatar-large">
-            <span>{{ currentUser()?.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
-          </div>
-          <span class="username">{{ currentUser()?.username }}</span>
+      <div
+        class="mobile-user-info"
+        routerLink="/account"
+        (click)="toggleMobileMenu()"
+      >
+        <div class="user-avatar-large">
+          <span>{{
+            currentUser()?.username?.charAt(0)?.toUpperCase() || "U"
+          }}</span>
         </div>
-        
-        <nav class="mobile-nav-items">
-          @for(button of mapButton(); track button) {
-            <a 
-              [routerLink]="[button.link]"
-              [queryParams]="button.name === 'Projets' && folders()[0].folderId ? {folderId: folders()[0].folderId} : null"
-              class="mobile-nav-item"
-              (click)="toggleMobileMenu()"
-            >
-              <span class="material-symbols-outlined">{{ button.icon }}</span>
-              <span>{{ button.name }}</span>
-            </a>
-          }
-          
-          <button class="mobile-logout-btn" (click)="logout($event)">
-            <i class="pi pi-sign-out"></i>
-            <span>Se déconnecter</span>
-          </button>
-        </nav>
+        <span class="username">{{ currentUser()?.username }}</span>
+      </div>
+
+      <nav class="mobile-nav-items">
+        @for(button of mapButton(); track button) {
+        <a
+          [routerLink]="[button.link]"
+          [queryParams]="
+            button.name === 'Projets' && folders()[0]?.folderId
+              ? { folderId: folders()[0]?.folderId }
+              : null
+          "
+          class="mobile-nav-item"
+          (click)="toggleMobileMenu()"
+        >
+          <span class="material-symbols-outlined">{{ button.icon }}</span>
+          <span>{{ button.name }}</span>
+        </a>
+        }
+
+        <button class="mobile-logout-btn" (click)="logout($event)">
+          <i class="pi pi-sign-out"></i>
+          <span>Se déconnecter</span>
+        </button>
+      </nav>
       } @else {
-        <div class="mobile-auth-buttons">
-          <button class="btn-outline" routerLink="/auth/login" (click)="toggleMobileMenu()">
-            {{ "Se connecter" | translate }}
-          </button>
-          <button class="btn-primary" routerLink="/auth/register" (click)="toggleMobileMenu()">
-            {{ "S'enregistrer" | translate }}
-          </button>
-        </div>
+      <div class="mobile-auth-buttons">
+        <button
+          class="btn-outline"
+          routerLink="/auth/login"
+          (click)="toggleMobileMenu()"
+        >
+          {{ "Se connecter" | translate }}
+        </button>
+        <button
+          class="btn-primary"
+          routerLink="/auth/register"
+          (click)="toggleMobileMenu()"
+        >
+          {{ "S'enregistrer" | translate }}
+        </button>
+      </div>
       }
     </div>
   </div>

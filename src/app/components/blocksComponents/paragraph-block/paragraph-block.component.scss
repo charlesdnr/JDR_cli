@@ -2,9 +2,12 @@
 
 .text-block {
   @include spacing-responsive(padding, var(--padding));
-  min-height: 120px !important;
-  height: calc(100% - 50px);
   @include flex-responsive(column, nowrap, var(--gap));
+  
+  & {
+    min-height: 120px !important;
+    height: calc(100% - 50px);
+  }
   
   @include respond-to('mobile') {
     min-height: 100px !important;
@@ -45,9 +48,12 @@
 }
 .text-block-readonly {
   @include spacing-responsive(padding, 1.5rem);
-  background-color: var(--background-color-lighter);
-  border-radius: 0 0 var(--radius-mobile) var(--radius-mobile);
-  border: 1px solid var(--neutral-color-transparent);
+  
+  & {
+    background-color: var(--background-color-lighter);
+    border-radius: 0 0 var(--radius-mobile) var(--radius-mobile);
+    border: 1px solid var(--neutral-color-transparent);
+  }
   
   @include respond-to('xs') {
     border-radius: 0 0 var(--radius-small) var(--radius-small);

@@ -18,12 +18,15 @@
 
 // === HERO SECTION ===
 .hero-section {
-  position: relative;
-  min-height: 100vh;
   @include flex-responsive(column, nowrap);
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  
+  & {
+    position: relative;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
   
   @include respond-to('mobile') {
     min-height: 90vh;
@@ -70,13 +73,16 @@
 }
 
 .hero-content {
-  position: relative;
-  z-index: 1;
   @include container-responsive;
   @include flex-responsive(row, nowrap, 4rem);
-  align-items: center;
-  width: 100%;
-  max-width: 1400px;
+  
+  & {
+    position: relative;
+    z-index: 1;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+  }
   
   @include respond-to('tablet') {
     flex-direction: column;

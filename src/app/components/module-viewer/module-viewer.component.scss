@@ -55,8 +55,11 @@ img {
 .module-info {
   @include spacing-responsive(padding, 0.8rem 1rem 1rem 1rem);
   @include flex-responsive(column, nowrap, 0.4rem);
-  flex-grow: 1;
-  overflow: hidden;
+  
+  & {
+    flex-grow: 1;
+    overflow: hidden;
+  }
   justify-content: space-between;
 
   @include respond-to("mobile") {

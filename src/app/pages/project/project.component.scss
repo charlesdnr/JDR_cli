@@ -2,19 +2,25 @@
 
 :host{
   @include flex-responsive(column, nowrap);
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
+  
+  & {
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+  }
 }
 
 .header-project{
-  height: 100%;
-  width: 100%;
   @include flex-responsive(row, wrap, var(--gap));
-  max-height: 50px;
   @include spacing-responsive(margin, var(--margin));
-  margin-top: 20px;
+  
+  & {
+    height: 100%;
+    width: 100%;
+    max-height: 50px;
+    margin-top: 20px;
+  }
   
   @include respond-to('mobile') {
     max-height: auto;
@@ -27,9 +33,12 @@
 
   .searchbar{
     @include flex-responsive(row, nowrap, calc(var(--gap) / 2));
-    align-items: center;
-    width: auto;
-    flex-shrink: 0;
+    
+    & {
+      align-items: center;
+      width: auto;
+      flex-shrink: 0;
+    }
     
     @include respond-to('mobile') {
       width: 100%;
@@ -42,17 +51,23 @@
 }
 .modules-container{
   @include flex-responsive(column, nowrap, 1rem);
-  flex: 1;
+  
+  & {
+    flex: 1;
+  }
   
   @include respond-to('mobile') {
     gap: 0.8rem;
   }
 }
 .container-folder{
-  height: 100%;
-  width: 100%;
   @include flex-responsive(row, nowrap, 1rem);
-  flex: 1;
+  
+  & {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+  }
   overflow: auto;
   position: relative;
   

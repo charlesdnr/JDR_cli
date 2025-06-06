@@ -6,11 +6,14 @@
 
 .icone-grab {
   @include flex-responsive(column, nowrap, 25px);
-  border-radius: var(--radius-small);
-  justify-content: flex-start;
   @include spacing-responsive(padding, 25px 10px);
-  height: 20rem;
-  flex-shrink: 0;
+  
+  & {
+    border-radius: var(--radius-small);
+    justify-content: flex-start;
+    height: 20rem;
+    flex-shrink: 0;
+  }
   
   @include respond-to('mobile') {
     height: auto;

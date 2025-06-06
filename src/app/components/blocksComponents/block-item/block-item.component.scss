@@ -42,12 +42,15 @@
 
 .block-header {
   @include flex-responsive(row, nowrap);
-  justify-content: space-between;
-  align-items: center;
   @include spacing-responsive(padding, 8px 12px);
-  border-bottom: 1px solid var(--neutral-color);
-  height: 50px;
-  flex-shrink: 0;
+  
+  & {
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--neutral-color);
+    height: 50px;
+    flex-shrink: 0;
+  }
   
   @include respond-to('mobile') {
     height: 45px;

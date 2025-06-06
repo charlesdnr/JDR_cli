@@ -7,14 +7,18 @@
 .blocks-container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  gap: 15px;
   @include spacing-responsive(padding, var(--padding));
-  padding-bottom: 8rem;
-  border: 1px dashed transparent;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  
+  & {
+    width: 100%;
+    gap: 15px;
+    padding-bottom: 8rem;
+    border: 1px dashed transparent;
+    background-color: var(--background-color);
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 
   @include respond-to("mobile") {
     gap: var(--gap-mobile);
