@@ -1,12 +1,14 @@
-// src/app/pages/account/account.component.scss
+@use "../../assets/sass/core/mixins" as *;
+
 :host {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  @include flex-responsive(column, nowrap);
+  justify-content: flex-start;
+  align-items: center;
   width: 100%;
-  height: 100%;
-  padding: 2rem;
-  overflow: auto;
+  min-height: 100vh;
+  @include spacing-responsive(padding, 2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
 
   ::ng-deep {
     .p-inputtext {
@@ -22,39 +24,63 @@
 }
 
 .container-account {
+  @include container-responsive;
   width: 100%;
+  max-width: 1200px;
 }
 
 .container-square {
-  display: flex;
-  gap: 2rem;
+  @include flex-responsive(row, nowrap, 2rem);
   width: 100%;
+  
+  @include respond-to('tablet') {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 }
 
 .card {
   background-color: var(--background-color-lighter);
-  // border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-1);
+  border-radius: var(--radius);
+  @include spacing-responsive(padding, 1.5rem);
+  box-shadow: var(--box-shadow);
   overflow: hidden;
   position: relative;
+  
+  @include respond-to('mobile') {
+    padding: var(--padding-mobile);
+    border-radius: var(--radius-mobile);
+  }
 }
 
 .left {
-  display: flex;
-  flex-direction: column;
+  @include flex-responsive(column, nowrap);
   flex: 3;
   padding: 0;
   align-items: center;
   background-color: var(--background-color-lighter);
-  // border-radius: 15px;
+  border-radius: var(--radius);
+  
+  @include respond-to('tablet') {
+    flex: 1;
+  }
+  
+  @include respond-to('mobile') {
+    border-radius: var(--radius-mobile);
+  }
 
   .upsquare {
     height: 100px;
     width: 100%;
-    background-color: var(--font-color);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    background-color: var(--primary-color);
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+    
+    @include respond-to('mobile') {
+      height: 80px;
+      border-top-left-radius: var(--radius-mobile);
+      border-top-right-radius: var(--radius-mobile);
+    }
   }
 
   .picture-container {
@@ -63,10 +89,16 @@
       z-index: 2;
       width: 150px;
       height: 150px;
-      border-radius: 50%; // Rond
+      border-radius: 50%;
       border: 4px solid var(--background-color-lighter);
       background-color: var(--surface-200);
       overflow: hidden;
+      
+      @include respond-to('mobile') {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+      }
 
       .profile-picture {
           width: 100%;
@@ -79,13 +111,18 @@
     flex-grow: 1;
     width: 100%;
     background-color: var(--background-color-lighter);
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    display: flex;
-    flex-direction: column;
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    @include flex-responsive(column, nowrap);
     align-items: center;
-    padding: 1.5rem;
+    @include spacing-responsive(padding, 1.5rem);
     padding-top: 85px;
+    
+    @include respond-to('mobile') {
+      padding-top: 70px;
+      border-bottom-left-radius: var(--radius-mobile);
+      border-bottom-right-radius: var(--radius-mobile);
+    }
 
     h2 {
         margin-top: 0;
@@ -93,73 +130,90 @@
     }
 
     .subtitle {
-        font-size: 0.9rem;
-        color: var(--font-color-secondary);
-        margin-bottom: 1.5rem;
+        @include font-responsive(var(--font-size-sm));
+        color: var(--font-secondary-color);
+        @include spacing-responsive(margin-bottom, 1.5rem);
+        text-align: center;
     }
 
     .button-group {
-        display: flex;
-        flex-direction: column; // Boutons l'un sous l'autre
-        gap: 0.75rem; // Espace entre les boutons
+        @include flex-responsive(column, nowrap, 0.75rem);
         width: 100%;
-        max-width: 250px; // Limite la largeur des boutons
+        max-width: 250px;
 
         ::ng-deep .p-button {
-           width: 100%; // Boutons pleine largeur
+           @include button-responsive;
+           width: 100%;
         }
     }
   }
 }
 
 .right {
-  flex: 7; // Prend 7 parts de l'espace
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; // Espace entre titre et formulaire
+  flex: 7;
+  @include flex-responsive(column, nowrap, 1.5rem);
+  
+  @include respond-to('tablet') {
+    flex: 1;
+  }
 
   .info-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    @include flex-responsive(column, nowrap, 1.5rem);
     justify-content: space-between;
-    height: 100%;
+    min-height: 100%;
   }
 
   .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem 1.5rem;
+    @include grid-responsive(2, 1rem 1.5rem);
+    
+    @include respond-to('mobile') {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
 
     .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      @include flex-responsive(column, nowrap, 0.5rem);
     }
   }
 
   .action-buttons {
-    display: flex;
+    @include flex-responsive(row, wrap, 1rem);
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
+    @include spacing-responsive(margin-top, 1rem);
+    
+    @include respond-to('mobile') {
+      flex-direction: column;
+      align-items: stretch;
+      
+      ::ng-deep .p-button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    .first {
+      @include flex-responsive(row, wrap, var(--gap));
+      
+      ::ng-deep .p-button {
+        min-width: 140px;
+      }
+    }
+    
+    // Fix pour le bouton supprimer - pas trop grand et correct spacing
+    ::ng-deep .p-button.p-button-danger {
+      max-width: 200px;
+      min-width: 160px;
+      
+      @include respond-to('mobile') {
+        max-width: 100%;
+      }
+    }
   }
 }
 
 
-@media (max-width: 992px) {
-    .container-square {
-        flex-direction: column;
-    }
-    .left, .right {
-        flex: 1;
-    }
-}
 
-.first {
-  display: flex;
-  gap: 10px;
-}
 
 .password-field {
   ::ng-deep .p-button-text.p-button-secondary {
@@ -170,8 +224,30 @@
   }
 }
 .dialog-footer {
-  display: flex;
+  @include flex-responsive(row, nowrap, 0.5rem);
   justify-content: flex-end;
-  gap: 0.5rem;
   width: 100%;
+  
+  @include respond-to('mobile') {
+    flex-direction: column;
+    
+    ::ng-deep .p-button {
+      width: 100%;
+    }
+  }
+}
+
+// Fix pour le scroll complet de la page
+.reset-password-content {
+  @include flex-responsive(column, nowrap, 1rem);
+  
+  .reset-description {
+    @include font-responsive(var(--font-size-sm));
+    color: var(--font-secondary-color);
+    margin-bottom: 1rem;
+  }
+  
+  .container-label {
+    @include flex-responsive(column, nowrap, 0.5rem);
+  }
 }

@@ -1,5 +1,15 @@
 <div class="container-folder">
-  <div class="folders">
+  <!-- Toggle Button -->
+  <button 
+    class="sidebar-toggle" 
+    (click)="toggleSidebar()"
+    [attr.aria-label]="sidebarCollapsed() ? 'Ouvrir le menu' : 'Fermer le menu'"
+  >
+    <i [class]="sidebarCollapsed() ? 'pi pi-angle-right' : 'pi pi-angle-left'"></i>
+  </button>
+  
+  <!-- Sidebar -->
+  <div class="folders" [class.collapsed]="sidebarCollapsed()">
     <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
     <p-tree
   #treeElement
@@ -47,7 +57,10 @@
             (dragstart)="onModuleDragStart(module)"
             (dragend)="onModuleDragEnd()"
           >
-            <app-module-viewer [moduleId]="module.moduleId" />
+            <app-module-viewer 
+              [moduleId]="module.moduleId" 
+              [moduleData]="module.moduleDetails || null" 
+            />
           </div>
         }
       } @else {

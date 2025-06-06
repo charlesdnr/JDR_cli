@@ -269,7 +269,8 @@
 html,
 body {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .p-autocomplete-input-multiple {
   padding: calc(var(--padding) / 2);
@@ -278,6 +279,7 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding-top: 70px; // Compensation pour le header fixe
 }
 
 body.resizing {

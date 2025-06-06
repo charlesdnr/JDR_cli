@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../core";
 
 @mixin _outline-style($color) {
@@ -18,11 +19,11 @@
       color: $color;
       // color: mix(white, $color, 10%);
       font-weight: 500;
-      background-color: mix(transparent, $color, 70%);
+      background-color: var(--primary-color-transparent-50);
 
       &:disabled {
          color: core.$disabled-color;
-         background-color: mix(black, core.$disabled-color, 5%);
+         background-color: var(--disabled-color);
       }
    }
 }

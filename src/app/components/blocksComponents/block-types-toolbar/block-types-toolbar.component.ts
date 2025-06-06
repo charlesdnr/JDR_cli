@@ -18,6 +18,10 @@ export class BlockTypesToolbarComponent {
 
   EBlockType = EBlockType;
 
+  ngOnInit(){
+    console.log(this.availableBlocks())
+  }
+
   getIconByType(type: EBlockType): string {
     switch (type) {
       case EBlockType.paragraph:

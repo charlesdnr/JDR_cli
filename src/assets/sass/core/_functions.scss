@@ -1,6 +1,7 @@
 /*
 Fichier contenant toutes les fonctions SASS
 */
+@use "sass:color";
 
 /// Fonction pour convertir des pixels en rem.
 ///
@@ -48,7 +49,7 @@ Fichier contenant toutes les fonctions SASS
    $gradient: ();
 
    @for $i from 0 through $steps - 1 {
-      $color: mix($start-color, $end-color, $step-size * $i);
+      $color: color.mix($start-color, $end-color, $step-size * $i);
       $gradient: append($gradient, $color, comma);
    }
 

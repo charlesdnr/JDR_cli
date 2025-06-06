@@ -29,6 +29,14 @@
           </span>
         }
       </div>
+      
+      @if(hasFullModuleData() && getModuleTags().length > 0) {
+        <div class="module-tags">
+          @for (tag of getModuleTags(); track tag.id) {
+            <p-chip [label]="tag.name" styleClass="module-tag-chip" />
+          }
+        </div>
+      }
     </div>
   </div>
 }

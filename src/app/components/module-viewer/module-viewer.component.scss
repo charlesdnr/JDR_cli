@@ -1,16 +1,27 @@
+@use "../../../assets/sass/core/mixins" as *;
+
 :host {
   cursor: pointer;
   display: block;
   width: 100%;
   min-height: 250px;
-  border-radius: 8px;
+  border-radius: var(--radius-mobile);
   border: 1px solid var(--neutral-color-transparent, rgba(128, 128, 128, 0.2));
   overflow: hidden;
   background-color: var(--background-color-lighter);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
-  display: flex;
-  flex-direction: column;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    border-color 0.2s ease-out;
+  @include flex-responsive(column, nowrap);
+
+  @include respond-to("mobile") {
+    min-height: 220px;
+  }
+
+  @include respond-to("xs") {
+    min-height: 200px;
+    border-radius: var(--radius-small);
+  }
 
   &:hover,
   &:focus-visible {
@@ -20,8 +31,8 @@
     outline: none;
   }
   &:focus-visible {
-     box-shadow: 0 0 0 2px var(--p-focus-ring-color);
-   }
+    box-shadow: 0 0 0 2px var(--p-focus-ring-color);
+  }
 }
 
 img {
@@ -29,33 +40,48 @@ img {
   height: 140px;
   object-fit: cover;
   display: block;
-  border-bottom: 1px solid var(--neutral-color-transparent, rgba(128, 128, 128, 0.2));
+  border-bottom: 1px solid
+    var(--neutral-color-transparent, rgba(128, 128, 128, 0.2));
+
+  @include respond-to("mobile") {
+    height: 120px;
+  }
+
+  @include respond-to("xs") {
+    height: 100px;
+  }
 }
 
 .module-info {
-  padding: 0.8rem 1rem 1rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  @include spacing-responsive(padding, 0.8rem 1rem 1rem 1rem);
+  @include flex-responsive(column, nowrap, 0.4rem);
   flex-grow: 1;
   overflow: hidden;
   justify-content: space-between;
+
+  @include respond-to("mobile") {
+    padding: 0.6rem 0.8rem 0.8rem 0.8rem;
+  }
+
+  @include respond-to("xs") {
+    padding: 0.5rem 0.6rem 0.6rem 0.6rem;
+  }
 }
 
 .module-title {
-  font-size: 1.1rem;
+  @include font-responsive(var(--font-size-lg));
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--font-color);
-  margin-bottom: 0.2rem;
+  @include spacing-responsive(margin-bottom, 0.2rem);
 }
 
 .module-description {
-  font-size: 0.9rem;
+  @include font-responsive(var(--font-size-sm));
   color: var(--font-secondary-color, grey);
-  margin: 0 0 0.5rem 0;
+  @include spacing-responsive(margin, 0 0 0.5rem 0);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -65,30 +91,69 @@ img {
   line-height: 1.4;
   flex-grow: 1;
   min-height: calc(1.4em * 2);
+
+  @include respond-to("xs") {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    min-height: 1.4em;
+  }
 }
 
 .module-meta {
-  display: flex;
+  @include flex-responsive(row, wrap, 0.5rem);
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   margin-top: auto;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--neutral-color-transparent, rgba(128, 128, 128, 0.1));
+  @include spacing-responsive(padding-top, 0.5rem);
+  border-top: 1px solid
+    var(--neutral-color-transparent, rgba(128, 128, 128, 0.1));
+
+  @include respond-to("xs") {
+    gap: 0.3rem;
+  }
 }
 
 .module-creator,
 .module-versions {
-  font-size: 0.8rem;
+  @include font-responsive(var(--font-size-xs));
   color: var(--neutral-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
+  @include flex-responsive(row, nowrap);
   align-items: center;
 }
 
 .module-versions {
   font-weight: 500;
+}
+
+.module-tags {
+  @include flex-responsive(row, wrap, 0.25rem);
+  @include spacing-responsive(margin-top, 0.5rem);
+
+  @include respond-to("xs") {
+    gap: 0.2rem;
+  }
+
+  ::ng-deep .module-tag-chip {
+    .p-chip {
+      @include font-responsive(var(--font-size-xs));
+      @include spacing-responsive(padding, 0.2rem 0.5rem);
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--radius-small);
+      border: none;
+
+      @include respond-to("xs") {
+        font-size: calc(var(--font-size-xs) * 0.9);
+        padding: 0.15rem 0.4rem;
+      }
+
+      .p-chip-text {
+        font-weight: 500;
+        line-height: 1;
+      }
+    }
+  }
 }

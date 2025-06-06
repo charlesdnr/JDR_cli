@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../core";
 
 a.x {
@@ -22,7 +23,7 @@ a.x {
 
       &.active {
          color: core.$primary-color;
-         background-color: mix(transparent, core.$primary-color, 85%);
+         background-color: var(--primary-color-transparent-50);
          @include core.transition(background-color, core.$transition-duration);
       }
    }

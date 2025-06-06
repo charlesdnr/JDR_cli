@@ -1,70 +1,95 @@
-:host{
+@use "../../../../assets/sass/core/mixins" as *;
+
+:host {
   height: 100%;
 }
 
 .blocks-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 15px;
-    padding: var(--padding);
-    padding-bottom: 8rem;
-    border: 1px dashed transparent;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  .highlight-drop-zone {
-    height: 100%;
-    padding: var(--padding);
-    background-color: rgba(59, 130, 246, 0.05);
-    border: 1px dashed rgba(59, 130, 246, 0.2);
-    border-radius: 8px;
-  }
-
-  .block-placeholder {
-    background-color: rgba(59, 130, 246, 0.15);
-    border: 2px dashed rgba(59, 130, 246, 0.4);
-    border-radius: 8px;
-    min-height: 180px !important;
-    margin: 15px 0;
-    animation: pulse-blue 1.5s infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .placeholder-content {
-      color: rgba(59, 130, 246, 0.6);
-      font-weight: 500;
-    }
-  }
-
-  @keyframes pulse-blue {
-    0% {
-      background-color: rgba(59, 130, 246, 0.1);
-    }
-
-    50% {
-      background-color: rgba(59, 130, 246, 0.2);
-    }
-
-    100% {
-      background-color: rgba(59, 130, 246, 0.1);
-    }
-  }
-
-  .module-block {
-    min-height: 120px;
-    background-color: var(--background-color-lighter);
-  }
-.container-skeleton {
   display: flex;
   flex-direction: column;
-  gap: var(--padding);
-  padding: var(--padding);
+  width: 100%;
+  gap: 15px;
+  @include spacing-responsive(padding, var(--padding));
+  padding-bottom: 8rem;
+  border: 1px dashed transparent;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  @include respond-to("mobile") {
+    gap: var(--gap-mobile);
+    padding-bottom: 6rem;
+  }
+
+  @include respond-to("xs") {
+    padding-bottom: 5rem;
+  }
 }
 
+.highlight-drop-zone {
+  height: 100%;
+  @include spacing-responsive(padding, var(--padding));
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 1px dashed rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-mobile);
+
+  @include respond-to("xs") {
+    border-radius: var(--radius-small);
+  }
+}
+
+.block-placeholder {
+  background-color: rgba(59, 130, 246, 0.15);
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  border-radius: var(--radius-mobile);
+  min-height: 180px !important;
+  @include spacing-responsive(margin, 15px 0);
+  animation: pulse-blue 1.5s infinite;
+  @include flex-responsive(column, nowrap);
+  align-items: center;
+  justify-content: center;
+
+  @include respond-to("mobile") {
+    min-height: 140px !important;
+  }
+
+  @include respond-to("xs") {
+    min-height: 120px !important;
+    border-radius: var(--radius-small);
+  }
+
+  .placeholder-content {
+    color: rgba(59, 130, 246, 0.6);
+    font-weight: 500;
+  }
+}
+
+@keyframes pulse-blue {
+  0% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+
+  100% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+.module-block {
+  min-height: 120px;
+  background-color: var(--background-color-lighter);
+}
+.container-skeleton {
+  @include flex-responsive(column, nowrap, var(--gap));
+  @include spacing-responsive(padding, var(--padding));
+
+  @include respond-to("mobile") {
+    gap: var(--gap-mobile);
+  }
+}
 
 .remote-cursor {
   position: absolute;
@@ -75,7 +100,7 @@
   .cursor-pointer {
     width: 2px;
     height: 20px;
-    background-color: var(--user-color, #3B82F6);
+    background-color: var(--user-color, #3b82f6);
     position: absolute;
     animation: blink 1s infinite;
   }
@@ -84,7 +109,7 @@
     position: absolute;
     top: -25px;
     left: 0;
-    background-color: var(--user-color, #3B82F6);
+    background-color: var(--user-color, #3b82f6);
     color: white;
     padding: 2px 8px;
     border-radius: 4px;
@@ -96,8 +121,13 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 // Ajoutons aussi un style pour les utilisateurs actifs
@@ -109,15 +139,20 @@
   gap: 5px;
 
   .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: var(--inputs-size);
+    height: var(--inputs-size);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: bold;
-    font-size: 14px;
+    @include font-responsive(var(--font-size-sm));
+
+    @include respond-to("mobile") {
+      width: var(--inputs-size-small);
+      height: var(--inputs-size-small);
+    }
   }
 }
 
@@ -129,6 +164,11 @@
 }
 
 @keyframes highlight-edit {
-  0%, 100% { background-color: rgba(59, 130, 246, 0.1); }
-  50% { background-color: rgba(59, 130, 246, 0.2); }
+  0%,
+  100% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
 }

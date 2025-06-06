@@ -25,6 +25,40 @@
 
   ::ng-deep .p-tabpanels {
     background-color: var(--background-color-lighter);
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100% - 60px); // Hauteur moins les tabs
+    
+    // Style de scrollbar invisible mais fonctionnel
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 3px;
+      transition: background var(--transition-duration, 0.25s) ease;
+    }
+    
+    &:hover::-webkit-scrollbar-thumb {
+      background: var(--neutral-color);
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
+    
+    // Pour Firefox
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    
+    &:hover {
+      scrollbar-color: var(--neutral-color) transparent;
+    }
   }
 
   ::ng-deep .p-tablist-tab-list {

@@ -1,6 +1,8 @@
 /*
 Fichier contenant toutes les mixins SASS
 */
+@use "sass:map";
+@use "sass:meta";
 @use "variables" as var;
 
 /// Mixin pour ajouter automatiquement les préfixes vendeurs à une propriété CSS.
@@ -264,13 +266,13 @@ Fichier contenant toutes les mixins SASS
 ///     }
 ///   }
 @mixin respond-to($breakpoint) {
-   $raw-query: map-get(var.$breakpoints, $breakpoint);
+   $raw-query: map.get(var.$breakpoints, $breakpoint);
 
    @if $raw-query {
       $query: if(
-         type-of($raw-query) == "string",
+         meta.type-of($raw-query) == "string",
          unquote($raw-query),
-         inspect($raw-query)
+         meta.inspect($raw-query)
       );
 
       @media #{$query} {
@@ -282,50 +284,178 @@ Fichier contenant toutes les mixins SASS
    }
 }
 
+/// Mixin pour les grilles responsives
+@mixin grid-responsive($columns: 1, $gap: var.$gap) {
+   display: grid;
+   grid-template-columns: repeat($columns, 1fr);
+   gap: $gap;
+   
+   @include respond-to('mobile') {
+      grid-template-columns: 1fr;
+      gap: var.$gap-mobile;
+   }
+}
+
+/// Mixin pour les conteneurs responsives
+@mixin container-responsive {
+   width: 100%;
+   max-width: var.$container-max-width;
+   margin: 0 auto;
+   padding: 0 var.$container-padding;
+   
+   @include respond-to('mobile') {
+      padding: 0 var.$container-padding-mobile;
+   }
+   
+   @include respond-to('xs') {
+      padding: 0 var.$container-padding-small;
+   }
+}
+
+/// Mixin pour flexbox responsive
+@mixin flex-responsive($direction: row, $wrap: wrap, $gap: var.$gap) {
+   display: flex;
+   flex-direction: $direction;
+   flex-wrap: $wrap;
+   gap: $gap;
+   
+   @include respond-to('mobile') {
+      flex-direction: column;
+      gap: var.$gap-mobile;
+   }
+}
+
+/// Mixin pour les tailles de police responsives
+@mixin font-responsive($base-size: var.$font-size-base) {
+   font-size: $base-size;
+   
+   @include respond-to('mobile') {
+      font-size: calc(#{$base-size} * 0.9);
+   }
+   
+   @include respond-to('xs') {
+      font-size: calc(#{$base-size} * 0.85);
+   }
+}
+
+/// Mixin pour les espacements responsifs
+@mixin spacing-responsive($property: padding, $base-value: var.$padding) {
+   #{$property}: $base-value;
+   
+   @include respond-to('mobile') {
+      #{$property}: var.$padding-mobile;
+   }
+   
+   @include respond-to('xs') {
+      #{$property}: var.$padding-small;
+   }
+}
+
+/// Mixin pour masquer sur mobile
+@mixin hide-mobile {
+   @include respond-to('mobile') {
+      display: none !important;
+   }
+}
+
+/// Mixin pour afficher seulement sur mobile
+@mixin show-mobile-only {
+   display: none;
+   
+   @include respond-to('mobile') {
+      display: block;
+   }
+}
+
+/// Mixin pour les boutons responsifs
+@mixin button-responsive {
+   height: var.$inputs-size;
+   
+   @include respond-to('mobile') {
+      height: var.$inputs-size-mobile;
+      font-size: var.$font-size-base;
+   }
+   
+   @include respond-to('xs') {
+      height: var.$inputs-size-small;
+      font-size: var.$font-size-sm;
+   }
+}
+
 /// Mixin pour exporter toutes les variables SASS en variables CSS
 ///
 /// @access private
 @mixin export-vars() {
-   --color-sheme: #{var.$color-sheme};
+   & {
+      --color-sheme: #{var.$color-sheme};
 
-   --primary-color: #{var.$primary-color};
-   --primary-color-transparent-50: #{var.$primary-color-transparent-50};
-   --secondary-color: #{var.$secondary-color};
-   --third-color: #{var.$third-color};
+      --primary-color: #{var.$primary-color};
+      --primary-color-transparent-50: #{var.$primary-color-transparent-50};
+      --secondary-color: #{var.$secondary-color};
+      --third-color: #{var.$third-color};
 
-   --background-color: #{var.$background-color};
-   --background-color-lighter: #{var.$background-color-lighter};
-   --background-color-lighter-lighter: #{var.$background-color-lighter-lighter};
-   --background-color-transparent: #{var.$background-color-transparent};
-   --container-color: #{var.$container-color};
-   --input-color: #{var.$input-color};
+      --background-color: #{var.$background-color};
+      --background-color-lighter: #{var.$background-color-lighter};
+      --background-color-lighter-lighter: #{var.$background-color-lighter-lighter};
+      --background-color-transparent: #{var.$background-color-transparent};
+      --container-color: #{var.$container-color};
+      --input-color: #{var.$input-color};
 
-   --font-familly: #{var.$font-familly};
-   --font-color: #{var.$font-color};
-   --font-secondary-color: #{var.$font-secondary-color};
-   --font-disabled-color: #{var.$font-disabled-color};
-   --font-color-invert: #{var.$font-color-invert};
-   --placeholder-color: #{var.$placeholder-color};
+      --font-familly: #{var.$font-familly};
+      --font-color: #{var.$font-color};
+      --font-secondary-color: #{var.$font-secondary-color};
+      --font-disabled-color: #{var.$font-disabled-color};
+      --font-color-invert: #{var.$font-color-invert};
+      --placeholder-color: #{var.$placeholder-color};
 
-   --danger-color: #{var.$danger-color};
-   --success-color: #{var.$success-color};
-   --warn-color: #{var.$warn-color};
-   --info-color: #{var.$info-color};
-   --neutral-color: #{var.$neutral-color};
-   --disabled-color: #{var.$disabled-color};
+      --danger-color: #{var.$danger-color};
+      --success-color: #{var.$success-color};
+      --warn-color: #{var.$warn-color};
+      --info-color: #{var.$info-color};
+      --neutral-color: #{var.$neutral-color};
+      --disabled-color: #{var.$disabled-color};
 
-   --padding: #{var.$padding};
-   --margin: #{var.$margin};
-   --gap: #{var.$gap};
+      --padding: #{var.$padding};
+      --padding-mobile: #{var.$padding-mobile};
+      --padding-small: #{var.$padding-small};
+      --margin: #{var.$margin};
+      --margin-mobile: #{var.$margin-mobile};
+      --gap: #{var.$gap};
+      --gap-mobile: #{var.$gap-mobile};
 
-   --radius: #{var.$radius};
-   --inner-radius: #{var.$inner-radius};
+      --radius: #{var.$radius};
+      --radius-mobile: #{var.$radius-mobile};
+      --radius-small: #{var.$radius-small};
+      --inner-radius: #{var.$inner-radius};
 
-   --inputs-size: #{var.$inputs-size};
-   --icons-size: #{var.$icons-size};
+      --inputs-size: #{var.$inputs-size};
+      --inputs-size-mobile: #{var.$inputs-size-mobile};
+      --inputs-size-small: #{var.$inputs-size-small};
+      --icons-size: #{var.$icons-size};
+      --icons-size-mobile: #{var.$icons-size-mobile};
+      --icons-size-small: #{var.$icons-size-small};
 
-   --transition-duration: #{var.$transition-duration};
-   --animation-duration: #{var.$animation-duration};
+      --font-size-xs: #{var.$font-size-xs};
+      --font-size-sm: #{var.$font-size-sm};
+      --font-size-base: #{var.$font-size-base};
+      --font-size-lg: #{var.$font-size-lg};
+      --font-size-xl: #{var.$font-size-xl};
+      --font-size-2xl: #{var.$font-size-2xl};
+      --font-size-3xl: #{var.$font-size-3xl};
 
-   --box-shadow: #{var.$box-shadow};
+      --header-height: #{var.$header-height};
+      --header-height-mobile: #{var.$header-height-mobile};
+      --sidebar-width: #{var.$sidebar-width};
+      --sidebar-width-collapsed: #{var.$sidebar-width-collapsed};
+
+      --container-padding: #{var.$container-padding};
+      --container-padding-mobile: #{var.$container-padding-mobile};
+      --container-padding-small: #{var.$container-padding-small};
+      --container-max-width: #{var.$container-max-width};
+
+      --transition-duration: #{var.$transition-duration};
+      --animation-duration: #{var.$animation-duration};
+
+      --box-shadow: #{var.$box-shadow};
+   }
 }

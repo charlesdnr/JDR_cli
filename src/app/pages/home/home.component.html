@@ -1,79 +1,365 @@
-<div class="container-first">
-  <div class="left">
-    <div class="first">
-      <h1>
-        {{ "Bienvenue" }}
-      </h1>
-      @if(currentUser()?.username){
-      <h1 style="color: var(--primary-color)">
-        {{ currentUser()?.username + ',' }}
-      </h1>
-      } @else {
-      <h1>,</h1>
-      }
-    </div>
-    <h1>{{ "Libère ton imagination," }}</h1>
-    <h1>{{ "construis ton monde \n avec l'IA" }}</h1>
-    <div class="container-button">
-      <p-button
-        label="Créer un projet"
-        icon="pi pi-arrow-right"
-        iconPos="right"
-        routerLink="/new-module"
-      />
-      <button>{{ "Explorer les projets" | translate }}</button>
-    </div>
-  </div>
-  <div class="right">
-    <img src="assets/images/home.png" alt="image de page home" />
-  </div>
-</div>
-<div class="popular-modules">
-  <div class="section">
-    <h2>Modules les plus sauvegardés</h2>
-    @if(loadingModules()) {
-      <div class="loading-modules">
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
-      </div>
-    } @else {
-      <div class="modules-grid">
-        @for(module of mostSavedModules(); track module.id) {
-          <div class="module-card">
-            <app-module-viewer [moduleId]="module.id" />
-          </div>
-        }
-        @if(mostSavedModules().length === 0) {
-          <div class="no-modules">
-            <p>Aucun module disponible pour le moment</p>
-          </div>
-        }
-      </div>
-    }
+<!-- Hero Section avec animation et gradient -->
+<section class="hero-section">
+  <div class="hero-background">
+    <div class="gradient-overlay"></div>
+    <div class="animated-particles"></div>
   </div>
   
-  <div class="section">
-    <h2>Modules les plus récents</h2>
-    @if(loadingModules()) {
-      <div class="loading-modules">
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
-        <p-skeleton height="150px" width="100%" styleClass="mb-2" />
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title">
+        @if(currentUser()?.username) {
+          Bienvenue <span class="gradient-text">{{ currentUser()?.username }}</span>,<br>
+        }
+        Créez vos <span class="gradient-text">aventures épiques</span> 
+        <br>en toute simplicité
+      </h1>
+      <p class="hero-description">
+        Plateforme moderne pour concevoir, partager et jouer vos modules de jeu de rôle. 
+        Rejoignez une communauté passionnée et donnez vie à vos histoires.
+      </p>
+      
+      <div class="hero-actions">
+        <button class="btn-primary-hero" routerLink="/new-module">
+          <span>Créer un module</span>
+          <i class="pi pi-arrow-right"></i>
+        </button>
+        <button class="btn-secondary-hero" (click)="scrollToExplore()">
+          <span>Découvrir</span>
+          <i class="pi pi-compass"></i>
+        </button>
       </div>
-    } @else {
-      <div class="modules-grid">
-        @for(module of mostRecentModules(); track module.id) {
-          <div class="module-card">
-            <app-module-viewer [moduleId]="module.id" />
+      
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ moduleStats().total || 0 }}</span>
+          <span class="stat-label">Modules créés</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ moduleStats().creators || 0 }}</span>
+          <span class="stat-label">Créateurs actifs</span>
+        </div>
+        <div class="stat-item">
+        </div>
+      </div>
+    </div>
+    
+    <div class="hero-visual">
+      <div class="floating-cards">
+        <div class="floating-card card-1">
+          <div class="card-icon">🏰</div>
+          <div class="card-title">Donjon Mystérieux</div>
+        </div>
+        <div class="floating-card card-2">
+          <div class="card-icon">⚔️</div>
+          <div class="card-title">Combat Épique</div>
+        </div>
+        <div class="floating-card card-3">
+          <div class="card-icon">🧙‍♂️</div>
+          <div class="card-title">Magie Ancienne</div>
+        </div>
+      </div>
+      <div class="hero-illustration">
+        <div class="central-orb"></div>
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="scroll-indicator" (click)="scrollToFeatures()">
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<!-- <section id="features" class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Fonctionnalités</span>
+      <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+      <p class="section-description">
+        Des outils puissants et intuitifs pour créer des expériences de jeu inoubliables
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card featured">
+        <div class="feature-icon">
+          <i class="pi pi-pencil"></i>
+        </div>
+        <h3>Éditeur Visuel</h3>
+        <p>Interface intuitive avec drag & drop pour construire vos modules sans effort</p>
+        <div class="feature-highlight">
+          <span>Nouveau</span>
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <h3>Collaboration</h3>
+        <p>Travaillez en équipe en temps réel avec vos co-créateurs</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="pi pi-cloud"></i>
+        </div>
+        <h3>Cloud Sync</h3>
+        <p>Vos créations sont automatiquement sauvegardées et synchronisées</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="pi pi-share-alt"></i>
+        </div>
+        <h3>Partage Facile</h3>
+        <p>Partagez vos modules avec la communauté en un clic</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="pi pi-mobile"></i>
+        </div>
+        <h3>Mobile Ready</h3>
+        <p>Créez et jouez depuis n'importe quel appareil</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="pi pi-palette"></i>
+        </div>
+        <h3>Thèmes Personnalisés</h3>
+        <p>Adaptez l'interface à votre univers de jeu</p>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+<!-- Popular Modules Section with Modern Design -->
+<section id="explore" class="explore-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Découvrir</span>
+      <h2 class="section-title">Modules Populaires</h2>
+      <p class="section-description">
+        Explorez les créations les plus appréciées de notre communauté
+      </p>
+    </div>
+    
+    <div class="modules-showcase">
+      @if (loadingModules()) {
+        <div class="loading-state">
+          <div class="loading-grid">
+            @for (i of [1,2,3,4,5,6]; track i) {
+              <div class="module-skeleton">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                  <div class="skeleton-line"></div>
+                  <div class="skeleton-line short"></div>
+                  <div class="skeleton-line"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        @if (mostSavedModules().length > 0) {
+          @for (module of mostSavedModules(); track module.id) {
+            <div class="module-card-modern" (click)="navigateToModule(module.id)">
+              <div class="module-image">
+                <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
+                     [alt]="module.title"
+                     loading="lazy">
+                <div class="module-overlay">
+                  <div class="module-stats">
+                    <span class="stat">
+                      <i class="pi pi-heart"></i>
+                      {{ Math.floor(Math.random() * 100) + 1 }}
+                    </span>
+                    <span class="stat">
+                      <i class="pi pi-eye"></i>
+                      {{ Math.floor(Math.random() * 500) + 50 }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="module-content">
+                <div class="module-meta">
+                  <span class="module-category">Aventure</span>
+                  <span class="module-difficulty">Intermédiaire</span>
+                </div>
+                
+                <h3 class="module-title">{{ module.title }}</h3>
+                <p class="module-description">{{ module.description }}</p>
+                
+                <div class="module-footer">
+                  <div class="module-author">
+                    <div class="author-avatar">
+                      {{ module.creator.username.charAt(0) || 'A' }}
+                    </div>
+                    <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
+                  </div>
+                  
+                  <div class="module-tags">
+                    @if (module.tags && module.tags.length > 0) {
+                      @for (tag of module.tags.slice(0, 2); track tag.id) {
+                        <span class="module-tag">{{ tag.name }}</span>
+                      }
+                    } @else {
+                      <span class="module-tag">Aventure</span>
+                      <span class="module-tag">JDR</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="empty-state">
+            <div class="empty-icon">🎲</div>
+            <h3>Aucun module disponible</h3>
+            <p>Soyez le premier à créer un module pour cette communauté !</p>
+            <button class="btn-primary" routerLink="/new-module">
+              Créer le premier module
+            </button>
           </div>
         }
-        @if(mostRecentModules().length === 0) {
-          <div class="no-modules">
-            <p>Aucun module disponible pour le moment</p>
+      }
+    </div>
+    
+    @if (mostRecentModules().length > 0 && !loadingModules()) {
+      <div class="section-divider">
+        <h3 class="subsection-title">Modules les plus récents</h3>
+      </div>
+      
+      <div class="modules-showcase recent">
+        @for (module of mostRecentModules(); track module.id) {
+          <div class="module-card-modern" (click)="navigateToModule(module.id)">
+            <div class="module-image">
+              <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
+                   [alt]="module.title"
+                   loading="lazy">
+              <div class="module-overlay">
+                <div class="module-badge new">Nouveau</div>
+              </div>
+            </div>
+            
+            <div class="module-content">
+              <div class="module-meta">
+                <span class="module-category">Récent</span>
+                <span class="module-time">{{ getTimeAgo(module.createdAt) }}</span>
+              </div>
+              
+              <h3 class="module-title">{{ module.title }}</h3>
+              <p class="module-description">{{ module.description }}</p>
+              
+              <div class="module-footer">
+                <div class="module-author">
+                  <div class="author-avatar">
+                    {{ module.creator.username.charAt(0) || 'A' }}
+                  </div>
+                  <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         }
       </div>
     }
+    
+    <div class="explore-actions">
+      <button class="btn-outline" routerLink="/project">
+        Voir tous les modules
+        <i class="pi pi-arrow-right"></i>
+      </button>
+    </div>
   </div>
-</div>
+</section>
+
+<!-- Community Section -->
+<!-- <section class="community-section">
+  <div class="container">
+    <div class="community-content">
+      <div class="community-text">
+        <span class="section-badge">Communauté</span>
+        <h2 class="section-title">Rejoignez la communauté</h2>
+        <p class="section-description">
+          Connectez-vous avec des milliers de créateurs passionnés. 
+          Partagez vos idées, obtenez des retours et collaborez sur des projets extraordinaires.
+        </p>
+        
+        <div class="community-features">
+          <div class="community-feature">
+            <i class="pi pi-comments"></i>
+            <span>Forum de discussion actif</span>
+          </div>
+          <div class="community-feature">
+            <i class="pi pi-star"></i>
+            <span>Système de notation et reviews</span>
+          </div>
+          <div class="community-feature">
+            <i class="pi pi-trophy"></i>
+            <span>Défis créatifs mensuels</span>
+          </div>
+        </div>
+        
+        <div class="community-actions">
+          <button class="btn-primary" routerLink="/auth">
+            <span>Créer un compte</span>
+            <i class="pi pi-user-plus"></i>
+          </button>
+          <button class="btn-secondary" (click)="scrollToFeatures()">
+            <span>En savoir plus</span>
+            <i class="pi pi-info-circle"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="community-visual">
+        <div class="testimonials">
+          <div class="testimonial active">
+            <div class="testimonial-content">
+              "Cette plateforme a révolutionné ma façon de créer des aventures. Interface intuitive et communauté fantastique !"
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">M</div>
+              <div class="author-info">
+                <span class="author-name">Marie Dubois</span>
+                <span class="author-role">Maître de jeu</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+<!-- CTA Section -->
+<!-- <section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Prêt à créer votre première aventure ?</h2>
+      <p class="cta-description">
+        Rejoignez des milliers de créateurs et donnez vie à vos histoires dès aujourd'hui
+      </p>
+      
+      <div class="cta-actions">
+        <button class="btn-primary-large" routerLink="/new-module">
+          <span>Commencer maintenant</span>
+          <i class="pi pi-arrow-right"></i>
+        </button>
+        
+        <div class="cta-note">
+          <i class="pi pi-check-circle"></i>
+          <span>Gratuit • Sans engagement • Accès immédiat</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->

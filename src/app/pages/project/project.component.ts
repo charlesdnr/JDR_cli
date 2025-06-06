@@ -42,9 +42,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Module } from '../../classes/Module';
 import { ModuleService } from '../../services/module.service';
 import { DragDropModule } from 'primeng/dragdrop';
+import { ModuleSummary } from '../../classes/ModuleSummary';
 
 interface DisplayableSavedModule extends UserSavedModule {
-  moduleDetails?: Module;
+  moduleDetails?: Module | ModuleSummary;
   isLoadingDetails?: boolean;
 }
 
@@ -92,11 +93,15 @@ export class ProjectComponent implements OnInit {
 
   displayedModules: WritableSignal<DisplayableSavedModule[]> = signal([]);
   moduleWithoutFolder = signal<DisplayableSavedModule[]>([]);
+  modulesSummary: WritableSignal<ModuleSummary[]> = signal([]);
 
   isLoadingFolders = signal(false);
   isLoadingModules = signal(false);
   searchValue = signal('');
   draggedModule: DisplayableSavedModule | null = null;
+  
+  // Sidebar state
+  sidebarCollapsed = signal(false);
 
   contextMenuItems: MenuItem[] = [
     {
@@ -325,8 +330,24 @@ export class ProjectComponent implements OnInit {
     }
   }
 
+  async loadModulesSummary(): Promise<void> {
+    try {
+      const user = this.currentUser();
+      if (!user) return;
+      
+      // Charger tous les modules summary de l'utilisateur
+      const summaries = await this.moduleHttpService.getModulesSummaryByUserId(user.id);
+      this.modulesSummary.set(summaries);
+    } catch (error) {
+      console.error('Erreur lors du chargement des modules summary:', error);
+    }
+  }
+
   async loadAllModulesForAllFolders(folders: UserFolder[]): Promise<void> {
     try {
+      // Charger d'abord les modules summary
+      await this.loadModulesSummary();
+      
       // Pour chaque dossier, charger ses modules et les ajouter à l'arbre
       for (const folder of folders) {
         if (folder.folderId) {
@@ -336,17 +357,29 @@ export class ProjectComponent implements OnInit {
               folder.folderId
             );
 
-          // Enrichir chaque savedModule avec les détails du module
+          // Enrichir chaque savedModule avec les détails du module depuis le cache summary
           const enrichedModules: DisplayableSavedModule[] = [];
 
           for (const savedModule of savedModules) {
-            const moduleDetails = await this.moduleHttpService.getModuleById(
-              savedModule.moduleId
+            const moduleDetails = this.modulesSummary().find(
+              summary => summary.id === savedModule.moduleId
             );
-            enrichedModules.push({
-              ...savedModule,
-              moduleDetails: moduleDetails,
-            });
+            
+            if (moduleDetails) {
+              enrichedModules.push({
+                ...savedModule,
+                moduleDetails: moduleDetails,
+              });
+            } else {
+              // Fallback: charger le module complet si pas trouvé dans summary
+              const fullModule = await this.moduleHttpService.getModuleById(
+                savedModule.moduleId
+              );
+              enrichedModules.push({
+                ...savedModule,
+                moduleDetails: fullModule,
+              });
+            }
           }
 
           // Ajouter les modules enrichis à l'arbre
@@ -372,21 +405,38 @@ export class ProjectComponent implements OnInit {
       const folderId = folder?.folderId;
       if (!folderId) return;
 
+      // S'assurer que les modules summary sont chargés
+      if (this.modulesSummary().length === 0) {
+        await this.loadModulesSummary();
+      }
+
       // Récupérer les modules sauvegardés
       const savedModules =
         await this.httpUserSavedModuleService.getSavedModulesByFolder(folderId);
 
-      // Enrichir chaque savedModule avec les détails du module
+      // Enrichir chaque savedModule avec les détails du module depuis le cache summary
       const enrichedModules: DisplayableSavedModule[] = [];
 
       for (const savedModule of savedModules) {
-        const moduleDetails = await this.moduleHttpService.getModuleById(
-          savedModule.moduleId
+        const moduleDetails = this.modulesSummary().find(
+          summary => summary.id === savedModule.moduleId
         );
-        enrichedModules.push({
-          ...savedModule,
-          moduleDetails: moduleDetails,
-        });
+        
+        if (moduleDetails) {
+          enrichedModules.push({
+            ...savedModule,
+            moduleDetails: moduleDetails,
+          });
+        } else {
+          // Fallback: charger le module complet si pas trouvé dans summary
+          const fullModule = await this.moduleHttpService.getModuleById(
+            savedModule.moduleId
+          );
+          enrichedModules.push({
+            ...savedModule,
+            moduleDetails: fullModule,
+          });
+        }
       }
 
       this.displayedModules.set(enrichedModules);
@@ -750,5 +800,9 @@ export class ProjectComponent implements OnInit {
 
   resetModule() {
     this.moduleService.clearCurrentModule();
+  }
+
+  toggleSidebar() {
+    this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
 }

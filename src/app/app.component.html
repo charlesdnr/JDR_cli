@@ -1,7 +1,15 @@
-<router-outlet>
+<div class="app-layout">
     @if(!onAuth){
         <app-header />
     }
-</router-outlet>
+    
+    <main class="main-content">
+        <router-outlet />
+    </main>
+    
+    @if(!onAuth){
+        <app-footer />
+    }
+</div>
 <p-toast position="bottom-right" />
 <p-confirmdialog />

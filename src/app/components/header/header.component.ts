@@ -51,7 +51,6 @@ export class HeaderComponent {
     return [
       { name: 'Explorer', icon: 'explore', link: '/explore' },
       { name: 'Projets', icon: 'assignment', link: '/projects' },
-      { name: 'Compte', icon: 'account_circle', link: '/account' },
     ]
   })
 

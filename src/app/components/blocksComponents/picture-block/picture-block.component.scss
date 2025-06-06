@@ -1,9 +1,17 @@
+@use "../../../../assets/sass/core/mixins" as *;
+
 .picture-block {
-  padding: var(--padding);
+  @include spacing-responsive(padding, var(--padding));
   min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding);
+  @include flex-responsive(column, nowrap, var(--gap));
+  
+  @include respond-to('mobile') {
+    min-height: 150px;
+  }
+  
+  @include respond-to('xs') {
+    min-height: 120px;
+  }
 
   .block-info {
     display: flex;
@@ -217,14 +225,3 @@
   }
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .picture-block {
-    padding: calc(var(--padding) * 0.75);
-
-    .image-section .upload-zone {
-      min-height: 150px;
-      padding: 1.5rem;
-    }
-  }
-}

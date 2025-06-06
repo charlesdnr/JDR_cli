@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../core";
 
 /// Permet de régler l'affichage CSS peut importe le style
@@ -62,11 +63,7 @@
    &.ng-select-multiple {
       .ng-value {
          color: core.$font-color !important;
-         background-color: mix(
-            transparent,
-            core.$primary-color,
-            50%
-         ) !important;
+         background-color: var(--primary-color-transparent-50) !important;
       }
    }
 

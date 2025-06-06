@@ -1,10 +1,18 @@
+@use "../../../../assets/sass/core/mixins" as *;  
+
 .text-block {
-  padding: 15px;
+  @include spacing-responsive(padding, var(--padding));
   min-height: 120px !important;
   height: calc(100% - 50px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding);
+  @include flex-responsive(column, nowrap, var(--gap));
+  
+  @include respond-to('mobile') {
+    min-height: 100px !important;
+  }
+  
+  @include respond-to('xs') {
+    min-height: 80px !important;
+  }
 
   textarea {
     width: 100%;
@@ -13,39 +21,52 @@
     resize: vertical;
   }
   .container-label {
-    // padding: 15px;
-    display: flex;
-    flex-direction: column;
+    @include flex-responsive(column, nowrap);
   }
   .basic-block {
-    display: flex;
-    gap: calc(var(--padding) / 2);
+    @include flex-responsive(row, wrap, calc(var(--gap) / 2));
+    
+    @include respond-to('mobile') {
+      gap: calc(var(--gap-mobile) / 2);
+    }
   }
 }
 
 ::ng-deep .ql-editor {
   min-height: 200px;
+  
+  @include respond-to('mobile') {
+    min-height: 150px;
+  }
+  
+  @include respond-to('xs') {
+    min-height: 120px;
+  }
 }
 .text-block-readonly {
-  padding: 1.5rem;
+  @include spacing-responsive(padding, 1.5rem);
   background-color: var(--background-color-lighter);
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 var(--radius-mobile) var(--radius-mobile);
   border: 1px solid var(--neutral-color-transparent);
   
+  @include respond-to('xs') {
+    border-radius: 0 0 var(--radius-small) var(--radius-small);
+  }
+  
   .block-title {
-    font-size: 1.25rem;
+    @include font-responsive(var(--font-size-xl));
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    @include spacing-responsive(margin-bottom, 1rem);
     font-weight: 600;
   }
   
   .block-content {
-    font-size: 1.1rem;
+    @include font-responsive(var(--font-size-lg));
     line-height: 1.8;
-    margin-bottom: 1.5rem;
+    @include spacing-responsive(margin-bottom, 1.5rem);
     
     p {
-      margin-bottom: 1rem;
+      @include spacing-responsive(margin-bottom, 1rem);
     }
   }
   
@@ -53,6 +74,6 @@
     font-style: italic;
     color: var(--font-color-secondary);
     text-align: right;
-    font-size: 0.9rem;
+    @include font-responsive(var(--font-size-sm));
   }
 }

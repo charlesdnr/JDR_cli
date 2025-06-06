@@ -4,6 +4,9 @@ import { ModuleRequest } from '../../classes/ModuleRequest';
 import { Module } from '../../classes/Module';
 import { UserHttpService } from './user-http.service';
 import { firstValueFrom } from 'rxjs';
+import { ModuleResponseSummaryDTO } from '../../interfaces/ModuleResponseSummaryDTO';
+import { ModuleSummary } from '../../classes/ModuleSummary';
+import { plainToClass } from 'class-transformer';
 
 interface SearchParams {
   page?: number;
@@ -42,6 +45,14 @@ export class ModuleHttpService extends BaseHttpService {
   /** GET /api/modules/{id} */
   getModuleById(id: number): Promise<Module> {
     return this.get<Module>(id);
+  }
+
+  /** GET /api/modules/summary/{userId} */
+  getModulesSummaryByUserId(userId: number): Promise<ModuleSummary[]> {
+    const url = `${this.baseApiUrl}/summary/${userId}`;
+    return firstValueFrom(
+      this.httpClient.get<ModuleResponseSummaryDTO[]>(url)
+    ).then(dtos => dtos.map(dto => plainToClass(ModuleSummary, dto)));
   }
 
   /** POST /api/modules */

@@ -41,6 +41,10 @@ import { TagRequest } from '../../interfaces/TagRequest';
 import { ChipModule } from 'primeng/chip';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 import { AvatarModule } from 'primeng/avatar';
+import { FileUploadModule, FileSelectEvent } from 'primeng/fileupload';
+import { ImageModule } from 'primeng/image';
+import { FileHttpService } from '../../services/https/file-http.service';
+import { Picture } from '../../classes/Picture';
 
 @Component({
   selector: 'app-project-parameters',
@@ -58,6 +62,8 @@ import { AvatarModule } from 'primeng/avatar';
     ChipModule,
     AvatarModule,
     AvatarGroupModule,
+    FileUploadModule,
+    ImageModule,
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss',
@@ -73,6 +79,7 @@ export class ProjectParametersComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private tagsHttpService = inject(TagHttpService);
+  private fileuploadService = inject(FileHttpService);
 
   autocomplete = viewChild<AutoComplete>('autocomplete');
 
@@ -195,7 +202,10 @@ export class ProjectParametersComponent implements OnInit {
   isReadOnly = input<boolean>(false);
   canPublish = input<boolean>(true);
   canInvite = input<boolean>(true);
-  selectedUsers = signal<User[]>([])
+  selectedUsers = signal<User[]>([]);
+
+  uploadingModuleImage = signal(false);
+  moduleImagePreview = signal<string>('');
 
   async ngOnInit(): Promise<void> {
     if (this.currentModule()) {
@@ -596,5 +606,100 @@ export class ProjectParametersComponent implements OnInit {
         }
       })
       .finally(() => this.loadingPublished.set(false));
+  }
+
+  onModuleImageSelect(event: FileSelectEvent) {
+    if (this.isReadOnly()) return;
+
+    const file = event.files[0];
+    if (!file) return;
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      console.error("Le fichier sélectionné n'est pas une image");
+      return;
+    }
+
+    // Vérifier la taille (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      console.error("L'image est trop volumineuse (max 5MB)");
+      return;
+    }
+
+    this.uploadingModuleImage.set(true);
+
+    // Upload file to server
+    this.fileuploadService.uploadFile(file)
+      .then((fileId) => {
+        // Update the module picture
+        if (this.currentModule().picture) {
+          this.currentModule().picture.src = fileId;
+          this.currentModule().picture.title = file.name;
+        } else {
+          this.currentModule().picture = new Picture(
+            file.name,
+            fileId,
+            new Date().toISOString(),
+            new Date().toISOString()
+          );
+        }
+
+        // Create preview for display
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          this.moduleImagePreview.set(result);
+          this.uploadingModuleImage.set(false);
+        };
+        reader.readAsDataURL(file);
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Image',
+          detail: 'Image du module mise à jour avec succès',
+        });
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'upload de l\'image du module:', error);
+        this.uploadingModuleImage.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible d\'uploader l\'image du module',
+        });
+      });
+  }
+
+  removeModuleImage() {
+    if (this.isReadOnly()) return;
+
+    if (this.currentModule().picture) {
+      this.currentModule().picture.src = '';
+      this.currentModule().picture.title = '';
+    }
+    this.moduleImagePreview.set('');
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Image',
+      detail: 'Image du module supprimée',
+    });
+  }
+
+  hasModuleImage(): boolean {
+    return !!this.currentModule().picture?.src;
+  }
+
+  getModuleImageSrc(): string {
+    const src = this.currentModule().picture?.src;
+    if (!src) return '';
+    
+    // If we have a preview from FileReader, use it; otherwise use server file ID
+    return this.moduleImagePreview() || src;
+  }
+
+  getModuleImageTitle(): string {
+    return this.currentModule().picture?.title || 'Image du module';
   }
 }

@@ -499,14 +499,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         new ParagraphBlock(tempModuleVersionId, 'Preview Paragraphe', 0, user),
         new MusicBlock(tempModuleVersionId, 'Preview Musique', 1, user),
         new StatBlock(tempModuleVersionId, 'Preview Stats', 2, user),
-        new PictureBlock(
-          'Preview Image',
-          new Picture(),
-          tempModuleVersionId,
-          'Preview Image',
-          3,
-          user
-        ),
+        new PictureBlock(tempModuleVersionId, 'Preview Image', 3, user),
         new IntegratedModuleBlock(
           tempModuleVersionId,
           'Preview Module Intégré',
@@ -792,12 +785,12 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
                   case 'picture':
                     newBlock = new PictureBlock(
-                      (block as PictureBlock).label || 'Image générée',
-                      new Picture(),
                       module.id,
-                      block.title || 'Image générée',
+                      block.title || 'Statistiques générées',
                       index,
-                      this.currentUser()!
+                      this.currentUser()!,
+                      (block as PictureBlock)?.picture,
+                      (block as PictureBlock)?.label ?? '',
                     );
                     break;
                 }

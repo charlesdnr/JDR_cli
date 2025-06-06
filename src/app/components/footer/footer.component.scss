@@ -1,0 +1,86 @@
+@use "../../../assets/sass/core/mixins" as *;
+
+.simple-footer {
+  background: var(--background-color-lighter);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+  
+  .footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem 2rem;
+    
+    @include respond-to('mobile') {
+      padding: 2rem 1rem 1.5rem;
+    }
+  }
+  
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+    
+    @include respond-to('tablet') {
+      gap: 1.5rem;
+    }
+  }
+  
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    .footer-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+    
+    .footer-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-color), #667eea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+  
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    
+    @include respond-to('mobile') {
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    a {
+      color: var(--font-secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+  
+  .footer-info {
+    p {
+      margin: 0;
+      color: var(--font-secondary-color);
+      font-size: 0.9rem;
+      
+      @include respond-to('mobile') {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

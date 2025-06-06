@@ -1,9 +1,9 @@
+@use "../../../assets/sass/core/mixins" as *;
+
 :host{
-  display: flex;
-  flex-direction: column;
+  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
-  // gap: 20px;
   height: 100%;
   width: 100%;
 }
@@ -11,56 +11,211 @@
 .header-project{
   height: 100%;
   width: 100%;
-  display: flex;
+  @include flex-responsive(row, wrap, var(--gap));
   max-height: 50px;
-  gap: var(--padding);
-  margin: calc(var(--padding));
+  @include spacing-responsive(margin, var(--margin));
   margin-top: 20px;
+  
+  @include respond-to('mobile') {
+    max-height: auto;
+    margin-top: 15px;
+  }
+  
+  @include respond-to('xs') {
+    margin-top: 10px;
+  }
 
   .searchbar{
-    display: flex;
+    @include flex-responsive(row, nowrap, calc(var(--gap) / 2));
     align-items: center;
-    gap: calc(var(--padding) / 2);
     width: auto;
     flex-shrink: 0;
+    
+    @include respond-to('mobile') {
+      width: 100%;
+      order: 2;
+    }
   }
   .filtres{
     flex: 1;
   }
 }
 .modules-container{
-  display: flex;
-  flex-direction: column;
+  @include flex-responsive(column, nowrap, 1rem);
   flex: 1;
-  gap: 1rem;
+  
+  @include respond-to('mobile') {
+    gap: 0.8rem;
+  }
 }
 .container-folder{
   height: 100%;
   width: 100%;
-  display: flex;
+  @include flex-responsive(row, nowrap, 1rem);
   flex: 1;
   overflow: auto;
-  gap: 1rem;
+  position: relative;
+  
+  @include respond-to('mobile') {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
   .modules-list{
     overflow: auto;
     max-height: 80%;
     flex-grow: 1;
-    display: grid;
+    @include grid-responsive(auto-fill, var(--gap));
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--padding);
     align-items: start;
     justify-content: flex-start;
-    padding: var(--padding);
+    @include spacing-responsive(padding, var(--padding));
+    
+    @include respond-to('tablet') {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    
+    @include respond-to('mobile') {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      max-height: none;
+    }
+    
+    @include respond-to('xs') {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .sidebar-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--radius-small);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    @include flex-responsive(row, nowrap);
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-duration) ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    &:hover {
+      background-color: var(--primary-color);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    i {
+      @include font-responsive(var(--font-size-base));
+      transition: transform var(--transition-duration) ease;
+    }
+    
+    @include respond-to('mobile') {
+      top: 5px;
+      left: 5px;
+      width: 35px;
+      height: 35px;
+    }
   }
 
   .folders{
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
+    @include flex-responsive(column, nowrap);
+    @include spacing-responsive(padding, 10px);
     border-right: 1px solid var(--neutral-color);
-  box-shadow: 5px 0 5px -5px var(--neutral-color);
-  background-color: var(--background-color-lighter);
+    box-shadow: 5px 0 5px -5px var(--neutral-color);
+    background-color: var(--background-color-lighter);
+    overflow-y: auto;
+    max-height: 100%;
+    width: var(--sidebar-width);
+    transition: all var(--transition-duration) ease;
+    
+    &.collapsed {
+      width: var(--sidebar-width-collapsed);
+      min-width: var(--sidebar-width-collapsed);
+      
+      ::ng-deep {
+        .p-tree {
+          .p-tree-node-label,
+          .p-button-label {
+            display: none;
+          }
+          
+          .p-tree-node-icon {
+            margin-right: 0;
+          }
+        }
+        
+        .p-button {
+          width: 44px;
+          padding: 0.5rem;
+          
+          .p-button-label {
+            display: none;
+          }
+          
+          .p-button-icon {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+    
+    @include respond-to('mobile') {
+      border-right: none;
+      border-bottom: 1px solid var(--neutral-color);
+      box-shadow: 0 5px 5px -5px var(--neutral-color);
+      max-height: 30vh;
+      order: 1;
+      width: 100%;
+      
+      &.collapsed {
+        width: 100%;
+        max-height: 60px;
+        overflow: hidden;
+        
+        ::ng-deep {
+          .p-tree, .p-button {
+            display: none;
+          }
+        }
+      }
+    }
+    
+    // Style de scrollbar invisible mais fonctionnel
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 3px;
+      transition: background var(--transition-duration) ease;
+    }
+    
+    &:hover::-webkit-scrollbar-thumb {
+      background: var(--neutral-color);
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
+    
+    // Pour Firefox
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    
+    &:hover {
+      scrollbar-color: var(--neutral-color) transparent;
+    }
 
     ::ng-deep .p-button {
       width: 100%;
@@ -69,14 +224,15 @@
 }
 
 .container-button {
-  display: flex;
-  gap: 10px;
+  @include flex-responsive(row, wrap, var(--gap));
+  
+  @include respond-to('mobile') {
+    justify-content: center;
+  }
 }
 
 .container-dialog {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  @include flex-responsive(column, nowrap, var(--gap));
 }
 ::ng-deep .p-tree-node-toggle-button{
   visibility: visible;
@@ -85,8 +241,7 @@
   margin-right: 3px;
 }
 .container-label{
-  display: flex;
-  flex-direction: column;
+  @include flex-responsive(column, nowrap);
 }
 
 

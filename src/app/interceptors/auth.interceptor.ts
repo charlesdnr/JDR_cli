@@ -24,10 +24,20 @@ export const authInterceptor: HttpInterceptorFn = (
 
       if (token) {
         // Cloner la requête si le token est obtenu
+        // Pour FormData, ne pas modifier Content-Type
+        const headers: { [key: string]: string } = {
+          Authorization: `Bearer ${token}`
+        };
+        
+        // Pour FormData/multipart, ne pas définir Content-Type
+        const isFormData = req.body instanceof FormData;
+        if (!isFormData) {
+          // Seulement pour les requêtes non-FormData, on peut ajouter Content-Type si nécessaire
+          // headers['Content-Type'] = 'application/json'; // Ne le faites que si nécessaire
+        }
+        
         const clonedReq = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`
-          }
+          setHeaders: headers
         });
         // Retourner la requête clonée (résolution de la Promise)
         return clonedReq;

@@ -3,22 +3,47 @@
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+::ng-deep .p-tabpanels {
+  padding: 0;
+}
+.container-parametres {
+  padding: var(--padding);
+  display: flex;
+  flex-direction: column;
+
+
+
+  
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  ::ng-deep .p-button {
+    width: 100%;
+  }
 }
 
-.container-parametres {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.container-label {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 
-    ::ng-deep .p-button {
-      width: 100%;
-    }
+  input,
+  textarea,
+  .p-select,
+  .p-autocomplete,
+  .p-treeselect {
+    max-width: 100%;
+    box-sizing: border-box;
   }
-
-  .container-label {
-    display: flex;
-    flex-direction: column;
-  }
+}
 .chips-container {
   display: flex;
   flex-wrap: wrap;
@@ -27,14 +52,13 @@
 }
 
 ::ng-deep {
-  .p-autocomplete-input-multiple{
+  .p-autocomplete-input-multiple {
     padding: 2px;
     padding-left: var(--padding);
     padding-bottom: 5px;
   }
 }
 .param-section {
-  
   h3 {
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
@@ -43,26 +67,26 @@
     border-bottom: 1px solid var(--neutral-color);
     padding-bottom: 0.5rem;
   }
-  
+
   p {
     margin: 0;
     padding: 0.5rem;
     border-radius: 4px;
     background-color: var(--background-color-lighter-lighter);
   }
-  
+
   .description-text {
     white-space: pre-line;
     line-height: 1.6;
   }
-  
+
   .tags-readonly {
     display: flex;
     flex-wrap: wrap;
     gap: var(--padding);
     padding-top: var(--padding);
   }
-  
+
   .no-tags {
     font-style: italic;
     color: var(--font-color);
@@ -72,4 +96,164 @@
 .read {
   display: flex;
   flex-direction: column;
+}
+
+// Module image section styling
+.module-image-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding);
+  margin-top: 0.5rem;
+
+  .module-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+
+    .module-image-wrapper {
+      position: relative;
+      display: inline-block;
+
+      ::ng-deep .p-image {
+        border-radius: calc(var(--radius) / 2);
+        overflow: hidden;
+
+        img {
+          border-radius: calc(var(--radius) / 2);
+          transition: transform var(--transition-duration) ease;
+
+          &:hover {
+            transform: scale(1.02);
+          }
+        }
+      }
+
+      .module-image-actions {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        opacity: 0;
+        transition: opacity var(--transition-duration) ease;
+
+        ::ng-deep .p-button {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: rgba(0, 0, 0, 0.7);
+          border: none;
+          backdrop-filter: blur(4px);
+
+          .p-button-icon {
+            font-size: 0.8rem;
+            color: white;
+          }
+        }
+      }
+
+      &:hover .module-image-actions {
+        opacity: 1;
+      }
+    }
+  }
+
+  .module-image-caption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--font-secondary-color);
+    font-style: italic;
+    margin-top: -0.5rem;
+  }
+
+  .module-upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--padding);
+    padding: calc(var(--padding) * 2);
+    border: 2px dashed var(--neutral-color);
+    border-radius: var(--radius);
+    background-color: var(--background-color-lighter-lighter);
+    transition: all var(--transition-duration) ease;
+
+    &:hover {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color-transparent-50);
+    }
+
+    .uploading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--primary-color);
+
+      i {
+        color: var(--primary-color);
+      }
+
+      p {
+        margin: 0;
+        font-weight: 500;
+      }
+    }
+
+    ::ng-deep .p-fileupload {
+      .p-button {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        border-radius: var(--radius);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all var(--transition-duration) ease;
+
+        &:hover {
+          background: color-mix(in srgb, var(--primary-color) 85%, black);
+          border-color: color-mix(in srgb, var(--primary-color) 85%, black);
+          transform: translateY(-1px);
+          box-shadow: var(--box-shadow);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+
+    .upload-info {
+      text-align: center;
+
+      .upload-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+        color: var(--font-color);
+
+        i {
+          font-size: 1.2rem;
+          color: var(--primary-color);
+        }
+      }
+
+      .upload-hint {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--font-secondary-color);
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Actions section styling
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--neutral-color);
 }
