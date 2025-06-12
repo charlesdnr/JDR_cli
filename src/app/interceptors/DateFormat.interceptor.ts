@@ -6,8 +6,8 @@ export const dateFormatInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
 
-  // Only process PUT and POST requests
-  if ((req.method === 'PUT' || req.method === 'POST') && req.body) {
+  // Only process PUT and POST requests, but skip FormData
+  if ((req.method === 'PUT' || req.method === 'POST') && req.body && !(req.body instanceof FormData)) {
     const processedBody = processDateFields(req.body);
 
     // Clone the request with the processed body

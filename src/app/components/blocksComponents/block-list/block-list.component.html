@@ -1,63 +1,78 @@
 @if(loadingBlock()){
-<div class="container-skeleton">
-  <p-skeleton height="12rem" />
-  <p-skeleton height="12rem" />
-  <p-skeleton height="12rem" />
-  <p-skeleton height="12rem" />
-</div>
-} @else {
-  <div
-  #blocksContainer
-  class="blocks-container"
-  cdkDropList
-  [cdkDropListData]="blocks()"
-  (cdkDropListDropped)="onDrop($event)"
-  cdkDropListOrientation="vertical"
-  [class.highlight-drop-zone]="isDraggingIcon()"
->
-  <!-- Les blocs existants -->
-  @for(block of blocks(); track block?.id; let i = $index) {
-  @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {
-  <div class="block-placeholder">
-    <div class="placeholder-content">
-      {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
-    </div>
+  <div class="container-skeleton">
+    <p-skeleton height="12rem" />
+    <p-skeleton height="12rem" />
+    <p-skeleton height="12rem" />
+    <p-skeleton height="12rem" />
   </div>
-  }
-  <app-block-item
-    [attr.data-block-id]="block.id"
-    [isReadOnly]="isReadOnly()"
-    [block]="block"
-    [enum]="EBlockType"
-    (removeBlock)="onRemoveBlock($event)"
-    (generateAIContent)="onGenerateAI($event)"
+  } @else {
+    <div
+    #blocksContainer
+    class="blocks-container"
+    cdkDropList
+    [cdkDropListData]="blocks()"
+    (cdkDropListDropped)="onDrop($event)"
+    cdkDropListOrientation="vertical"
+    [class.highlight-drop-zone]="isDraggingIcon()"
   >
-    @if(isParagraphBlock(block)) {
-    <app-paragraph-block
-      [paragraphBlock]="asParagraphBlock(block)"
-      [isReadOnly]="isReadOnly()"
-    ></app-paragraph-block>
-    } @else if(isMusicBlock(block)) {
-    <app-music-block
-      [musicBlock]="asMusicBlock(block)"
-      [isReadOnly]="isReadOnly()"
-    ></app-music-block>
-    } @else if(isStatBlock(block)) {
-    <app-stat-block
-      [statBlock]="asStatBlock(block)"
-      [isReadOnly]="isReadOnly()"
-    ></app-stat-block>
-    } @else if(isModuleBlock(block)) {
-    <div class="module-block"></div>
-    }
-  </app-block-item>
-  } @if(isDraggingIcon() && isOverDropZone() && insertPosition() ===
-  blocks().length) {
-  <div class="block-placeholder">
-    <div class="placeholder-content">
-      {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
+    <!-- État vide avec animation -->
+    @if(showEmptyState()) {
+    <div class="empty-state-content">
+      <ng-lottie [height]="'30rem'" [options]="lottieOptions()" />
+      <h1>{{ "Glisse et dépose un block pour commencer !" | translate }}</h1>
     </div>
+    }
+    <!-- Les blocs existants -->
+    @for(block of blocks(); track block?.id; let i = $index) {
+    @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {
+    <div class="block-placeholder">
+      <div class="placeholder-content">
+        {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
+      </div>
+    </div>
+    }
+    <app-block-item
+      [attr.data-block-id]="block.id"
+      [isReadOnly]="isReadOnly()"
+      [block]="block"
+      [enum]="EBlockType"
+      (removeBlock)="onRemoveBlock($event)"
+      (generateAIContent)="onGenerateAI($event)"
+    >
+      @if(isParagraphBlock(block)) {
+      <app-paragraph-block
+        [paragraphBlock]="asParagraphBlock(block)"
+        [isReadOnly]="isReadOnly()"
+      ></app-paragraph-block>
+      } @else if(isMusicBlock(block)) {
+      <app-music-block
+        [musicBlock]="asMusicBlock(block)"
+        [isReadOnly]="isReadOnly()"
+      ></app-music-block>
+      } @else if(isStatBlock(block)) {
+      <app-stat-block
+        [statBlock]="asStatBlock(block)"
+        [isReadOnly]="isReadOnly()"
+      ></app-stat-block>
+      } @else if(isPictureBlock(block)) {
+      <app-picture-block
+        [pictureBlock]="asPictureBlock(block)"
+        [isReadOnly]="isReadOnly()"
+      ></app-picture-block>
+      } @else if(isModuleBlock(block)) {
+      <app-module-block
+        [moduleBlock]="asModuleBlock(block)"
+        [isReadOnly]="isReadOnly()"
+      ></app-module-block>
+      }
+    </app-block-item>
+    } @if(isDraggingIcon() && isOverDropZone() && insertPosition() ===
+    blocks().length) {
+    <div class="block-placeholder">
+      <div class="placeholder-content">
+        {{ getBlockPreview(draggedIconType() || EBlockType.paragraph) }}
+      </div>
+    </div>
+    }
   </div>
   }
-</div>
-}

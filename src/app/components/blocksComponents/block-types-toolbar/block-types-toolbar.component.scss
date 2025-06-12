@@ -1,30 +1,50 @@
+@use "../../../../assets/sass/core/mixins" as *;
+
 :host{
   user-select: none;
+  display: block;
+  width: 100%;
 }
 
 .icone-grab {
-  display: flex;
-  flex-direction: column;
-  border-radius: 0;
-  justify-content: flex-start;
-  gap: 25px;
-  padding: 25px 10px;
-  height: 20rem;
-  border-radius: 5px;
-  flex-shrink: 0;
+  @include flex-responsive(column, nowrap, 25px);
+  @include spacing-responsive(padding, 25px 10px);
+  
+  & {
+    border-radius: var(--radius-small);
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  @include respond-to('mobile') {
+    height: auto;
+    max-height: 15rem;
+    overflow-y: auto;
+    gap: var(--gap-mobile);
+    padding: var(--padding-mobile);
+  }
+  
+  @include respond-to('xs') {
+    gap: calc(var(--gap-mobile) * 0.7);
+    padding: var(--padding-small);
+  }
 }
 
 .icon-item {
-  display: flex;
+  @include flex-responsive(row, nowrap, var(--gap));
   align-items: center;
-  padding: 10px;
+  @include spacing-responsive(padding, var(--padding-small));
   background-color: var(--primary-color-transparent-50);
   color: var(--font-color);
   font-weight: 600;
-  gap: 10px;
-  border-radius: 4px;
+  border-radius: var(--radius-small);
   cursor: grab;
   transition: all 0.2s;
+  
+  @include respond-to('mobile') {
+    gap: var(--gap-mobile);
+    padding: var(--padding-mobile);
+  }
 
   &:hover {
     background-color: var(--primary-color);
@@ -37,7 +57,11 @@
   }
 
   i {
-    font-size: 1.7rem;
+    @include font-responsive(var(--font-size-xl));
+    
+    @include respond-to('mobile') {
+      font-size: var(--font-size-lg);
+    }
   }
 }
 
@@ -45,24 +69,23 @@
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  display: flex;
-  flex-direction: column;
+  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
   background-color: white;
-  padding: 15px;
-  border-radius: 4px;
+  @include spacing-responsive(padding, 15px);
+  border-radius: var(--radius-small);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   transform: translate(-50%, -50%);
 
   i {
-    font-size: 2rem;
+    @include font-responsive(var(--font-size-2xl));
     margin-bottom: 5px;
     color: var(--neutral-color);
   }
 
   span {
-    font-size: 0.8rem;
+    @include font-responsive(var(--font-size-xs));
     font-weight: 500;
     color: var(--neutral-color);
   }

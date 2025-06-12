@@ -1,0 +1,354 @@
+@use "../core";
+
+/// Permet de définir la couleur du placeholder d'un input de type champs de saisie
+/// @access private
+/// @param {Color} $color la couleur à appliquer
+@mixin _placeholder($color) {
+   &::-webkit-input-placeholder {
+      /* WebKit browsers */
+      color: $color;
+   }
+
+   &:-moz-placeholder {
+      /* Mozilla Firefox 4 to 18 */
+      color: $color;
+   }
+
+   &::-moz-placeholder {
+      /* Mozilla Firefox 19+ */
+      color: $color;
+   }
+
+   &:-ms-input-placeholder {
+      /* Internet Explorer 10+ */
+      color: $color;
+   }
+}
+
+/// Permet de fixer le style appliqué par le navigateur quand l'autofill est présenté
+/// @access private
+@mixin _autofill-fix() {
+   &:-webkit-autofill {
+      // Ici on est obligé de mettre !important car les navigateurs ont la priorité dessus autrement
+      @include core.add-vendor-prefixes(text-fill-color,
+         core.$font-color !important);
+
+      @include core.add-vendor-prefixes(background-clip, text !important);
+      @include core.box-shadow((inset 0 0 0 1000px core.$input-color,
+            core.$box-shadow));
+      caret-color: core.$font-color;
+   }
+}
+
+// ========== Styles ========== //
+
+/// Version par défaut d'un input standard
+/// @access private
+@mixin _default-style() {
+   height: core.$inputs-size;
+   background-color: core.$input-color;
+   color: core.$font-color;
+   padding: 0 calc(core.$inputs-size / 4);
+
+   @include core.border();
+   @include core.box-shadow(core.$box-shadow);
+   // @include core.transition(color, core.$transition-duration);
+
+   &:disabled,
+   &:has(:disabled) {
+      color: core.$font-disabled-color;
+      background-color: core.$disabled-color;
+      opacity: 1;
+      // TODO: Regarder si c'est mieux sans ou avec
+      // En dark thème ça rend bien
+      @include core.box-shadow(unset);
+   }
+
+   &:focus {
+      outline: 1px solid core.$primary-color;
+   }
+
+   // Implémentations des classes Reactive Forms
+}
+
+/// Version outlined d'un input standard
+/// @access private
+@mixin _outline-style() {
+   &.outlined {
+      @include core.border(1px, solid, core.$font-color);
+      background-color: transparent;
+
+      &:disabled,
+      &:has(:disabled) {
+         // Changer le background color ?
+         opacity: 1;
+         @include core.border(1px, solid, core.$font-disabled-color);
+      }
+   }
+}
+
+/// Version semi-outlined d'un input standard
+/// @access private
+@mixin _semi-outlined-style() {
+   &.semi-outlined {
+      background-color: transparent;
+      @include core.box-shadow();
+      @include core.border();
+      @include core.add-vendor-prefixes(border-bottom,
+         1px solid core.$font-color );
+
+      &:disabled,
+      &:has(:disabled) {
+         // Changer le background color ?
+         opacity: 1;
+         @include core.add-vendor-prefixes(border-bottom,
+            1px solid core.$font-disabled-color );
+      }
+   }
+}
+
+// ========== SASS ========== //
+
+// Style par défaut des inputs
+input.x {
+
+   // Appliquer le style par défaut des inputs
+   &:not([type="checkbox"],
+      [type="color"],
+      [type="file"],
+      [type="radio"],
+      [type="range"]) {
+      @include _default-style();
+      @include _outline-style();
+      @include _semi-outlined-style();
+
+      @include _placeholder(core.$placeholder-color);
+      @include _autofill-fix();
+   }
+
+   &[type="checkbox"] {
+      /* Styles spécifiques pour les inputs de type checkbox */
+      // $checkbox-size: calc(core.$inputs-size / 1.5);
+      position: relative;
+      cursor: pointer;
+      background-color: core.$neutral-color;
+      min-width: calc(core.$inputs-size / 1.5);
+      min-height: calc(core.$inputs-size / 1.5);
+      @include core.size(calc(core.$inputs-size / 1.5));
+      @include core.box-shadow(core.$box-shadow);
+
+      &.outlined {
+         @include core.outline(1px, solid, core.$font-color);
+         background-color: transparent;
+      }
+
+      &:not(.toggle):checked {
+         background-color: core.$primary-color;
+
+         &::after {
+            position: absolute;
+            content: "";
+
+            width: calc(core.$inputs-size / 3);
+            height: calc(core.$inputs-size / 6);
+            top: 45%;
+            left: 50%;
+
+            @include core.add-vendor-prefixes(border-left, 2px solid white);
+            @include core.add-vendor-prefixes(border-bottom, 2px solid white);
+            @include core.transform(translate(-50%, -50%) rotateZ(-50deg));
+         }
+      }
+
+      &.toggle {
+         position: relative;
+         aspect-ratio: 2 / 1;
+         width: calc(core.$inputs-size / 1.5) * 2;
+         @include core.transition(background-color, core.$transition-duration);
+
+         &::after {
+            position: absolute;
+            content: "";
+            background-color: white;
+            aspect-ratio: 1 / 1;
+
+            height: calc(core.$inputs-size / 1.5 - core.$padding / 4);
+            top: calc(core.$padding / 8);
+            left: calc(core.$padding / 8);
+
+            @include core.transition(all, core.$transition-duration);
+         }
+
+         &.rounded::after {
+            @include core.border-radius(core.$inner-radius);
+         }
+
+         &.circle::after {
+            @include core.border-radius(9999px);
+         }
+
+         &:active::after {
+            aspect-ratio: 1.5 / 1;
+         }
+
+         &:checked {
+            background-color: core.$primary-color;
+            @include core.transition(background-color);
+
+            &::after {
+               left: calc(100% - core.$padding / 8);
+               @include core.transform(translateX(-100%));
+               @include core.transition(all, core.$transition-duration);
+            }
+         }
+      }
+   }
+
+   &[type="date"] {
+      cursor: text;
+
+      /* Styles spécifiques pour les inputs de type date */
+      &::-webkit-calendar-picker-indicator {
+         cursor: pointer;
+      }
+   }
+
+   // Comportement par défaut peu importe les inputs
+   &:disabled {
+      cursor: default;
+   }
+}
+
+// Style des selects
+
+select.x {
+   outline: none;
+   @include _default-style();
+   @include _outline-style();
+   @include _semi-outlined-style();
+
+   @include _placeholder(core.$placeholder-color);
+
+   option {
+      background-color: core.$input-color;
+      color: core.$font-color;
+   }
+}
+
+// ========== Section pour les inputs ayant un container ========== //
+
+.input-container {
+   display: flex;
+   flex-flow: column;
+
+   &:has( :not(input[type="checkbox"],
+         input[type="color"],
+         input[type="file"],
+         input[type="radio"],
+         input[type="range"])) {
+      .content {
+         display: flex;
+         flex-flow: row;
+         align-items: center;
+
+         // Rendre l'input invisible quand il est dans le container
+         input {
+            flex: 1;
+            background-color: transparent;
+            @include core.box-shadow();
+            padding: 0;
+
+            &.right {
+               text-align: right;
+            }
+
+            &:focus {
+               @include core.outline();
+            }
+         }
+
+         // Support pour les prefixes et suffixes
+         .suffix,
+         .prefix {
+            height: core.$inputs-size;
+            line-height: calc(core.$inputs-size + 1px);
+         }
+
+         // Ajoute un margin aux éléments ajouté si un suffix est présent
+         .suffix:has(+ *) {
+            margin-right: calc(core.$inputs-size / 8);
+         }
+
+         // Les variances de styles de l'input
+         @include _default-style();
+         @include _outline-style();
+         @include _semi-outlined-style();
+      }
+
+      // Variante utilisant les labels flottants
+      &.float {
+         position: relative;
+         padding-top: calc(core.$inputs-size / 2);
+
+         // Position du label dans le champ
+         >label {
+            position: absolute;
+            @include core.transition(transform, core.$transition-duration);
+            @include core.transform(translate(calc(core.$inputs-size / 4),
+                  calc(core.$inputs-size / 4)));
+         }
+
+         // Définit les condition pour que le label soit positionné au dessus du champ
+         &:has(input:focus, input:not(:placeholder-shown)) {
+
+            // Positionnement du label
+            >label {
+               @include core.transition(transform, core.$transition-duration);
+               @include core.transform(translate(0, -100%));
+               font-size: small;
+            }
+
+            // Afficher les éléments si le label n'est plus dans l'input
+
+            // Afficher le placeholder
+            input {
+               // @include core.transition(all, core.$transition-duration);
+               @include _placeholder(core.$placeholder-color);
+            }
+
+            .content>*:not(input ~ *, input) {
+               @include core.transition(opacity, core.$transition-duration);
+               opacity: 1;
+            }
+         }
+
+         // Cacher les éléments si nécessaire quand le label est dans l'input
+
+         // Par défaut cacher le placeholder
+         input {
+            // @include core.transition(all, core.$transition-duration);
+            @include _placeholder(transparent);
+         }
+
+         .content>*:not(input ~ *, input) {
+            @include core.transition(opacity, core.$transition-duration);
+            // J'ai choisis de mettre l'opacité pour conserver les tailles des éléments
+            opacity: 0;
+         }
+      }
+
+      // Quand l'input contenue dans l'input-container est disabled
+      // Disabled
+      // Permet de changer la couleur du label
+      &:has(:disabled) {
+         color: core.$font-disabled-color;
+      }
+   }
+
+   // Appliquer le style aux erreurs
+   >.errors {
+      color: core.$danger-color;
+      font-style: italic;
+      font-size: small;
+   }
+}

@@ -20,6 +20,8 @@ import { MusicBlock } from '../../classes/MusicBlock';
 import { IntegratedModuleBlock } from '../../classes/IntegratedModuleBlock';
 import { GameSystem } from '../../classes/GameSystem';
 import { StatBlock } from '../../classes/StatBlock';
+import { PictureBlock } from '../../classes/PictureBlock';
+import { Picture } from '../../classes/Picture';
 import { EBlockType } from '../../enum/BlockType';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { BlockHttpService } from '../../services/https/block-http.service';
@@ -122,10 +124,13 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   private cursorSubscription: StompSubscription | undefined;
   private updateSubscription: StompSubscription | undefined;
 
-  private cursorPositionsMap = new Map<number, {
-    current: { x: number, y: number },
-    target: { x: number, y: number }
-  }>();
+  private cursorPositionsMap = new Map<
+    number,
+    {
+      current: { x: number; y: number };
+      target: { x: number; y: number };
+    }
+  >();
   private animationFrameId: number | null = null;
 
   // Pour le suivi du curseur
@@ -158,7 +163,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   setupCollaborativeFunctions(moduleId: number): void {
     // S'abonner aux curseurs des autres utilisateurs
-    this.cursorSubscription = this.notificationService.subscribeToModuleCursors(moduleId);
+    this.cursorSubscription =
+      this.notificationService.subscribeToModuleCursors(moduleId);
 
     // S'abonner aux mises à jour du contenu
     this.updateSubscription = this.notificationService.subscribeToModuleUpdates(
@@ -180,7 +186,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   private updateCursorPositions(): void {
     // Mettre à jour la position du curseur avec interpolation
-    this.notificationService.userCursors().forEach(cursor => {
+    this.notificationService.userCursors().forEach((cursor) => {
       // Ignorer notre propre curseur
       if (cursor.userId === this.currentUser()?.id) return;
 
@@ -188,7 +194,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       if (!this.cursorPositionsMap.has(cursor.userId)) {
         this.cursorPositionsMap.set(cursor.userId, {
           current: { x: cursor.position.x, y: cursor.position.y },
-          target: { x: cursor.position.x, y: cursor.position.y }
+          target: { x: cursor.position.x, y: cursor.position.y },
         });
         return;
       }
@@ -202,7 +208,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       positions.current.y += (positions.target.y - positions.current.y) * 0.3;
 
       // Mettre à jour les coordonnées CSS dans le DOM directement pour éviter les cycles de détection
-      const cursorElement = document.querySelector(`.remote-cursor[data-user-id="${cursor.userId}"]`);
+      const cursorElement = document.querySelector(
+        `.remote-cursor[data-user-id="${cursor.userId}"]`
+      );
       if (cursorElement) {
         (cursorElement as HTMLElement).style.left = `${positions.current.x}px`;
         (cursorElement as HTMLElement).style.top = `${positions.current.y}px`;
@@ -244,7 +252,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       blockId: 0, // Pas important dans ce cas
       position: { x, y },
       userColor: this.getUserColor(currentUser.id),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.notificationService.sendCursorPosition(module.id, cursorPosition);
@@ -260,7 +268,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     const version = this.currentVersion();
     if (!version || !version.blocks) return;
 
-    const blockIndex = version.blocks.findIndex(b => b.id === update.blockId);
+    const blockIndex = version.blocks.findIndex((b) => b.id === update.blockId);
     if (blockIndex === -1) return;
 
     const block = version.blocks[blockIndex];
@@ -292,7 +300,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
 
     // Forcer la mise à jour du signal
-    this.moduleService.currentModuleVersion.update(version => {
+    this.moduleService.currentModuleVersion.update((version) => {
       if (!version) return undefined;
 
       const updatedBlocks = [...version.blocks];
@@ -302,23 +310,30 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     });
   }
 
-  onBlockCursorPosition(event: { blockId: number, position: DOMRect, elementId: string }) {
+  onBlockCursorPosition(event: {
+    blockId: number;
+    position: DOMRect;
+    elementId: string;
+  }) {
     const cursorPosition: CursorPosition = {
       userId: this.currentUser()?.id || 0,
       username: this.currentUser()?.username || 'Utilisateur',
       blockId: event.blockId,
       position: {
         x: event.position.left,
-        y: event.position.top
+        y: event.position.top,
       },
       elementId: event.elementId,
       userColor: this.getUserColor(this.currentUser()?.id || 0),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Envoyer la position via le service de notification
     if (this.currentModule()?.id) {
-      this.notificationService.sendCursorPosition(this.currentModule()!.id, cursorPosition);
+      this.notificationService.sendCursorPosition(
+        this.currentModule()!.id,
+        cursorPosition
+      );
     }
   }
 
@@ -484,10 +499,11 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         new ParagraphBlock(tempModuleVersionId, 'Preview Paragraphe', 0, user),
         new MusicBlock(tempModuleVersionId, 'Preview Musique', 1, user),
         new StatBlock(tempModuleVersionId, 'Preview Stats', 2, user),
+        new PictureBlock(tempModuleVersionId, 'Preview Image', 3, user),
         new IntegratedModuleBlock(
           tempModuleVersionId,
           'Preview Module Intégré',
-          3,
+          4,
           user
         ),
       ];
@@ -750,8 +766,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                       index,
                       this.currentUser()!,
                       (block as MusicBlock).label ||
-                      block.title ||
-                      'Ambiance musicale',
+                        block.title ||
+                        'Ambiance musicale',
                       (block as MusicBlock).src || ''
                     );
                     break;
@@ -764,6 +780,17 @@ export class NewProjectComponent implements OnInit, OnDestroy {
                       this.currentUser()!,
                       (block as StatBlock).statRules || '',
                       (block as StatBlock).statValues || ''
+                    );
+                    break;
+
+                  case 'picture':
+                    newBlock = new PictureBlock(
+                      module.id,
+                      block.title || 'Statistiques générées',
+                      index,
+                      this.currentUser()!,
+                      (block as PictureBlock)?.picture,
+                      (block as PictureBlock)?.label ?? '',
                     );
                     break;
                 }

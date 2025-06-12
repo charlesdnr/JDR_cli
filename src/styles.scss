@@ -269,7 +269,9 @@
 html,
 body {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--background-color);
 }
 .p-autocomplete-input-multiple {
   padding: calc(var(--padding) / 2);
@@ -278,6 +280,12 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding-top: 70px; // Compensation pour le header fixe
+}
+
+// Supprime le padding quand on est en mode auth (pas de header)
+body.auth-mode {
+  padding-top: 0 !important;
 }
 
 body.resizing {
@@ -432,4 +440,8 @@ body.resizing [contenteditable="true"] {
   gap: 8px;
   margin-bottom: 15px;
   width: fit-content;
+}
+
+app-auth {
+  height: 100%;
 }

@@ -63,8 +63,9 @@
     </div>
   </div>
   } @else {
+  <!-- 0. Gestion des versions -->
   <div class="container-label">
-    <label for="versions">Version du module</label>
+    <label for="versions">{{ "Version du module" | translate }}</label>
     <p-select
       [filter]="true"
       fluid
@@ -86,6 +87,7 @@
       </ng-template>
     </p-select>
   </div>
+  <!-- 1. Informations de base -->
   <div class="container-label">
     <label for="moduleName">{{ "Titre" | translate }}</label>
     <input
@@ -98,6 +100,7 @@
       autocomplete="false"
     />
   </div>
+
   <div class="container-label">
     <label for="moduleDescription">{{ "Description" | translate }}</label>
     <textarea
@@ -110,32 +113,90 @@
       autocomplete="false"
     ></textarea>
   </div>
+
+  <!-- 2. Image du module -->
   <div class="container-label">
-    <label for="gameSystem">{{ "Jeux" | translate }}</label>
+    <label>{{ "Image du module" | translate }}</label>
+    <div class="module-image-section">
+      @if(hasModuleImage()) {
+      <div class="module-image-container">
+        <div class="module-image-wrapper">
+          <p-image
+            [src]="getModuleImageSrc()"
+            [alt]="getModuleImageTitle()"
+            width="200px"
+            [preview]="true"
+            [style]="{ maxWidth: '200px', height: 'auto' }"
+          />
+          <div class="module-image-actions">
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+              (onClick)="removeModuleImage()"
+              [disabled]="isReadOnly()"
+            />
+          </div>
+        </div>
+
+        @if(currentModule().picture.title) {
+        <div class="module-image-caption">
+          {{ currentModule().picture.title }}
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="module-upload-zone">
+        @if(uploadingModuleImage()) {
+        <div class="uploading-state">
+          <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
+          <p>Téléchargement en cours...</p>
+        </div>
+        } @else {
+        <p-fileUpload
+          mode="basic"
+          chooseLabel="Choisir une image"
+          accept="image/*"
+          maxFileSize="5000000"
+          (onSelect)="onModuleImageSelect($event)"
+          [showUploadButton]="false"
+          [auto]="true"
+          [disabled]="isReadOnly()"
+          styleClass="upload-button"
+        />
+
+        <div class="upload-info">
+          <p class="upload-text">
+            <i class="pi pi-image"></i>
+            Image représentant le module
+          </p>
+          <p class="upload-hint">
+            Formats acceptés: JPG, PNG, GIF, WebP (max 5MB)
+          </p>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- 3. Configuration du jeu -->
+  <div class="container-label">
+    <label for="gameSystem">{{ "Système de jeu" | translate }}</label>
     <p-select
       [options]="gameSystems()"
       [loading]="gameLoading"
       [disabled]="isReadOnly()"
       [(ngModel)]="currentGameSystem"
       optionLabel="name"
-      placeholder="Selectionner un jeux"
+      placeholder="Sélectionner un système de jeu"
       inputId="gameSystem"
     ></p-select>
   </div>
+
+  <!-- 4. Tags -->
   <div class="container-label">
-    <label for="stockage">{{ "Stocker dans" | translate }}</label>
-    <p-treeselect
-      [options]="treeNode()"
-      [disabled]="needToCreate()"
-      metaKeySelection="true"
-      [loading]="folderLoading"
-      [(ngModel)]="selectedFolder"
-      (ngModelChange)="saveFolder()"
-      [fluid]="true"
-    />
-  </div>
-  <div class="container-label">
-    <label for="tags">Tags</label>
+    <label for="tags">{{ "Tags" | translate }}</label>
     <p-autocomplete
       #autocomplete
       [(ngModel)]="tagsSearch"
@@ -167,45 +228,59 @@
       }
     </div>
   </div>
-  <p-button
-    [label]="needToCreate() ? 'Créer' : 'Sauvegarder'"
-    [loading]="loadingSave()"
-    [disabled]="isReadOnly()"
-    icon="pi pi-save"
-    (onClick)="save()"
-    severity="success"
-  />
-  <p-button
-    [disabled]="needToCreate() || !canPublish()"
-    (onClick)="published()"
-    [loading]="loadingPublished()"
-    [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
-    [label]="currentVersion().published ? 'Rendre Privée' : 'Publier'"
-    severity="help"
-  />
+
+  <!-- 5. Organisation -->
+  <div class="container-label">
+    <label for="stockage">{{ "Dossier de stockage" | translate }}</label>
+    <p-treeselect
+      [options]="treeNode()"
+      [disabled]="needToCreate()"
+      metaKeySelection="true"
+      [loading]="folderLoading"
+      [(ngModel)]="selectedFolder"
+      (ngModelChange)="saveFolder()"
+      [fluid]="true"
+    />
+  </div>
+
+  <!-- 6. Collaborateurs (si privé) -->
   @if(!currentVersion().published){
   <div class="container-label">
+    <label>{{ "Collaborateurs" | translate }}</label>
     <app-user-avatar-choose [disabled]="!canInvite()" />
   </div>
   }
-  <!-- <p-button
-    label="Générer avec l'IA"
-    icon="pi pi-sparkles"
-    styleClass="p-button-help p-button-raised"
-    (onClick)="generateCompleteModule()"
-    [disabled]="true"
-    pTooltip="Bientot disponible !"
-    tooltipPosition="top"
-  ></p-button> -->
+
+  <!-- 7. Actions principales -->
+  <div class="actions-section">
+    <p-button
+      [label]="needToCreate() ? 'Créer le module' : 'Sauvegarder'"
+      [loading]="loadingSave()"
+      [disabled]="isReadOnly()"
+      icon="pi pi-save"
+      (onClick)="save()"
+      severity="success"
+      [fluid]="true"
+    />
+
+    <p-button
+      [disabled]="needToCreate() || !canPublish()"
+      (onClick)="published()"
+      [loading]="loadingPublished()"
+      [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
+      [label]="currentVersion().published ? 'Rendre privé' : 'Publier'"
+      severity="help"
+      [fluid]="true"
+    />
+  </div>
+  } @if(!isReadOnly() && currentUser()?.id === currentModule().creator.id){
+  <p-button
+    [fluid]="true"
+    [disabled]="needToCreate() || isReadOnly()"
+    [label]="'Supprimer'"
+    icon="pi pi-trash"
+    (onClick)="deleteRequested.emit()"
+    severity="danger"
+  />
   }
 </div>
-@if(!isReadOnly() && currentUser()?.id === currentModule().creator.id){
-<p-button
-  [fluid]="true"
-  [disabled]="needToCreate() || isReadOnly()"
-  [label]="'Supprimer'"
-  icon="pi pi-trash"
-  (onClick)="deleteRequested.emit()"
-  severity="danger"
-/>
-}

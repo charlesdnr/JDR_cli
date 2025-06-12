@@ -1,0 +1,301 @@
+.explore-container {
+  width: 100%;
+  height: 90%;
+  overflow-y: auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    gap: 1.5rem;
+    height: 100vh;
+  }
+}
+
+.explore-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+
+  .header-content {
+    h1 {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--font-secondary-color);
+      margin-bottom: 1rem;
+    }
+
+    .stats {
+      .stat-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: var(--background-color-lighter);
+        border-radius: 20px;
+        font-size: 0.9rem;
+
+        strong {
+          color: var(--primary-color);
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.filters-section {
+  background-color: var(--background-color-lighter);
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex-shrink: 0;
+
+  .search-bar {
+    ::ng-deep .p-inputtext {
+      width: 100%;
+      height: 48px;
+      font-size: 1rem;
+      border-radius: 24px;
+      padding-left: 3rem;
+    }
+
+    ::ng-deep .p-iconfield {
+      width: 100%;
+    }
+  }
+
+  .advanced-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        color: var(--font-color);
+        font-size: 0.9rem;
+      }
+
+      ::ng-deep .p-select {
+        width: 100%;
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: flex-end;
+
+      ::ng-deep .p-button {
+        height: 40px;
+      }
+    }
+  }
+
+  .tags-filter {
+    label {
+      display: block;
+      font-weight: 500;
+      color: var(--font-color);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      ::ng-deep .p-chip {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+
+        &.clickable-tag {
+          background-color: var(--background-color);
+          color: var(--font-color);
+
+          &:hover {
+            background-color: var(--primary-color-transparent-50);
+            border-color: var(--primary-color);
+          }
+        }
+
+        &.selected-tag {
+          background-color: var(--primary-color);
+          color: white;
+          border-color: var(--primary-color);
+        }
+      }
+    }
+  }
+}
+
+.modules-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  .loading-grid,
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    flex: 1;
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  .module-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-color-lighter);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: fit-content;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    app-module-viewer {
+      flex: 1;
+    }
+
+    .module-meta {
+      padding: 1rem;
+      border-top: 1px solid var(--neutral-color-transparent);
+
+      .module-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+
+        .tag-badge {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          background-color: var(--primary-color-transparent-50);
+          color: var(--primary-color);
+          border-radius: 12px;
+          font-weight: 500;
+
+          &.more {
+            background-color: var(--neutral-color);
+            color: white;
+          }
+        }
+      }
+
+      .module-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--font-secondary-color);
+        font-size: 0.8rem;
+
+        .stat {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+
+          i {
+            font-size: 0.7rem;
+          }
+        }
+      }
+    }
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+
+    .no-results-content {
+      text-align: center;
+      max-width: 400px;
+
+      h3 {
+        color: var(--font-color);
+        margin: 1rem 0 0.5rem 0;
+        font-size: 1.5rem;
+      }
+
+      p {
+        color: var(--font-secondary-color);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+// Pagination
+.pagination-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1rem 0;
+  flex-shrink: 0;
+
+  .pagination-info {
+    font-size: 0.9rem;
+    color: var(--font-secondary-color);
+    margin: 0 1rem;
+  }
+
+  ::ng-deep .p-paginator {
+    border: none;
+    background: transparent;
+
+    .p-paginator-element {
+      border-radius: 8px;
+      margin: 0 2px;
+
+      &:hover {
+        background-color: var(--primary-color-transparent-50);
+      }
+
+      &.p-paginator-page-selected {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    }
+  }
+}

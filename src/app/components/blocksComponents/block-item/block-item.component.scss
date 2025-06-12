@@ -1,12 +1,17 @@
+@use "../../../../assets/sass/core/mixins" as *;
+
 .block-container {
   background-color: var(--background-color-lighter);
-  border-radius: 8px;
+  border-radius: var(--radius-mobile);
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   width: 100%;
-  // min-height: 180px !important;
+  
+  @include respond-to('xs') {
+    border-radius: var(--radius-small);
+  }
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -36,22 +41,38 @@
 }
 
 .block-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--neutral-color);
-  height: 50px;
-  flex-shrink: 0;
+  @include flex-responsive(row, nowrap);
+  @include spacing-responsive(padding, 8px 12px);
+  
+  & {
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--neutral-color);
+    height: 50px;
+    flex-shrink: 0;
+  }
+  
+  @include respond-to('mobile') {
+    height: 45px;
+    padding: 6px 10px;
+  }
+  
+  @include respond-to('xs') {
+    height: 40px;
+    padding: 5px 8px;
+  }
 
   .texte {
-    display: flex;
+    @include flex-responsive(row, nowrap, var(--gap));
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    
+    @include respond-to('mobile') {
+      gap: var(--gap-mobile);
+    }
 
     i {
-      font-size: 1rem;
+      @include font-responsive(var(--font-size-base));
     }
   }
 }
@@ -71,19 +92,28 @@
 
 .block-controls {
   cursor: pointer;
-  display: flex;
-  gap: calc(var(--padding) / 2);
+  @include flex-responsive(row, nowrap, calc(var(--gap) / 2));
+  
+  @include respond-to('mobile') {
+    gap: calc(var(--gap-mobile) / 2);
+  }
 }
 
 .block-preview {
   background-color: white;
-  border-radius: 8px;
+  border-radius: var(--radius-mobile);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   min-width: 200px;
   min-height: 80px;
-  display: flex;
+  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
+  
+  @include respond-to('mobile') {
+    min-width: 150px;
+    min-height: 60px;
+    border-radius: var(--radius-small);
+  }
 
   .block-preview-content {
     padding: 10px 15px;
@@ -95,13 +125,22 @@
 .block-placeholder {
   background-color: rgba(59, 130, 246, 0.15);
   border: 2px dashed rgba(59, 130, 246, 0.4);
-  border-radius: 8px;
+  border-radius: var(--radius-mobile);
   min-height: 180px !important;
-  margin: 15px 0;
+  @include spacing-responsive(margin, 15px 0);
   animation: pulse-blue 1.5s infinite;
-  display: flex;
+  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
+  
+  @include respond-to('mobile') {
+    min-height: 140px !important;
+  }
+  
+  @include respond-to('xs') {
+    min-height: 120px !important;
+    border-radius: var(--radius-small);
+  }
 
   .placeholder-content {
     color: rgba(59, 130, 246, 0.6);
@@ -127,11 +166,15 @@
 .readonly-block {
   box-shadow: none;
   border: none;
-  margin-bottom: 1.5rem;
+  @include spacing-responsive(margin-bottom, 1.5rem);
   
   .block-header {
     background-color: var(--primary-color-transparent-50);
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--radius-mobile) var(--radius-mobile) 0 0;
+    
+    @include respond-to('xs') {
+      border-radius: var(--radius-small) var(--radius-small) 0 0;
+    }
     
     .texte {
       font-weight: 600;

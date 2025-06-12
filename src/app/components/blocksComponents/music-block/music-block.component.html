@@ -3,33 +3,33 @@
   <h3 class="block-title">{{ musicBlock().title }}</h3>
   @if(musicBlock().label) {
   <p class="music-label">{{ musicBlock().label }}</p>
-  } @if(musicBlock().src) {
-  <audio controls [src]="musicBlock().src"></audio>
-  } @else {
-  <p class="music-description">
-    Description: {{ musicBlock().label || "Aucune description disponible" }}
-  </p>
   }
+  <app-audioplayer [isReadOnly]="true" />
 </div>
 } @else {
-
 <div class="music-block">
-  @if(musicBlock() && musicBlock().label) {
-  <div class="music-content">
-    <div class="music-details">
-      <h4>{{ musicBlock().label }}</h4>
-      @if(musicBlock().src) {
-      <audio controls [src]="musicBlock().src"></audio>
-      } @else {
-      <p class="music-description">
-        Aucune source audio disponible. Description de l'ambiance musicale
-        souhaitée.
-      </p>
-      }
+  <!-- Informations du bloc -->
+  <div class="block-info">
+    <div class="container-label">
+      <label for="musicTitle">{{ "Titre" | translate }}</label>
+      <input
+        id="musicTitle"
+        type="text"
+        pInputText
+        [(ngModel)]="musicBlock().title"
+        placeholder="Titre de l'ambiance musicale..."
+        [disabled]="isReadOnly()"
+      />
     </div>
   </div>
-  } @else {
-  <app-audioplayer />
-  }
+
+  <!-- Lecteur audio avec upload -->
+  <div class="audio-section">
+    <app-audioplayer 
+      [isReadOnly]="isReadOnly()"
+      (onAudioUploaded)="onAudioUploaded($event)"
+      (onAudioRemoved)="onAudioRemoved()"
+    />
+  </div>
 </div>
 }

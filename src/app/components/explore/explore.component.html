@@ -1,0 +1,171 @@
+<div class="explore-container">
+    <!-- En-tête avec titre et statistiques -->
+    <div class="explore-header">
+      <div class="header-content">
+        <h1>{{ "Explorer les projets" | translate }}</h1>
+        <p class="subtitle">Découvrez des modules créés par la communauté</p>
+        @if(!loading()) {
+          <div class="stats">
+            <span class="stat-item">
+              <strong>{{ totalElements() }}</strong> 
+              {{ totalElements() === 1 ? 'module trouvé' : 'modules trouvés' }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  
+    <!-- Barre de recherche et filtres -->
+    <div class="filters-section">
+      <!-- Recherche principale -->
+      <div class="search-bar">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input 
+            type="text" 
+            pInputText 
+            [placeholder]="'Rechercher un module...' | translate"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </p-iconfield>
+      </div>
+  
+      <!-- Filtres avancés -->
+      <div class="advanced-filters">
+        <!-- Système de jeu -->
+        <div class="filter-group">
+          <label>{{ "Système de jeu" | translate }}</label>
+          <p-select
+            [options]="gameSystems()"
+            [ngModel]="selectedGameSystem()"
+            (ngModelChange)="onGameSystemChange($event)"
+            optionLabel="name"
+            [placeholder]="'Tous les systèmes' | translate"
+            [showClear]="true"
+          />
+        </div>
+  
+        <!-- Type de module -->
+        <div class="filter-group">
+          <label>{{ "Type de module" | translate }}</label>
+          <p-select
+            [options]="moduleTypes"
+            [ngModel]="selectedModuleType()"
+            (ngModelChange)="onModuleTypeChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            [placeholder]="'Tous les types' | translate"
+            [showClear]="true"
+          />
+        </div>
+  
+        <!-- Tri -->
+        <div class="filter-group">
+          <label>{{ "Trier par" | translate }}</label>
+          <p-select
+            [options]="sortOptions"
+            [ngModel]="sortBy()"
+            (ngModelChange)="onSortChange($event)"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
+  
+        <!-- Bouton clear filters -->
+        <div class="filter-actions">
+          <p-button
+            label="Effacer les filtres"
+            icon="pi pi-filter-slash"
+            severity="secondary"
+            (onClick)="clearFilters()"
+            [disabled]="!searchTerm() && selectedTags().length === 0 && !selectedGameSystem() && !selectedModuleType()"
+          />
+        </div>
+      </div>
+  
+      <!-- Tags populaires -->
+      <div class="tags-filter">
+        <label>{{ "Tags populaires" | translate }}</label>
+        <div class="tags-container">
+          @for(tag of availableTags().slice(0, 15); track tag.id) {
+            <p-chip
+              [label]="tag.name"
+              [removable]="false"
+              (click)="onTagToggle(tag)"
+              [styleClass]="isTagSelected(tag) ? 'selected-tag' : 'clickable-tag'"
+            />
+          }
+        </div>
+      </div>
+
+      <!-- Tags sélectionnés -->
+      @if(selectedTags().length > 0) {
+        <div class="selected-tags">
+          <label>Tags sélectionnés:</label>
+          <div class="tags-container">
+            @for(tag of selectedTags(); track tag.id) {
+              <p-chip
+                [label]="tag.name"
+                [removable]="true"
+                (onRemove)="onTagToggle(tag)"
+                styleClass="selected-tag"
+              />
+            }
+          </div>
+        </div>
+      }
+    </div>
+  
+    <!-- Liste des modules -->
+    <div class="modules-section">
+      @if(loading()) {
+        <div class="loading-grid">
+          @for(i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+            <p-skeleton height="250px" width="100%" />
+          }
+        </div>
+      } @else if(displayedModules().length === 0) {
+        <div class="no-results">
+          <div class="no-results-content">
+            <i class="pi pi-search" style="font-size: 3rem; color: var(--neutral-color);"></i>
+            <h3>Aucun module trouvé</h3>
+            <p>Essayez de modifier vos critères de recherche ou d'exploration.</p>
+            <p-button
+              label="Effacer les filtres"
+              icon="pi pi-refresh"
+              (onClick)="clearFilters()"
+            />
+          </div>
+        </div>
+      } @else {
+        <div class="modules-grid">
+          @for(module of displayedModules(); track module.id) {
+            <div class="module-card-wrapper">
+              <app-module-viewer [moduleId]="module.id" [moduleData]="module" />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Pagination -->
+      @if(!loading() && totalElements() > pageSize()) {
+        <div class="pagination-section">
+          <p-paginator
+            [rows]="pageSize()"
+            [totalRecords]="totalElements()"
+            [first]="currentPage() * pageSize()"
+            (onPageChange)="onPageChange($event)"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Page {currentPage} sur {totalPages}"
+            [showFirstLastIcon]="true"
+            [showPageLinks]="true"
+            [pageLinkSize]="5"
+          />
+          <div class="pagination-info">
+            {{ getPaginationInfo() }}
+          </div>
+        </div>
+      }
+    </div>
+  </div>

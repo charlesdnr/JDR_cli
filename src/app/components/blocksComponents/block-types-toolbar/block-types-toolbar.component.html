@@ -1,5 +1,5 @@
 <div class="icone-grab">
-  @for(block of availableBlocks(); track block.type) {
+  @for(block of availableBlocks(); track $index) {
   <div
     class="icon-item"
     (mousedown)="startIconDrag($event, block.type)"

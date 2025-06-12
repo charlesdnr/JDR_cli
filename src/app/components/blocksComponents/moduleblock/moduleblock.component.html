@@ -1,0 +1,156 @@
+@if(isReadOnly()) {
+    <div class="module-block-readonly">
+      <h3 class="block-title">{{ moduleBlock().title }}</h3>
+      
+      @if(loadingSelectedModule()) {
+        <div class="loading-state">
+          <p-skeleton height="120px" width="100%" />
+        </div>
+      } @else if(hasSelectedModule()) {
+        @let module = selectedModule()!;
+        <div class="integrated-module-card readonly">
+          <div class="module-header">
+            <div class="module-info">
+              <h4 class="module-title">{{ module.title }}</h4>
+              <p class="module-creator">Par {{ getModuleCreator() }}</p>
+            </div>
+            <div class="module-actions">
+              <p-button
+                icon="pi pi-external-link"
+                severity="secondary"
+                size="small"
+                (onClick)="openModuleInNewTab()"
+                pTooltip="Ouvrir dans un nouvel onglet"
+                tooltipPosition="top"
+              />
+            </div>
+          </div>
+          
+          <div class="module-content">
+            <p class="module-description">{{ getModulePreview() }}</p>
+            
+            <div class="module-stats">
+              <span class="stat">
+                <i class="pi pi-copy"></i>
+                {{ getModuleVersionsCount() }} {{ getModuleVersionsCount() === 1 ? 'version' : 'versions' }}
+              </span>
+              <span class="stat">
+                <i class="pi pi-globe"></i>
+                {{ getPublishedVersionsCount() }} {{ getPublishedVersionsCount() === 1 ? 'publiée' : 'publiées' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="no-module-selected readonly">
+          <i class="pi pi-link" style="font-size: 2rem;"></i>
+          <p>Aucun module intégré sélectionné</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="module-block">
+      <!-- Configuration du bloc -->
+      <div class="block-config">
+        <div class="container-label">
+          <label for="moduleTitle">{{ "Titre du bloc" | translate }}</label>
+          <input
+            id="moduleTitle"
+            type="text"
+            pInputText
+            [ngModel]="moduleBlock().title"
+            (ngModelChange)="onTitleChange($event)"
+            placeholder="Titre du bloc module..."
+          />
+        </div>
+        
+        <div class="container-label">
+          <label for="moduleSelect">{{ "Module à intégrer" | translate }}</label>
+          @if(loadingModules()) {
+            <p-skeleton height="40px" width="100%" />
+          } @else {
+            <p-select
+              id="moduleSelect"
+              [options]="moduleOptions()"
+              [ngModel]="moduleBlock().moduleId"
+              (ngModelChange)="onModuleSelect($event)"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un module..."
+              [showClear]="true"
+              [filter]="true"
+              filterBy="label"
+            >
+              <ng-template #selectedItem let-selectedOption>
+                <div class="selected-module">
+                  <span class="selected-title">{{ selectedOption.label }}</span>
+                </div>
+              </ng-template>
+              
+              <ng-template #item let-option>
+                <div class="module-option">
+                  <div class="option-title">{{ option.label }}</div>
+                  @if(option.description) {
+                    <div class="option-description">{{ option.description }}</div>
+                  }
+                </div>
+              </ng-template>
+            </p-select>
+          }
+        </div>
+      </div>
+  
+      <!-- Aperçu du module sélectionné -->
+      @if(loadingSelectedModule()) {
+        <div class="module-preview loading">
+          <p-skeleton height="150px" width="100%" />
+        </div>
+      } @else if(hasSelectedModule()) {
+        @let module = selectedModule()!;
+        <div class="integrated-module-card">
+          <div class="module-header">
+            <div class="module-info">
+              <h4 class="module-title">{{ module.title }}</h4>
+              <p class="module-creator">Par {{ getModuleCreator() }}</p>
+            </div>
+            <div class="module-actions">
+              <p-button
+                icon="pi pi-external-link"
+                severity="secondary"
+                size="small"
+                (onClick)="openModuleInNewTab()"
+                pTooltip="Ouvrir dans un nouvel onglet"
+                tooltipPosition="top"
+              />
+            </div>
+          </div>
+          
+          <div class="module-content">
+            <p class="module-description">{{ getModulePreview() }}</p>
+            
+            <div class="module-stats">
+              <span class="stat">
+                <i class="pi pi-copy"></i>
+                {{ getModuleVersionsCount() }} {{ getModuleVersionsCount() === 1 ? 'version' : 'versions' }}
+              </span>
+              <span class="stat">
+                <i class="pi pi-globe"></i>
+                {{ getPublishedVersionsCount() }} {{ getPublishedVersionsCount() === 1 ? 'publiée' : 'publiées' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="integration-notice">
+            <i class="pi pi-info-circle"></i>
+            <span>Ce module sera affiché comme une référence dans votre projet</span>
+          </div>
+        </div>
+      } @else {
+        <div class="no-module-selected">
+          <i class="pi pi-link" style="font-size: 3rem; color: var(--neutral-color);"></i>
+          <h4>Aucun module sélectionné</h4>
+          <p>Choisissez un module dans la liste ci-dessus pour l'intégrer à votre projet.</p>
+        </div>
+      }
+    </div>
+  }

@@ -44,16 +44,9 @@
     <div class="read-only-notice">
       <i class="pi pi-lock"></i> Mode lecture seule
     </div>
-    } @if($currentBlocks && $currentBlocks.length === 0 && !isDraggingIcon()){
-    <div class="container-empty">
-      <ng-lottie height="30rem" [options]="options" />
-      <h1>{{ "Glisse et dépose un block pour commencer !" | translate }}</h1>
-    </div>
     } @if($currentBlocks){
     <app-block-list
-      [style.height]="
-        $currentBlocks.length === 0 && !isDraggingIcon() ? '0' : '100%'
-      "
+      style="height: 100%"
       [blocks]="$currentBlocks"
       [(isDraggingIcon)]="isDraggingIcon"
       [(isOverDropZone)]="isOverDropZone"
@@ -62,6 +55,8 @@
       [(activeIconElement)]="activeIconElement"
       [(dragPosition)]="dragPosition"
       [isReadOnly]="isReadOnly()"
+      [showEmptyState]="$currentBlocks.length === 0 && !isDraggingIcon()"
+      [lottieOptions]="options"
     ></app-block-list>
     }
   </div>

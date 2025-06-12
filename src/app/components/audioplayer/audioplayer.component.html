@@ -1,15 +1,23 @@
 <div class="audio-player-container">
   <!-- Upload Section -->
   <div class="upload-section">
-    <p-fileUpload
-      mode="basic"
-      chooseLabel="Importer un audio"
-      accept="audio/*"
-      (onSelect)="onFileSelect($event)"
-      [showUploadButton]="false"
-      maxFileSize="10000000"
-    >
-    </p-fileUpload>
+    @if(uploadingAudio()) {
+      <div class="uploading-state">
+        <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
+        <p>Téléchargement en cours...</p>
+      </div>
+    } @else {
+      <p-fileUpload
+        mode="basic"
+        chooseLabel="Importer un audio"
+        accept="audio/*"
+        (onSelect)="onFileSelect($event)"
+        [showUploadButton]="false"
+        [disabled]="isReadOnly()"
+        maxFileSize="10000000"
+      >
+      </p-fileUpload>
+    }
   </div>
 
   <!-- Audio Player Section -->
@@ -45,6 +53,7 @@
           tooltipPosition="top"
           [rounded]="true"
           [text]="true"
+          [disabled]="isReadOnly()"
           severity="danger"
           icon="pi pi-times"
         />

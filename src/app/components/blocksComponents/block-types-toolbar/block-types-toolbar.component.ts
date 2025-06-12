@@ -6,17 +6,21 @@ import { Block } from '../../../classes/Block';
   selector: 'app-block-types-toolbar',
   imports: [],
   templateUrl: './block-types-toolbar.component.html',
-  styleUrl: './block-types-toolbar.component.scss'
+  styleUrl: './block-types-toolbar.component.scss',
 })
 export class BlockTypesToolbarComponent {
   availableBlocks = input.required<Block[]>();
   isDraggingIcon = input<boolean>(false);
-  dragPosition = input<{ x: number, y: number }>({ x: 0, y: 0 });
+  dragPosition = input<{ x: number; y: number }>({ x: 0, y: 0 });
   draggedIconType = input<EBlockType | null>(null);
 
-  blockDragStarted = output<{ event: Event, blockType: EBlockType }>();
+  blockDragStarted = output<{ event: Event; blockType: EBlockType }>();
 
-  EBlockType = EBlockType
+  EBlockType = EBlockType;
+
+  ngOnInit(){
+    console.log(this.availableBlocks())
+  }
 
   getIconByType(type: EBlockType): string {
     switch (type) {
