@@ -1,0 +1,152 @@
+@use "sass:color";
+@use "../core";
+
+/// Permet de régler l'affichage CSS peut importe le style
+/// @access private
+@mixin _default-fix() {
+   color: core.$font-color;
+   border-radius: unset;
+
+   .ng-focused {
+      outline: none;
+   }
+
+   .ng-placeholder {
+      color: core.$placeholder-color !important;
+      top: unset !important;
+   }
+
+   .ng-value {
+      padding-right: 5px;
+   }
+
+   .ng-select-container {
+      min-height: core.$inputs-size;
+      height: core.$inputs-size;
+   }
+
+   // Dans le cas du ng-select multiple
+   &.ng-select-multiple {
+      // La taille du conteneur est mis en automatique pour pouvoir accueillir
+      // une multitude d'éléments. Ce bug est provoqué à cause de la taille des inputs
+      .ng-select-container {
+         height: auto;
+      }
+   }
+}
+
+/// Version par défaut d'un ng-select
+/// @access private
+@mixin _default-style() {
+   &.ng-select-focused:not(.ng-select-opened) .ng-select-container {
+      @include core.box-shadow(core.$box-shadow);
+   }
+
+   // Supporter la classe rounded
+   &.rounded .ng-select-container {
+      @include core.border-radius(core.$inner-radius);
+   }
+
+   &.ng-select-opened > .ng-select-container {
+      @include core.border-radius(core.$inner-radius core.$inner-radius 0 0);
+
+      &:hover {
+         @include core.box-shadow(core.$box-shadow);
+      }
+
+      // Pour la couleur de la flèche
+      .ng-arrow-wrapper .ng-arrow {
+         border-color: transparent transparent core.$placeholder-color;
+      }
+   }
+
+   &.ng-select-multiple {
+      .ng-value {
+         color: core.$font-color !important;
+         background-color: var(--primary-color-transparent-50) !important;
+      }
+   }
+
+   .ng-select-container {
+      background-color: core.$input-color;
+      border: none;
+      border-radius: unset;
+      color: core.$font-color;
+      outline: 0px solid core.$primary-color;
+      transition: outline 0.1s linear;
+
+      @include core.box-shadow(core.$box-shadow);
+   }
+
+   .ng-option,
+   .ng-optgroup {
+      color: core.$font-color;
+      background-color: core.$input-color !important;
+   }
+
+   .ng-option-marked {
+      color: core.$primary-color !important;
+   }
+
+   .ng-dropdown-panel.ng-select-bottom {
+      border: none;
+      overflow: hidden;
+      @include core.box-shadow(core.$box-shadow);
+      @include core.border-radius(0 0 core.$inner-radius core.$inner-radius);
+
+      .ng-option:last-child {
+         @include core.border-radius(0 0 core.$inner-radius core.$inner-radius);
+      }
+   }
+
+   .ng-arrow-wrapper .ng-arrow {
+      border-color: core.$placeholder-color transparent transparent;
+   }
+
+   &.ng-select-disabled {
+      .ng-select-container {
+         background-color: core.$disabled-color;
+         color: core.$font-disabled-color;
+         @include core.box-shadow(unset);
+      }
+   }
+
+   &.ng-select-focused {
+      > .ng-select-container {
+         outline: 2px solid core.$primary-color;
+         transition: outline 0.1s linear;
+      }
+   }
+
+   // Support des classes reactive form
+   &.ng-pending {
+      > .ng-select-container {
+         animation: pending-animation 1s ease-in-out infinite;
+      }
+   }
+
+   &.ng-touched.ng-invalid,
+   &.ng-dirty.ng-invalid {
+      > .ng-select-container {
+         outline: 1px solid core.$danger-color;
+      }
+   }
+}
+
+ng-select.x {
+   @include _default-fix();
+
+   @include _default-style();
+}
+
+@keyframes pending-animation {
+   0% {
+      outline: 2px solid core.$info-color;
+   }
+   50% {
+      outline: 4px solid core.$warn-color;
+   }
+   100% {
+      outline: 2px solid core.$info-color;
+   }
+}

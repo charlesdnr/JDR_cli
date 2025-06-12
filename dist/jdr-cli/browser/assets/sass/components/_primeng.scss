@@ -1,0 +1,99 @@
+@use "../core";
+
+/* TabMenu */
+p-tabMenu.x {
+    .p-tabmenu .p-tabmenu-nav {
+        background-color: transparent ;
+        font-family: core.$font-familly, sans-serif;
+        color: core.$font-color;
+    }
+
+    .p-tabmenu-nav {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .p-tabmenuitem {
+        margin: 0.3rem;
+    }
+
+    .p-highlight {
+        color: core.$primary-color;
+    }
+
+    .p-menuitem-link {
+        @include core.add-vendor-prefixes(border, solid 0);
+        display: flex;
+        width: 100%;
+        @include core.border-radius(0);
+        gap: 0.4rem;
+    }
+}
+
+/* password input */
+.p-password-input {
+  padding-inline: var(--p-inputtext-padding-x);
+}
+
+.p-accordion .p-accordion-content {
+  transition: max-height 0.15s ease-in-out !important;
+}
+.p-accordion .p-accordion-header .p-accordion-header-icon {
+  transition: transform 0.15s !important;
+}
+.p-tab{
+  font-size: 0.9rem;
+}
+.p-tablist-nav-button {
+  display: none;
+}
+.p-accordioncontent-content {
+  padding: 0;
+  padding-left: var(--padding);
+  padding-right: var(--padding);
+  padding-bottom: var(--padding);
+}
+.p-treetable .p-treetable-thead>tr>th{
+  text-align: center;
+}
+
+.p-button:disabled {
+  background-color: light-dark(rgba(239, 239, 239, 0.3), rgba(19, 1, 1, 0.3));
+  color: light-dark(rgba(16, 16, 16, 0.3), rgba(255, 255, 255, 0.3));
+  border-color: light-dark(rgba(118, 118, 118, 0.3), rgba(195, 195, 195, 0.3));
+}
+
+/* Pour Firefox */
+.p-select-list-container {
+  scrollbar-width: auto !important;
+  scrollbar-color: grey transparent !important;
+}
+
+/* Pour Chrome, Edge, et Safari */
+.p-select-list-container::-webkit-scrollbar {
+  all: initial !important;
+}
+
+.p-select-list-container::-webkit-scrollbar-track {
+  all: initial !important;
+}
+
+.p-select-list-container::-webkit-scrollbar-thumb {
+  all: initial !important;
+}
+
+.p-select-list-container::-webkit-scrollbar-thumb:hover {
+   all: initial !important;
+}
+.p-select-list-container::-webkit-scrollbar-thumb:active {
+   all: initial !important;
+}
+.p-tablist-tab-list {
+  border-color: transparent;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-popover{
+  width: 600px;
+}

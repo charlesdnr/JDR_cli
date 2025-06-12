@@ -1,0 +1,112 @@
+/*
+Fichier contenant toutes les fonctions SASS
+*/
+@use "sass:color";
+
+/// Fonction pour convertir des pixels en rem.
+///
+/// @access public
+/// @param {Number} $px - Valeur en pixels à convertir en rem.
+/// @param {Number} $base-font-size - Taille de la police de base en pixels (par défaut: 16px).
+///
+/// @return {String} La valeur convertie en rem.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     font-size: px-to-rem(24);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     font-size: 1.5rem;
+///   }
+///
+@function px-to-rem($px, $base-font-size: 16px) {
+   @return ($px / $base-font-size) + rem;
+}
+
+/// Fonction pour générer des couleurs dégradées.
+///
+/// @access public
+/// @param {Color} $start-color - Couleur de départ du dégradé.
+/// @param {Color} $end-color - Couleur de fin du dégradé.
+/// @param {Number} $steps - Nombre d'étapes pour le dégradé.
+///
+/// @return {List} Liste des couleurs du dégradé.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     background: linear-gradient(generate-gradient-color(#ff0000, #00ff00, 5));
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     background: linear-gradient(#ff0000, #ff8000, #ffcc00, #b3ff00, #00ff00);
+///   }
+///
+@function generate-gradient-color($start-color, $end-color, $steps) {
+   $step-size: percentage(calc(1 / ($steps - 1)));
+   $gradient: ();
+
+   @for $i from 0 through $steps - 1 {
+      $color: color.mix($start-color, $end-color, $step-size * $i);
+      $gradient: append($gradient, $color, comma);
+   }
+
+   @return $gradient;
+}
+
+/// Fonction pour obtenir un pourcentage d'une valeur par rapport à une autre valeur.
+///
+/// @access public
+/// @param {Number} $value - Valeur dont on veut obtenir le pourcentage.
+/// @param {Number} $total - Valeur totale par rapport à laquelle on veut calculer le pourcentage.
+///
+/// @return {Number} Pourcentage de $value par rapport à $total.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     width: percentage-of(50px, 100px);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     width: 50%;
+///   }
+///
+@function percentage-of($value, $total) {
+   @return ($value / $total) * 100%;
+}
+
+/// Fonction pour calculer la différence entre deux valeurs.
+///
+/// @access public
+/// @param {Number} $value1 - Première valeur.
+/// @param {Number} $value2 - Deuxième valeur.
+///
+/// @return {Number} Différence absolue entre $value1 et $value2.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     margin-top: difference(10px, 5px);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     margin-top: 5px;
+///   }
+///
+@function difference($value1, $value2) {
+   @return abs($value1 - $value2);
+}
+
+/// Fonction pour vérifier si une liste contient une valeur spécifique.
+///
+/// @access public
+/// @param {List} $list - Liste dans laquelle rechercher la valeur.
+/// @param {*} $value - Valeur à rechercher dans la liste.
+///
+/// @return {Boolean} True si la liste contient la valeur, sinon False.
+@function list-contains($list, $value) {
+   @return index($list, $value) != null;
+}

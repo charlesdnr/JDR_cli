@@ -1,0 +1,463 @@
+/*
+Fichier contenant toutes les mixins SASS
+*/
+@use "sass:map";
+@use "sass:meta";
+@use "variables" as var;
+
+/// Mixin pour ajouter automatiquement les préfixes vendeurs à une propriété CSS.
+///
+/// @access public
+/// @param {String} $property - Propriété CSS à laquelle ajouter les préfixes vendeurs.
+/// @param {Any} $value - Valeur de la propriété CSS.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include add-vendor-prefixes(transition, all 0.5s ease);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     -webkit-transition: all 0.5s ease;
+///     -moz-transition: all 0.5s ease;
+///     -ms-transition: all 0.5s ease;
+///     transition: all 0.5s ease;
+///   }
+///
+@mixin add-vendor-prefixes($property, $value) {
+   @each $prefix in ("-webkit-", "-moz-", "-ms-", "-o-", "") {
+      #{$prefix + $property}: $value;
+   }
+}
+
+/// Mixin pour centrer un élément horizontalement et verticalement.
+///
+/// @access public
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include center-element;
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     position: absolute;
+///     top: 50%;
+///     left: 50%;
+///     transform: translate(-50%, -50%);
+///   }
+///
+@mixin center-element {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   @include transform(translate(-50%, -50%));
+}
+
+/// Mixin pour ajouter un dégradé de couleur en arrière-plan avec préfixes vendeurs.
+///
+/// @access public
+/// @param {Color} $start-color - Couleur de départ du dégradé.
+/// @param {Color} $end-color - Couleur de fin du dégradé.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include gradient-background(#ff0000, #00ff00);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     background: #ff0000;
+///     background: -moz-linear-gradient(top, #ff0000 0%, #00ff00 100%);
+///     background: -webkit-linear-gradient(top, #ff0000 0%, #00ff00 100%);
+///     background: linear-gradient(to bottom, #ff0000 0%, #00ff00 100%);
+///   }
+///
+@mixin gradient-background($start-color, $end-color) {
+   background: $start-color;
+   background: -moz-linear-gradient(top, $start-color 0%, $end-color 100%);
+   background: -webkit-linear-gradient(top, $start-color 0%, $end-color 100%);
+   background: linear-gradient(to bottom, $start-color 0%, $end-color 100%);
+}
+
+/// Mixin pour ajouter une ombre à un élément.
+///
+/// @access public
+/// @param $x-offset - Décalage horizontal de l'ombre.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include box-shadow();
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+///     -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+///     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+///   }
+///
+@mixin box-shadow($shadow: none) {
+   @include add-vendor-prefixes(box-shadow, $shadow);
+}
+
+/// Mixin pour ajouter des transitions CSS.
+///
+/// @access public
+/// @param {List} $properties - Propriétés CSS à animer.
+/// @param {Number} $duration - Durée de la transition (par défaut: 0.3s).
+/// @param {String} $timing-function - Fonction de temporisation de la transition (par défaut: ease).
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include transition(all, 0.5s, ease-in-out);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     -webkit-transition: all 0.5s ease-in-out;
+///     -moz-transition: all 0.5s ease-in-out;
+///     transition: all 0.5s ease-in-out;
+///   }
+///
+@mixin transition($properties, $duration: 0.3s, $timing-function: ease) {
+   @include add-vendor-prefixes(
+      transition,
+      $properties $duration $timing-function
+   );
+}
+
+/// Mixin pour ajouter des bordures arrondies à un élément.
+///
+/// @access public
+/// @param {Length} $radius - Rayon des bordures arrondies.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include border-radius(10px);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     -webkit-border-radius: 10px;
+///     -moz-border-radius: 10px;
+///     border-radius: 10px;
+///   }
+///
+@mixin border-radius($radius) {
+   @include add-vendor-prefixes(border-radius, $radius);
+}
+
+/// Mixin pour ajouter une bordure autour d'un élément.
+///
+/// @access public
+/// @param {Length} $width - Largeur de la bordure.
+/// @param {String} $style - Style de la bordure (par exemple: solid, dashed, etc.).
+/// @param {Color} $color - Couleur de la bordure.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include border(1px, solid, #000);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     border: 1px solid #000;
+///     -webkit-border: 1px solid #000;
+///     -moz-border: 1px solid #000;
+///   }
+///
+@mixin border($width: none, $style: null, $color: null) {
+   @include add-vendor-prefixes(border, $width $style $color);
+}
+
+/// Mixin pour ajouter une outline autour d'un élément.
+///
+/// @access public
+/// @param {Length} $width - Largeur de la bordure.
+/// @param {String} $style - Style de la bordure (par exemple: solid, dashed, etc.).
+/// @param {Color} $color - Couleur de la bordure.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include outline(1px, solid, #000);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     outline: 1px solid #000;
+///     -webkit-outline: 1px solid #000;
+///     -moz-outline: 1px solid #000;
+///   }
+///
+@mixin outline($width: none, $style: null, $color: null) {
+   @include add-vendor-prefixes(outline, $width $style $color);
+}
+
+/// Mixin pour appliquer des transformations CSS à un élément avec préfixes vendeurs.
+///
+/// @access public
+/// @param {List} $transformations - Liste des transformations au format `fonction(valeur)`.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include transform((
+///       translateX(50px),
+///       rotate(45deg),
+///       scale(1.5)
+///     ));
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     -webkit-transform: translateX(50px) rotate(45deg) scale(1.5);
+///     -ms-transform: translateX(50px) rotate(45deg) scale(1.5);
+///     transform: translateX(50px) rotate(45deg) scale(1.5);
+///   }
+///
+@mixin transform($transformations) {
+   @include add-vendor-prefixes(transform, $transformations);
+}
+
+/// Mixin pour appliquer une taille à un élément.
+///
+/// @access public
+/// @param {Length} $width - La taille en largeur.
+/// @param {Length} $height - La taille en hauteur.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include size(50px);
+///   }
+///
+/// @example css - CSS après compilation
+///   .foo {
+///     width: 50px;
+///     height: 50px;
+///   }
+///
+@mixin size($width: null, $height: null) {
+   width: $width;
+   @if ($height == null) {
+      height: $width;
+   } @else {
+      height: $height;
+   }
+}
+
+/// Mixin pour répondre à un point de rupture (breakpoint) spécifique.
+///
+/// @access public
+/// @param {String} $breakpoint - Nom du point de rupture (breakpoint) défini dans la variable `$breakpoints`.
+///
+/// @throws Error si aucun point de rupture correspondant n'est trouvé dans la variable `$breakpoints`.
+///
+/// @example scss - Utilisation
+///   .foo {
+///     @include respond-to('sm') {
+///       font-size: 14px;
+///     }
+///   }
+///
+/// @example css - CSS après compilation
+///   @media (min-width: 640px) {
+///     .foo {
+///       font-size: 14px;
+///     }
+///   }
+@mixin respond-to($breakpoint) {
+   $raw-query: map.get(var.$breakpoints, $breakpoint);
+
+   @if $raw-query {
+      $query: if(
+         meta.type-of($raw-query) == "string",
+         unquote($raw-query),
+         meta.inspect($raw-query)
+      );
+
+      @media #{$query} {
+         @content;
+      }
+   } @else {
+      @error 'No value found for `#{$breakpoint}`. '
+          + 'Please make sure it is defined in `$breakpoints` map.';
+   }
+}
+
+/// Mixin pour les grilles responsives
+@mixin grid-responsive($columns: 1, $gap: var.$gap) {
+   display: grid;
+   grid-template-columns: repeat($columns, 1fr);
+   gap: $gap;
+   
+   @include respond-to('mobile') {
+      grid-template-columns: 1fr;
+      gap: var.$gap-mobile;
+   }
+}
+
+/// Mixin pour les conteneurs responsives
+@mixin container-responsive {
+   width: 100%;
+   max-width: var.$container-max-width;
+   margin: 0 auto;
+   padding: 0 var.$container-padding;
+   
+   @include respond-to('mobile') {
+      padding: 0 var.$container-padding-mobile;
+   }
+   
+   @include respond-to('xs') {
+      padding: 0 var.$container-padding-small;
+   }
+}
+
+/// Mixin pour flexbox responsive
+@mixin flex-responsive($direction: row, $wrap: wrap, $gap: var.$gap) {
+   & {
+      display: flex;
+      flex-direction: $direction;
+      flex-wrap: $wrap;
+      gap: $gap;
+   }
+   
+   @include respond-to('mobile') {
+      flex-direction: column;
+      gap: var.$gap-mobile;
+   }
+}
+
+/// Mixin pour les tailles de police responsives
+@mixin font-responsive($base-size: var.$font-size-base) {
+   font-size: $base-size;
+   
+   @include respond-to('mobile') {
+      font-size: calc(#{$base-size} * 0.9);
+   }
+   
+   @include respond-to('xs') {
+      font-size: calc(#{$base-size} * 0.85);
+   }
+}
+
+/// Mixin pour les espacements responsifs
+@mixin spacing-responsive($property: padding, $base-value: var.$padding) {
+   & {
+      #{$property}: $base-value;
+   }
+   
+   @include respond-to('mobile') {
+      #{$property}: var.$padding-mobile;
+   }
+   
+   @include respond-to('xs') {
+      #{$property}: var.$padding-small;
+   }
+}
+
+/// Mixin pour masquer sur mobile
+@mixin hide-mobile {
+   @include respond-to('mobile') {
+      display: none !important;
+   }
+}
+
+/// Mixin pour afficher seulement sur mobile
+@mixin show-mobile-only {
+   display: none;
+   
+   @include respond-to('mobile') {
+      display: block;
+   }
+}
+
+/// Mixin pour les boutons responsifs
+@mixin button-responsive {
+   height: var.$inputs-size;
+   
+   @include respond-to('mobile') {
+      height: var.$inputs-size-mobile;
+      font-size: var.$font-size-base;
+   }
+   
+   @include respond-to('xs') {
+      height: var.$inputs-size-small;
+      font-size: var.$font-size-sm;
+   }
+}
+
+/// Mixin pour exporter toutes les variables SASS en variables CSS
+///
+/// @access private
+@mixin export-vars() {
+   --color-sheme: #{$color-sheme};
+
+   --primary-color: #{$primary-color};
+   --primary-color-transparent-50: #{$primary-color-transparent-50};
+   --secondary-color: #{var.$secondary-color};
+   --third-color: #{var.$third-color};
+
+   --background-color: #{$background-color};
+   --background-color-lighter: #{$background-color-lighter};
+   --background-color-lighter-lighter: #{$background-color-lighter-lighter};
+   --background-color-transparent: #{$background-color-transparent};
+   --container-color: #{$container-color};
+   --input-color: #{$input-color};
+
+   --font-familly: #{var.$font-familly};
+   --font-color: #{$font-color};
+   --font-secondary-color: #{var.$font-secondary-color};
+   --font-disabled-color: #{$font-disabled-color};
+   --font-color-invert: #{$font-color-invert};
+   --placeholder-color: #{$placeholder-color};
+
+   --danger-color: #{$danger-color};
+   --success-color: #{$success-color};
+   --warn-color: #{$warn-color};
+   --info-color: #{$info-color};
+   --neutral-color: #{$neutral-color};
+   --disabled-color: #{$disabled-color};
+
+   --padding: #{var.$padding};
+   --padding-mobile: #{var.$padding-mobile};
+   --padding-small: #{var.$padding-small};
+   --margin: #{var.$margin};
+   --margin-mobile: #{var.$margin-mobile};
+   --gap: #{var.$gap};
+   --gap-mobile: #{var.$gap-mobile};
+
+   --radius: #{var.$radius};
+   --radius-mobile: #{var.$radius-mobile};
+   --radius-small: #{var.$radius-small};
+   --inner-radius: #{var.$inner-radius};
+
+   --inputs-size: #{var.$inputs-size};
+   --inputs-size-mobile: #{var.$inputs-size-mobile};
+   --inputs-size-small: #{var.$inputs-size-small};
+   --icons-size: #{var.$icons-size};
+   --icons-size-mobile: #{var.$icons-size-mobile};
+   --icons-size-small: #{var.$icons-size-small};
+
+   --font-size-xs: #{var.$font-size-xs};
+   --font-size-sm: #{var.$font-size-sm};
+   --font-size-base: #{var.$font-size-base};
+   --font-size-lg: #{var.$font-size-lg};
+   --font-size-xl: #{var.$font-size-xl};
+   --font-size-2xl: #{var.$font-size-2xl};
+   --font-size-3xl: #{var.$font-size-3xl};
+
+   --header-height: #{var.$header-height};
+   --header-height-mobile: #{var.$header-height-mobile};
+   --sidebar-width: #{var.$sidebar-width};
+   --sidebar-width-collapsed: #{var.$sidebar-width-collapsed};
+
+   --container-padding: #{var.$container-padding};
+   --container-padding-mobile: #{var.$container-padding-mobile};
+   --container-padding-small: #{var.$container-padding-small};
+   --container-max-width: #{var.$container-max-width};
+
+   --transition-duration: #{var.$transition-duration};
+   --animation-duration: #{var.$animation-duration};
+
+   --box-shadow: #{var.$box-shadow};
+}

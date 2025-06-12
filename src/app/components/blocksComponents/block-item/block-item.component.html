@@ -14,13 +14,12 @@
         <span>{{ getBlockPreview(block()?.type ?? "stat") }}</span>
       </div>
       <div class="block-controls">
-        @if(block()?.id && !isReadOnly()){
+        @if(block()?.id && !isReadOnly() && block()!.type === enum().paragraph){
         <p-button
           icon="pi pi-sparkles"
           pTooltip="Générer avec l'IA"
           tooltipPosition="top"
           (click)="onGenerateAI(block()?.id!, block()!.type)"
-          [disabled]="block()!.type === enum().module"
           [rounded]="true"
           [text]="true"
           severity="help"

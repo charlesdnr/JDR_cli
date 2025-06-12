@@ -73,7 +73,7 @@ interface DisplayableSavedModule extends UserSavedModule {
   ],
   providers: [TreeDragDropService],
   templateUrl: './project.component.html',
-  styleUrls: ['./project.component.scss'],
+  styleUrl: './project.component.scss',
 })
 export class ProjectComponent implements OnInit {
   private httpUserFolderService = inject(UserFolderHttpService);
@@ -611,6 +611,32 @@ export class ProjectComponent implements OnInit {
 
   onModuleDragEnd(): void {
     this.draggedModule = null;
+  }
+
+  // Nouvelles méthodes pour les statistiques
+  getTotalModulesCount(): number {
+    const withoutFolder = this.moduleWithoutFolder().length;
+    const inFolders = this.treeNode().reduce((total, node) => {
+      return total + (node.data?.modules?.length || 0);
+    }, 0);
+    return withoutFolder + inFolders;
+  }
+
+  getFoldersCount(): number {
+    return this.treeNode().length;
+  }
+
+  getRecentModulesCount(): number {
+    // Pour l'instant, retourne le nombre total, à améliorer avec une vraie logique de "récent"
+    return Math.min(this.getTotalModulesCount(), 5);
+  }
+
+  getDisplayedModulesLength(): number {
+    if (this.selectedFolder()) {
+      return this.displayedModules().length;
+    } else {
+      return this.moduleWithoutFolder().length;
+    }
   }
 
   onFolderDrop(event: any, node: TreeNode): void {

@@ -1,0 +1,73 @@
+@use "sass:color";
+@use "../core" as *;
+@use "../components" as *;
+
+html[data-theme="light"] {
+   --color-sheme: light;
+   --primary-color: hsl(205, 100%, 50%);
+   --primary-color-transparent-50: hsla(205, 100%, 50%, 0.1);
+
+   --background-color: hsl(210, 3%, 87%);
+   --background-color-lighter: hsl(0, 0%, 92%);
+   --background-color-transparent: hsla(210, 3%, 87%, 0.219);
+   --container-color: color.mix(white, hsl(210, 3%, 87%), 40%);
+   --input-color: white;
+
+   --danger-color: hsl(5, 100%, 58%);
+   --success-color: hsl(103, 100%, 33%);
+   --warn-color: hsl(36, 100%, 50%);
+   --info-color: hsl(231, 48%, 48%);
+   --neutral-color: hsl(200, 18%, 46%);
+   --disabled-color: hsla(0, 0%, 0%, 0.12);
+
+   --font-color: hsl(250, 24%, 15%);
+   --font-color-invert: white;
+   --font-disabled-color: hsla(0, 0%, 0%, 0.60);
+   --placeholder-color: hsl(0, 0%, 50%);
+
+   --font-familly: #{$font-familly};
+   --font-secondary-color: #{$font-secondary-color};
+
+   --padding: #{$padding};
+   --padding-mobile: #{$padding-mobile};
+   --padding-small: #{$padding-small};
+   --margin: #{$margin};
+   --margin-mobile: #{$margin-mobile};
+   --gap: #{$gap};
+   --gap-mobile: #{$gap-mobile};
+
+   --radius: #{$radius};
+   --radius-mobile: #{$radius-mobile};
+   --radius-small: #{$radius-small};
+   --inner-radius: #{$inner-radius};
+
+   --inputs-size: #{$inputs-size};
+   --inputs-size-mobile: #{$inputs-size-mobile};
+   --inputs-size-small: #{$inputs-size-small};
+   --icons-size: #{$icons-size};
+   --icons-size-mobile: #{$icons-size-mobile};
+   --icons-size-small: #{$icons-size-small};
+
+   --font-size-xs: #{$font-size-xs};
+   --font-size-sm: #{$font-size-sm};
+   --font-size-base: #{$font-size-base};
+   --font-size-lg: #{$font-size-lg};
+   --font-size-xl: #{$font-size-xl};
+   --font-size-2xl: #{$font-size-2xl};
+   --font-size-3xl: #{$font-size-3xl};
+
+   --header-height: #{$header-height};
+   --header-height-mobile: #{$header-height-mobile};
+   --sidebar-width: #{$sidebar-width};
+   --sidebar-width-collapsed: #{$sidebar-width-collapsed};
+
+   --container-padding: #{$container-padding};
+   --container-padding-mobile: #{$container-padding-mobile};
+   --container-padding-small: #{$container-padding-small};
+   --container-max-width: #{$container-max-width};
+
+   --transition-duration: #{$transition-duration};
+   --animation-duration: #{$animation-duration};
+
+   --box-shadow: #{$box-shadow};
+}

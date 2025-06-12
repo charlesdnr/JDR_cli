@@ -1,0 +1,10 @@
+@use "../core";
+
+i-lucide,
+lucide-icon,
+mat-icon,
+.mat-icon {
+   display: inline-block !important;
+   height: core.$icons-size !important;
+   width: core.$icons-size !important;
+}
