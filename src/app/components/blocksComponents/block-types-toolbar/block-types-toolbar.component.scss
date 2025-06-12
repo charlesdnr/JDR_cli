@@ -2,6 +2,8 @@
 
 :host{
   user-select: none;
+  display: block;
+  width: 100%;
 }
 
 .icone-grab {
@@ -11,8 +13,7 @@
   & {
     border-radius: var(--radius-small);
     justify-content: flex-start;
-    height: 20rem;
-    flex-shrink: 0;
+    width: 100%;
   }
   
   @include respond-to('mobile') {

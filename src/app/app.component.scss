@@ -2,6 +2,15 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  
+  &.auth-mode {
+    height: 100vh;
+    
+    .main-content {
+      height: 100%;
+      flex: none;
+    }
+  }
 }
 
 .main-content {

@@ -283,6 +283,11 @@ body {
   padding-top: 70px; // Compensation pour le header fixe
 }
 
+// Supprime le padding quand on est en mode auth (pas de header)
+body.auth-mode {
+  padding-top: 0 !important;
+}
+
 body.resizing {
   cursor: col-resize !important;
   user-select: none !important;
@@ -435,4 +440,8 @@ body.resizing [contenteditable="true"] {
   gap: 8px;
   margin-bottom: 15px;
   width: fit-content;
+}
+
+app-auth {
+  height: 100%;
 }

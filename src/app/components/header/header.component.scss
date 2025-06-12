@@ -478,11 +478,6 @@
 }
 
 // === GLOBAL ADJUSTMENTS ===
-// Ajout de padding-top au body pour compenser le header fixe
 :host {
   display: block;
-}
-
-:host ::ng-deep body {
-  padding-top: 70px;
 }

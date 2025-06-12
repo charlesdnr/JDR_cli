@@ -15,6 +15,13 @@
     cdkDropListOrientation="vertical"
     [class.highlight-drop-zone]="isDraggingIcon()"
   >
+    <!-- État vide avec animation -->
+    @if(showEmptyState()) {
+    <div class="empty-state-content">
+      <ng-lottie [height]="'30rem'" [options]="lottieOptions()" />
+      <h1>{{ "Glisse et dépose un block pour commencer !" | translate }}</h1>
+    </div>
+    }
     <!-- Les blocs existants -->
     @for(block of blocks(); track block?.id; let i = $index) {
     @if(isDraggingIcon() && isOverDropZone() && insertPosition() === i) {

@@ -1,35 +1,51 @@
 :host {
   display: flex;
   height: 100%;
+  flex: 1;
   overflow: hidden;
   position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 .container-edit {
   display: flex;
-  min-height: 600px;
   width: 100%;
   gap: 20px;
   position: relative;
+  align-items: flex-start;
 }
 
 .toolbar {
   background-color: var(--background-color-lighter);
-  margin-bottom: 25px;
   max-width: 270px;
   min-width: 270px;
+  width: 270px;
   padding: 3px;
-  height: 92%;
   border-right: 1px solid var(--neutral-color);
   box-shadow: 5px 0 5px -5px var(--neutral-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+
+  ::ng-deep .p-tabs {
+    display: flex;
+    flex-direction: column;
+  }
+
+  ::ng-deep .p-tablist {
+    flex-shrink: 0;
+    background-color: var(--background-color-lighter);
+  }
 
   ::ng-deep .p-tabpanels {
     background-color: var(--background-color-lighter);
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(100% - 60px); // Hauteur moins les tabs
+    max-height: calc(100vh - 200px); // Hauteur maximum pour le contenu des tabs
     
-    // Style de scrollbar invisible mais fonctionnel
+    // Scrollbar invisible
     &::-webkit-scrollbar {
       width: 6px;
     }
@@ -41,7 +57,7 @@
     &::-webkit-scrollbar-thumb {
       background: transparent;
       border-radius: 3px;
-      transition: background var(--transition-duration, 0.25s) ease;
+      transition: background 0.25s ease;
     }
     
     &:hover::-webkit-scrollbar-thumb {
@@ -61,17 +77,34 @@
     }
   }
 
+  ::ng-deep .p-tabpanel {
+    display: flex;
+    flex-direction: column;
+
+    app-block-types-toolbar {
+      flex-shrink: 0;
+    }
+
+    app-project-parameters {
+      flex-shrink: 0;
+    }
+  }
+
   ::ng-deep .p-tablist-tab-list {
     background-color: var(--background-color-lighter);
   }
 }
 
 .editor {
-  flex: 1;
+  width: 100%;
+  height: calc(100vh - 140px); // Hauteur maximum fixe
+  max-height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow-y: auto !important;
+  overflow: hidden;
+  background-color: var(--background-color);
+  position: relative;
 }
 
 .blocks-container {
@@ -122,20 +155,6 @@
 }
 
 
-::ng-deep .p-tabs {
-  height: 100%;
-}
-::ng-deep .p-tabpanels {
-  height: 100%;
-}
-.container-empty {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 80%;
-  justify-content: space-around;
-  align-items: center;
-}
 
 .readonly-toolbar {
   .p-tabs-tab:last-child {

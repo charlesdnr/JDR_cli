@@ -8,6 +8,8 @@
     justify-content: center;
     height: 100%;
     width: 100%;
+    flex: 1;
+    overflow: hidden;
   }
 }
 
@@ -67,8 +69,8 @@
     height: 100%;
     width: 100%;
     flex: 1;
+    overflow: hidden;
   }
-  overflow: auto;
   position: relative;
   
   @include respond-to('mobile') {
@@ -77,9 +79,9 @@
   }
   
   .modules-list{
-    overflow: auto;
-    max-height: 80%;
-    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
     @include grid-responsive(auto-fill, var(--gap));
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     align-items: start;
@@ -92,7 +94,6 @@
     
     @include respond-to('mobile') {
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      max-height: none;
     }
     
     @include respond-to('xs') {
