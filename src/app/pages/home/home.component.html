@@ -20,11 +20,11 @@
       </p>
       
       <div class="hero-actions">
-        <button class="btn-primary-hero" routerLink="/new-module">
+        <a routerLink="/new-module" class="btn-primary-hero">
           <span>Créer un module</span>
           <i class="pi pi-arrow-right"></i>
-        </button>
-        <button class="btn-secondary-hero" (click)="scrollToExplore()">
+        </a>
+        <button (click)="scrollToExplore()" class="btn-secondary-hero">
           <span>Découvrir</span>
           <i class="pi pi-compass"></i>
         </button>
@@ -68,7 +68,7 @@
     </div>
   </div>
   
-  <div class="scroll-indicator" (click)="scrollToFeatures()">
+  <div class="scroll-indicator" (click)="scrollToFeatures()" (keyup.enter)="scrollToFeatures()" tabindex="0">
     <div class="scroll-arrow"></div>
   </div>
 </section>
@@ -139,144 +139,307 @@
   </div>
 </section> -->
 
-<!-- Popular Modules Section with Modern Design -->
+<!-- Transition Wave Element -->
+<div class="section-transition">
+  <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="currentColor"></path>
+  </svg>
+</div>
+
+<!-- Enhanced Discover Section with Modern Design -->
 <section id="explore" class="explore-section">
   <div class="container">
+    <!-- Enhanced Section Header -->
     <div class="section-header">
-      <span class="section-badge">Découvrir</span>
-      <h2 class="section-title">Modules Populaires</h2>
+      <div class="section-badge-container">
+        <span class="section-badge">Découvrir</span>
+        <div class="badge-glow"></div>
+      </div>
+      <h2 class="section-title">
+        <span class="title-word" style="--delay: 0s">Modules</span>
+        <span class="title-word" style="--delay: 0.1s">Populaires</span>
+      </h2>
       <p class="section-description">
-        Explorez les créations les plus appréciées de notre communauté
+        Explorez les créations les plus appréciées de notre communauté passionnée
       </p>
+      <div class="section-decorative-line"></div>
     </div>
     
-    <div class="modules-showcase">
-      @if (loadingModules()) {
-        <div class="loading-state">
-          <div class="loading-grid">
-            @for (i of [1,2,3,4,5,6]; track i) {
-              <div class="module-skeleton">
-                <div class="skeleton-image"></div>
-                <div class="skeleton-content">
-                  <div class="skeleton-line"></div>
-                  <div class="skeleton-line short"></div>
-                  <div class="skeleton-line"></div>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      } @else {
-        @if (mostSavedModules().length > 0) {
-          @for (module of mostSavedModules(); track module.id) {
-            <div class="module-card-modern" (click)="navigateToModule(module.id)">
-              <div class="module-image">
-                <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
-                     [alt]="module.title"
-                     loading="lazy">
-                <div class="module-overlay">
-                  <div class="module-stats">
-                    <span class="stat">
-                      <i class="pi pi-heart"></i>
-                      {{ Math.floor(Math.random() * 100) + 1 }}
-                    </span>
-                    <span class="stat">
-                      <i class="pi pi-eye"></i>
-                      {{ Math.floor(Math.random() * 500) + 50 }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="module-content">
-                <div class="module-meta">
-                  <span class="module-category">Aventure</span>
-                  <span class="module-difficulty">Intermédiaire</span>
-                </div>
-                
-                <h3 class="module-title">{{ module.title }}</h3>
-                <p class="module-description">{{ module.description }}</p>
-                
-                <div class="module-footer">
-                  <div class="module-author">
-                    <div class="author-avatar">
-                      {{ module.creator.username.charAt(0) || 'A' }}
-                    </div>
-                    <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
-                  </div>
-                  
-                  <div class="module-tags">
-                    @if (module.tags && module.tags.length > 0) {
-                      @for (tag of module.tags.slice(0, 2); track tag.id) {
-                        <span class="module-tag">{{ tag.name }}</span>
-                      }
-                    } @else {
-                      <span class="module-tag">Aventure</span>
-                      <span class="module-tag">JDR</span>
-                    }
-                  </div>
-                </div>
+    <!-- Featured Module Spotlight -->
+    @if (mostSavedModules().length > 0 && !loadingModules()) {
+      <div class="featured-module-spotlight">
+        <div class="spotlight-content">
+          <div class="spotlight-image">
+            <img [src]="mostSavedModules()[0].picture.src || 'assets/images/baseImageModule.png'" 
+                 [alt]="mostSavedModules()[0].title"
+                 loading="lazy">
+            <div class="spotlight-overlay">
+              <div class="spotlight-badge">⭐ Le plus populaire</div>
+              <div class="spotlight-stats">
+                <span class="stat-item">
+                  <i class="pi pi-heart"></i>
+                  {{ featuredModuleStats().likes }}
+                </span>
+                <span class="stat-item">
+                  <i class="pi pi-eye"></i>
+                  {{ featuredModuleStats().views }}
+                </span>
               </div>
             </div>
-          }
-        } @else {
-          <div class="empty-state">
-            <div class="empty-icon">🎲</div>
-            <h3>Aucun module disponible</h3>
-            <p>Soyez le premier à créer un module pour cette communauté !</p>
-            <button class="btn-primary" routerLink="/new-module">
-              Créer le premier module
-            </button>
           </div>
-        }
-      }
-    </div>
-    
-    @if (mostRecentModules().length > 0 && !loadingModules()) {
-      <div class="section-divider">
-        <h3 class="subsection-title">Modules les plus récents</h3>
-      </div>
-      
-      <div class="modules-showcase recent">
-        @for (module of mostRecentModules(); track module.id) {
-          <div class="module-card-modern" (click)="navigateToModule(module.id)">
-            <div class="module-image">
-              <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
-                   [alt]="module.title"
-                   loading="lazy">
-              <div class="module-overlay">
-                <div class="module-badge new">Nouveau</div>
+          
+          <div class="spotlight-details">
+            <div class="spotlight-meta">
+              <p-tag value="Aventure Premium" styleClass="spotlight-category" severity="info"></p-tag>
+              <div class="spotlight-rating">
+                <p-rating 
+                  [(ngModel)]="ratingValue" 
+                  [readonly]="true" 
+                  styleClass="rating-stars">
+                </p-rating>
+                <span class="rating-text">5.0</span>
               </div>
             </div>
             
-            <div class="module-content">
-              <div class="module-meta">
-                <span class="module-category">Récent</span>
-                <span class="module-time">{{ getTimeAgo(module.createdAt) }}</span>
+            <h3 class="spotlight-title">{{ mostSavedModules()[0].title }}</h3>
+            <p class="spotlight-description">{{ mostSavedModules()[0].description }}</p>
+            
+            <div class="spotlight-author">
+              <div class="author-avatar-large">
+                {{ mostSavedModules()[0].creator.username.charAt(0) || 'A' }}
               </div>
-              
-              <h3 class="module-title">{{ module.title }}</h3>
-              <p class="module-description">{{ module.description }}</p>
-              
-              <div class="module-footer">
-                <div class="module-author">
-                  <div class="author-avatar">
-                    {{ module.creator.username.charAt(0) || 'A' }}
-                  </div>
-                  <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
-                </div>
+              <div class="author-info">
+                <span class="author-name">{{ mostSavedModules()[0].creator.username || 'Anonyme' }}</span>
+                <span class="author-role">Maître de Jeu Expert</span>
               </div>
             </div>
+            
+            <p-button 
+              class="btn-spotlight" 
+              (click)="navigateToModule(mostSavedModules()[0].id)"
+              label="Découvrir ce module"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              styleClass="p-button-lg p-button-rounded"
+              size="large">
+            </p-button>
           </div>
-        }
+        </div>
       </div>
     }
     
-    <div class="explore-actions">
-      <button class="btn-outline" routerLink="/project">
-        Voir tous les modules
-        <i class="pi pi-arrow-right"></i>
-      </button>
+    <!-- Enhanced Modules Grid -->
+    <div class="modules-section">
+      <div class="modules-header">
+        <h3 class="modules-section-title">Autres modules populaires</h3>
+        <div class="modules-filter">
+          <p-button label="Tous" styleClass="filter-btn active p-button-sm" size="small"></p-button>
+          <p-button label="Aventure" styleClass="filter-btn p-button-sm p-button-outlined" size="small"></p-button>
+          <p-button label="Campagne" styleClass="filter-btn p-button-sm p-button-outlined" size="small"></p-button>
+          <p-button label="Scénario" styleClass="filter-btn p-button-sm p-button-outlined" size="small"></p-button>
+        </div>
+      </div>
+      
+      <div class="modules-showcase">
+        @if (loadingModules()) {
+          <div class="loading-state">
+            <div class="loading-grid">
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="module-skeleton">
+                  <div class="skeleton-image"></div>
+                  <div class="skeleton-content">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          @if (mostSavedModules().length > 1) {
+            @for (module of mostSavedModules().slice(1); track module.id) {
+              <p-card 
+                class="module-card-enhanced" 
+                (click)="navigateToModule(module.id)"
+                styleClass="h-full">
+                <ng-template pTemplate="header">
+                  <div class="module-image">
+                    <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
+                         [alt]="module.title"
+                         loading="lazy">
+                    <div class="module-overlay">
+                      <div class="module-stats">
+                        <p-badge 
+                          [value]="getModuleStats(module).likes" 
+                          icon="pi pi-heart" 
+                          styleClass="stat p-badge-info">
+                        </p-badge>
+                        <p-badge 
+                          [value]="getModuleStats(module).views" 
+                          icon="pi pi-eye" 
+                          styleClass="stat p-badge-secondary">
+                        </p-badge>
+                      </div>
+                      <p-button 
+                        class="quick-view-btn"
+                        icon="pi pi-search-plus"
+                        styleClass="p-button-rounded p-button-text"
+                        size="large">
+                      </p-button>
+                    </div>
+                  </div>
+                </ng-template>
+                
+                <ng-template pTemplate="content">
+                  <div class="module-content">
+                    <div class="module-meta">
+                      <p-tag value="Aventure" styleClass="module-category" severity="success"></p-tag>
+                      <p-tag value="Intermédiaire" styleClass="module-difficulty" severity="warn"></p-tag>
+                    </div>
+                    
+                    <h3 class="module-title">{{ module.title }}</h3>
+                    <p class="module-description">{{ module.description }}</p>
+                    
+                    <div class="module-footer">
+                      <div class="module-author">
+                        <div class="author-avatar">
+                          {{ module.creator.username.charAt(0) || 'A' }}
+                        </div>
+                        <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
+                      </div>
+                      
+                      <div class="module-tags">
+                        @if (module.tags && module.tags.length > 0) {
+                          @for (tag of module.tags.slice(0, 2); track tag.id) {
+                            <p-chip [label]="tag.name" styleClass="module-tag"></p-chip>
+                          }
+                        } @else {
+                          <p-chip label="Aventure" styleClass="module-tag"></p-chip>
+                          <p-chip label="JDR" styleClass="module-tag"></p-chip>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-card>
+            }
+          } @else {
+            <div class="empty-state">
+              <div class="empty-icon">🎲</div>
+              <h3>Aucun module disponible</h3>
+              <p>Soyez le premier à créer un module pour cette communauté !</p>
+              <p-button 
+                routerLink="/new-module"
+                label="Créer le premier module"
+                styleClass="p-button-lg p-button-rounded"
+                size="large">
+              </p-button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+    
+    <!-- Recent Modules with Enhanced Design -->
+    @if (mostRecentModules().length > 0 && !loadingModules()) {
+      <div class="recent-modules-section">
+        <div class="section-divider">
+          <div class="divider-line"></div>
+          <h3 class="subsection-title">
+            <span class="title-icon">⚡</span>
+            Modules les plus récents
+          </h3>
+          <div class="divider-line"></div>
+        </div>
+        
+        <div class="recent-modules-showcase">
+          @for (module of mostRecentModules(); track module.id) {
+            <p-card 
+              class="module-card-recent" 
+              (click)="navigateToModule(module.id)"
+              styleClass="h-full">
+              <ng-template pTemplate="header">
+                <div class="module-image">
+                  <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
+                       [alt]="module.title"
+                       loading="lazy">
+                  <div class="module-overlay">
+                    <p-badge value="Nouveau" icon="✨" styleClass="module-badge new p-badge-success"></p-badge>
+                  </div>
+                </div>
+              </ng-template>
+              
+              <ng-template pTemplate="content">
+                <div class="module-content">
+                  <div class="module-meta">
+                    <p-tag value="Récent" styleClass="module-category" severity="success"></p-tag>
+                    <span class="module-time">{{ getTimeAgo(module.createdAt) }}</span>
+                  </div>
+                  
+                  <h3 class="module-title">{{ module.title }}</h3>
+                  <p class="module-description">{{ module.description }}</p>
+                  
+                  <div class="module-footer">
+                    <div class="module-author">
+                      <div class="author-avatar">
+                        {{ module.creator.username.charAt(0) || 'A' }}
+                      </div>
+                      <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
+                    </div>
+                    
+                    <div class="module-action">
+                      <p-button 
+                        icon="pi pi-play"
+                        label="Jouer"
+                        styleClass="btn-module-action p-button-sm p-button-rounded"
+                        size="small">
+                      </p-button>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </p-card>
+          }
+        </div>
+      </div>
+    }
+    
+    
+    <!-- Enhanced Call-to-Action -->
+    <div class="explore-cta">
+      <div class="cta-content">
+        <h3 class="cta-title">Découvrez encore plus d'aventures</h3>
+        <p class="cta-description">Explorez notre collection complète de modules créés par la communauté</p>
+        <div class="cta-actions">
+          <p-button 
+            routerLink="/project"
+            label="Voir tous les modules"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            styleClass="btn-primary-large p-button-lg p-button-rounded"
+            size="large">
+          </p-button>
+          <p-button 
+            routerLink="/new-module"
+            label="Créer un module"
+            icon="pi pi-plus"
+            iconPos="right"
+            styleClass="btn-secondary-large p-button-lg p-button-rounded p-button-outlined"
+            size="large">
+          </p-button>
+        </div>
+      </div>
+      
+      <div class="cta-visual">
+        <div class="floating-elements">
+          <div class="floating-element" style="--delay: 0s">🎲</div>
+          <div class="floating-element" style="--delay: 0.5s">⚔️</div>
+          <div class="floating-element" style="--delay: 1s">🏰</div>
+          <div class="floating-element" style="--delay: 1.5s">🧙‍♂️</div>
+          <div class="floating-element" style="--delay: 2s">🐉</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
