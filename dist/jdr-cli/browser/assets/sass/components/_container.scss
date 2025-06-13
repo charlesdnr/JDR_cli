@@ -2,17 +2,17 @@
 @use "../core";
 
 .container {
-   background-color: core.$container-color;
-   @include core.box-shadow(core.$box-shadow);
+   // background-color: core.$container-color;
+   // @include core.box-shadow(core.$box-shadow);
 
-   // Transition entre le changement des themes
-   @include core.transition(background-color, core.$transition-duration);
+   // // Transition entre le changement des themes
+   // @include core.transition(background-color, core.$transition-duration);
 
-   &.rounded {
-      @include core.border-radius(core.$radius);
-   }
+   // &.rounded {
+   //    @include core.border-radius(core.$radius);
+   // }
    
-   .container {
-      background-color: var(--container-color);
-   }
+   // .container {
+   //    background-color: var(--container-color);
+   // }
 }

@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { BadgeModule } from 'primeng/badge';
+import { ChipModule } from 'primeng/chip';
+import { RatingModule } from 'primeng/rating';
+import { TagModule } from 'primeng/tag';
 import { TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink } from '@angular/router';
 import { ModuleHttpService } from '../../services/https/module-http.service';
@@ -10,10 +15,22 @@ import { StatisticsService } from '../../services/statistics.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { PlatformStatistics } from '../../interfaces/PlatformStatisticsDTO';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
-  imports: [ButtonModule, TranslateModule, RouterLink, SkeletonModule],
+  imports: [
+    ButtonModule, 
+    CardModule, 
+    BadgeModule, 
+    ChipModule, 
+    RatingModule, 
+    TagModule,
+    TranslateModule, 
+    RouterLink, 
+    SkeletonModule,
+    FormsModule
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -106,7 +123,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Navigation methods
   scrollToFeatures() {
-    document.getElementById('features')?.scrollIntoView({ 
+    document.getElementById('explore')?.scrollIntoView({ 
       behavior: 'smooth' 
     });
   }
@@ -134,6 +151,28 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `Il y a ${Math.floor(diffInDays / 30)} mois`;
   }
 
-  // Math reference for template
-  Math = Math;
+  // Rating value for PrimeNG rating component
+  ratingValue = 5;
+  
+  // Computed stats for featured module (stable values, not changing on each render)
+  featuredModuleStats = computed(() => {
+    const module = this.mostSavedModules()[0];
+    if (!module) return { likes: 0, views: 0 };
+    
+    // Generate stable stats based on module ID to avoid random changes
+    const baseId = module.id || 1;
+    const likes = 100 + (baseId * 7) % 200; // Stable calculation based on module ID
+    const views = 500 + (baseId * 13) % 1000; // Stable calculation based on module ID
+    
+    return { likes, views };
+  });
+
+  // Helper method to get stable stats for any module
+  getModuleStats(module: Module): { likes: number; views: number } {
+    const baseId = module.id || 1;
+    const likes = 1 + (baseId * 3) % 100; // Stable calculation based on module ID (1-100)
+    const views = 50 + (baseId * 11) % 500; // Stable calculation based on module ID (50-549)
+    
+    return { likes, views };
+  }
 }
