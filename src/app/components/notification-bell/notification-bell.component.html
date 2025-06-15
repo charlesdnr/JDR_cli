@@ -4,7 +4,7 @@
   <p-overlaybadge [value]="unreadCount() > 0 ? unreadCount().toString() : ''" severity="danger">
     <p-button
             icon="pi pi-bell"
-            (click)="op.toggle($event)">
+            (click)="onBellClick(); op.toggle($event)">
     </p-button>
   </p-overlaybadge>
 

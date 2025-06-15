@@ -11,9 +11,9 @@ export class ModuleSummary {
   picture: Picture;
 
   constructor(
-    id: number = 0,
-    title: string = '',
-    description: string = '',
+    id = 0,
+    title = '',
+    description = '',
     creator: User = new User('', ''),
     versions: ModuleVersion[] = [],
     picture: Picture = new Picture()

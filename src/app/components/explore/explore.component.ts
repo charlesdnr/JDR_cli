@@ -10,7 +10,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { PaginatorModule } from 'primeng/paginator';
 import { TranslateModule } from '@ngx-translate/core';
-import { ModuleViewerComponent } from '../../components/module-viewer/module-viewer.component';
+import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 import { ModuleHttpService } from '../../services/https/module-http.service';
 import { TagHttpService } from '../../services/https/tag-http.service';
 import { GameSystemHttpService } from '../../services/https/game-system-http.service';
@@ -43,7 +43,7 @@ interface PaginatedResponse<T> {
     InputIconModule,
     PaginatorModule,
     TranslateModule,
-    ModuleViewerComponent,
+    ModuleCardComponent,
   ],
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.scss',

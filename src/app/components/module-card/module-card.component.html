@@ -1,0 +1,69 @@
+<div 
+  class="module-card" 
+  [class.clickable]="clickable()"
+  (click)="openModule()"
+  [tabindex]="clickable() ? 0 : -1"
+  (keyup.enter)="clickable() && openModule()">
+  
+  <!-- Module Image -->
+  <div class="module-image">
+    <img 
+      [src]="getImageSrc()" 
+      [alt]="module().title"
+      loading="lazy">
+    
+    <!-- Published badge -->
+    @if (isPublished()) {
+      <div class="status-badge published">
+        <i class="pi pi-check-circle"></i>
+        Publié
+      </div>
+    } @else {
+      <div class="status-badge draft">
+        <i class="pi pi-file-edit"></i>
+        Brouillon
+      </div>
+    }
+  </div>
+
+  <!-- Module Content -->
+  <div class="module-content">
+    <h3 class="module-title">{{ module().title }}</h3>
+    <p class="module-description">{{ module().description }}</p>
+    
+    <!-- Module Footer -->
+    <div class="module-footer">
+      <!-- Creator info -->
+      @if (showCreator()) {
+        <div 
+          class="module-creator clickable-author" 
+          (click)="goToUserProfile($event, module().creator.id)"
+          (keyup.enter)="goToUserProfile($event, module().creator.id)"
+          tabindex="0"
+          pTooltip="Voir le profil de {{ module().creator.username }}"
+          tooltipStyleClass="tooltip-info">
+          <div class="author-avatar">
+            {{ module().creator.username?.charAt(0) || 'A' }}
+          </div>
+          <span class="author-name">{{ module().creator.username || 'Anonyme' }}</span>
+        </div>
+      }
+      
+      <!-- Creation date -->
+      @if (getCreatedAt()) {
+        <div class="module-date">
+          <i class="pi pi-calendar"></i>
+          <span>{{ getTimeAgo(getCreatedAt()) }}</span>
+        </div>
+      }
+      
+      <!-- Versions count -->
+      @if (module().versions && module().versions.length > 0) {
+        <div class="module-versions">
+          <i class="pi pi-history"></i>
+          <span>{{ module().versions.length }} version{{ module().versions.length > 1 ? 's' : '' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

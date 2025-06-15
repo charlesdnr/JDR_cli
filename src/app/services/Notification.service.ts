@@ -24,6 +24,11 @@ export class NotificationService {
   private stompClient: Client | null = null;
   private firebaseToken = signal<string | null>(null);
 
+  // Cache management
+  private lastLoadTime = signal<number>(0);
+  private cacheExpiryTime = 5 * 60 * 1000; // 5 minutes
+  private isLoading = signal<boolean>(false);
+
   // Utilisation des signaux Angular 19
   notifications = signal<Notification[]>([]);
   unreadCount = signal<number>(0);
@@ -52,8 +57,8 @@ export class NotificationService {
           const currentUser = this.userService.currentJdrUser();
           if (currentUser && !this.isConnected() && !this.connectionPending()) {
             this.connect();
-            this.loadNotifications();
-            this.loadUnreadCount();
+            // Only load notifications if cache is expired or empty
+            this.loadNotificationsIfNeeded();
           }
         } catch (error) {
           console.error('Error getting Firebase token:', error);
@@ -64,6 +69,7 @@ export class NotificationService {
         this.disconnect();
         this.notifications.set([]);
         this.unreadCount.set(0);
+        this.lastLoadTime.set(0);
       }
     });
   }
@@ -151,22 +157,44 @@ export class NotificationService {
     this.isConnected.set(false);
   }
 
+  private isCacheValid(): boolean {
+    const now = Date.now();
+    const lastLoad = this.lastLoadTime();
+    return lastLoad > 0 && (now - lastLoad) < this.cacheExpiryTime;
+  }
+
+  private async loadNotificationsIfNeeded(): Promise<void> {
+    // Skip if already loading, cache is valid, or notifications are already loaded
+    if (this.isLoading() || (this.isCacheValid() && this.notifications().length > 0)) {
+      return;
+    }
+
+    await Promise.all([
+      this.loadNotifications(),
+      this.loadUnreadCount()
+    ]);
+  }
+
   async loadNotifications(): Promise<void> {
     const currentUser = this.userService.currentJdrUser();
-    if (!currentUser) return;
+    if (!currentUser || this.isLoading()) return;
 
     try {
+      this.isLoading.set(true);
       const response = await firstValueFrom(this.http.get<Notification[]>(`${this.apiUrl}/user/${currentUser.id}`));
       this.notifications.set(response || []);
+      this.lastLoadTime.set(Date.now());
     } catch (error) {
       console.error('Error loading notifications:', error);
       this.notifications.set([]);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   async loadUnreadCount(): Promise<void> {
     const currentUser = this.userService.currentJdrUser();
-    if (!currentUser) return;
+    if (!currentUser || this.isLoading()) return;
 
     try {
       const response = await firstValueFrom(this.http.get<{ count: number }>(`${this.apiUrl}/user/${currentUser.id}/count`));
@@ -214,6 +242,12 @@ export class NotificationService {
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
+  }
+
+  // Force refresh notifications (bypasses cache)
+  async forceRefreshNotifications(): Promise<void> {
+    this.lastLoadTime.set(0); // Invalidate cache
+    await this.loadNotificationsIfNeeded();
   }
 
   subscribeToModuleAccessUpdates(moduleId: number, callback: (data: any) => void) {
