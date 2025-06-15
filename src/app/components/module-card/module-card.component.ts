@@ -24,6 +24,7 @@ export class ModuleCardComponent {
   module = input.required<ModuleSummary | Module>();
   showCreator = input<boolean>(true);
   clickable = input<boolean>(true);
+  isHorizontal = input<boolean>(false);
   
   private router = inject(Router);
 

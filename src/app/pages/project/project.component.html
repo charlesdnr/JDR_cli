@@ -1,71 +1,110 @@
 <div class="projects-page">
-  <!-- Modern Header -->
-  <header class="page-header">
-    <div class="header-content">
+  <!-- Compact Header -->
+  <header class="compact-header">
+    <div class="header-main">
       <div class="header-left">
-        <button 
-          class="sidebar-toggle-modern" 
-          (click)="toggleSidebar()"
+        <p-button 
+          [outlined]="true"
+          size="small"
+          [icon]="sidebarCollapsed() ? 'pi pi-bars' : 'pi pi-times'"
+          (onClick)="toggleSidebar()"
           [attr.aria-label]="sidebarCollapsed() ? 'Ouvrir le menu' : 'Fermer le menu'"
-        >
-          <i [class]="sidebarCollapsed() ? 'pi pi-bars' : 'pi pi-times'"></i>
-        </button>
-        <div class="page-title-section">
+        ></p-button>
+        
+        <div class="title-section">
           <h1 class="page-title">Mes Projets</h1>
-          <p class="page-subtitle">Organisez et gérez vos modules JDR</p>
         </div>
       </div>
       
-      <div class="header-actions">
-        <div class="search-section">
-          <div class="search-container">
-            <i class="pi pi-search search-icon"></i>
+      <div class="header-center">
+        <div class="search-compact">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
             <input 
               type="text" 
-              class="search-input" 
-              placeholder="Rechercher un module..." 
+              pInputText
+              placeholder="Rechercher..." 
               [(ngModel)]="searchValue"
             />
-            <button class="search-filter-btn" title="Filtres avancés">
-              <i class="pi pi-filter"></i>
-            </button>
-          </div>
+          </p-iconfield>
         </div>
+      </div>
+      
+      <div class="header-right">
+        <p-selectbutton 
+          [options]="viewOptions"
+          [ngModel]="isGridView() ? 'grid' : 'list'"
+          (ngModelChange)="isGridView.set($event === 'grid')"
+          optionValue="value"
+        >
+          <ng-template let-item pTemplate="item">
+            <i [class]="item.icon"></i>
+          </ng-template>
+        </p-selectbutton>
         
-        <div class="action-buttons">
-          <button class="btn-secondary-modern" title="Grille">
-            <i class="pi pi-th-large"></i>
-          </button>
-          <button class="btn-secondary-modern" title="Liste">
-            <i class="pi pi-list"></i>
-          </button>
-          <button 
-            class="btn-primary-modern"
-            (click)="resetModule()"
-            routerLink="/new-module"
-          >
-            <i class="pi pi-plus"></i>
-            <span>Nouveau Module</span>
-          </button>
-        </div>
+        <p-select 
+          [options]="sortOptions" 
+          [ngModel]="selectedSort()" 
+          (ngModelChange)="onSortChange($event)"
+          optionLabel="label"
+          optionValue="value"
+          [style]="{'min-width': '150px'}"
+        ></p-select>
+        
+        <p-button 
+          label="Nouveau"
+          icon="pi pi-plus"
+          (onClick)="resetModule()"
+          routerLink="/new-module"
+        ></p-button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Sidebar -->
-    <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+  <!-- Main Layout -->
+  <main class="main-layout">
+    <!-- Compact Sidebar -->
+    <aside class="compact-sidebar" [class.collapsed]="sidebarCollapsed()">
       <div class="sidebar-header">
         <div class="sidebar-title">
-          <i class="pi pi-folder"></i>
           <span>Dossiers</span>
         </div>
+        <p-button 
+          [outlined]="true"
+          size="small"
+          icon="pi pi-plus"
+          (onClick)="showNewFolderDialog(null)"
+          title="Nouveau dossier"
+        ></p-button>
       </div>
       
       <div class="sidebar-content">
         <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
-        <div class="folders-tree">
+        
+        <div class="tree-container">
+          <!-- Section pour les modules sans dossier -->
+          @if (moduleWithoutFolder().length > 0) {
+            <div class="modules-without-folder">
+              <div 
+                class="tree-node folder-node" 
+                [class.selected]="!selectedFolder()"
+                (click)="selectNoFolder()"
+                (keydown.enter)="selectNoFolder()"
+                (keydown.space)="selectNoFolder()"
+                tabindex="0"
+                role="button"
+                [attr.aria-pressed]="!selectedFolder()"
+                [pTooltip]="sidebarCollapsed() ? 'Modules sans dossier (' + moduleWithoutFolder().length + ')' : ''"
+                tooltipPosition="right"
+                [showDelay]="300"
+              >
+                <i class="pi pi-home"></i>
+                <span>Modules sans dossier</span>
+                <span class="module-count">({{ moduleWithoutFolder().length }})</span>
+              </div>
+            </div>
+          }
+          
           <p-tree
             #treeElement
             [value]="treeNode()"
@@ -80,127 +119,171 @@
             draggableScope="folders"
             droppableScope="folders"
           >
+            <ng-template let-node pTemplate="default">
+              <div 
+                class="tree-node" 
+                [class.is-module]="node.type === 'module'"
+                [pTooltip]="sidebarCollapsed() ? node.label : ''"
+                tooltipPosition="right"
+                [showDelay]="300"
+              >
+                <span>{{ node.label }}</span>
+                @if (node.type === 'module') {
+                  <i class="pi pi-file module-icon"></i>
+                }
+              </div>
+            </ng-template>
           </p-tree>
         </div>
       </div>
-      
-      <div class="sidebar-footer">
-        <button
-          class="btn-new-folder"
-          (click)="showNewFolderDialog(null)"
-        >
-          <i class="pi pi-plus"></i>
-          <span>Nouveau dossier</span>
-        </button>
-      </div>
     </aside>
 
-    <!-- Content Area -->
-    <section class="content-area">
-      <!-- Quick Stats -->
-      <div class="stats-bar">
+    <!-- Content Workspace -->
+    <section class="content-workspace">
+      <!-- Compact Stats -->
+      <div class="stats-compact">
         <div class="stat-item">
-          <div class="stat-icon">
-            <i class="pi pi-book"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-number">{{ getTotalModulesCount() }}</span>
-            <span class="stat-label">Modules</span>
-          </div>
+          <i class="pi pi-book"></i>
+          <span class="stat-number">{{ getTotalModulesCount() }}</span>
+          <span class="stat-label">Modules</span>
         </div>
-        
         <div class="stat-item">
-          <div class="stat-icon">
-            <i class="pi pi-folder"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-number">{{ getFoldersCount() }}</span>
-            <span class="stat-label">Dossiers</span>
-          </div>
+          <i class="pi pi-folder"></i>
+          <span class="stat-number">{{ getFoldersCount() }}</span>
+          <span class="stat-label">Dossiers</span>
         </div>
-        
         <div class="stat-item">
-          <div class="stat-icon">
-            <i class="pi pi-clock"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-number">{{ getRecentModulesCount() }}</span>
-            <span class="stat-label">Récents</span>
-          </div>
+          <i class="pi pi-clock"></i>
+          <span class="stat-number">{{ getRecentModulesCount() }}</span>
+          <span class="stat-label">Récents</span>
         </div>
       </div>
 
-      <!-- Modules Grid -->
-      <div class="modules-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            @if (selectedFolder()) {
-              <i class="pi pi-folder-open"></i>
-              {{ selectedFolder()!.label }}
-            } @else {
-              <i class="pi pi-home"></i>
-              Tous les modules
-            }
-          </h2>
-          <div class="section-actions">
-            <select class="sort-select">
-              <option>Récent</option>
-              <option>Nom A-Z</option>
-              <option>Nom Z-A</option>
-              <option>Date création</option>
-            </select>
-          </div>
-        </div>
+      <!-- Modules Showcase -->
+      <div class="modules-showcase">
         
-        <div class="modules-grid">
-          @if (selectedFolder()) {
-            @for (module of displayedModules(); track module.savedModuleId) {
-              <div
-                class="module-card-wrapper"
-                [draggable]="true"
-                (dragstart)="onModuleDragStart(module)"
-                (dragend)="onModuleDragEnd()"
-              >
-                <app-module-viewer 
-                  [moduleId]="module.moduleId" 
-                  [moduleData]="module.moduleDetails || null" 
-                />
-              </div>
-            }
-          } @else {
-            @for (module of moduleWithoutFolder(); track module) {
-              <div
-                class="module-card-wrapper"
-                [draggable]="true"
-                (dragstart)="onModuleDragStart(module)"
-                (dragend)="onModuleDragEnd()"
-              >
-                <app-module-viewer [moduleId]="module.moduleId" />
-              </div>
-            }
-          }
-          
-          @if (getDisplayedModulesLength() === 0) {
-            <div class="empty-state">
-              <div class="empty-icon">
-                <i class="pi pi-inbox"></i>
-              </div>
-              <h3>Aucun module trouvé</h3>
-              <p>Commencez par créer votre premier module ou ajustez vos filtres de recherche.</p>
-              <button 
-                class="btn-primary-modern"
-                (click)="resetModule()"
-                routerLink="/new-module"
-              >
-                <i class="pi pi-plus"></i>
-                Créer un module
-              </button>
+        <!-- Modules Grid/List -->
+        <div class="modules-display" [class.list-view]="!isGridView()" [class.grid-view]="isGridView()">
+          @if (isLoadingModules()) {
+            <div class="loading-grid">
+              @for (i of [1,2,3,4]; track i) {
+                <div class="skeleton-card">
+                  <div class="skeleton-header"></div>
+                  <div class="skeleton-content"></div>
+                </div>
+              }
             </div>
+          } @else {
+            @if (filteredAndSortedModules().length > 0) {
+              <div class="modules-grid">
+                @for (module of filteredAndSortedModules(); track module.savedModuleId) {
+                  <div
+                    class="module-wrapper"
+                    [draggable]="true"
+                    (dragstart)="onModuleDragStart(module)"
+                    (dragend)="onModuleDragEnd()"
+                  >
+                    @if (module.moduleDetails) {
+                      <app-module-card 
+                        [module]="module.moduleDetails"
+                        [clickable]="true"
+                        [isHorizontal]="!isGridView()"
+                      />
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state">
+                <div class="empty-illustration">
+                  <div class="illustration-background">
+                    <div class="floating-shapes">
+                      <div class="shape shape-1"></div>
+                      <div class="shape shape-2"></div>
+                      <div class="shape shape-3"></div>
+                      <div class="shape shape-4"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="main-icon">
+                    @if (searchValue()) {
+                      <i class="pi pi-search"></i>
+                    } @else if (selectedFolder()) {
+                      <i class="pi pi-folder-open"></i>
+                    } @else {
+                      <i class="pi pi-book"></i>
+                    }
+                  </div>
+                  
+                  <div class="icon-glow"></div>
+                </div>
+                
+                <div class="empty-content">
+                  <h2 class="empty-title">
+                    @if (searchValue()) {
+                      Aucun résultat trouvé
+                    } @else if (selectedFolder()) {
+                      Dossier vide
+                    } @else {
+                      Commencez votre aventure
+                    }
+                  </h2>
+                  
+                  <p class="empty-description">
+                    @if (searchValue()) {
+                      Aucun module ne correspond à "<strong>{{ searchValue() }}</strong>". 
+                      Essayez avec d'autres termes ou créez un nouveau module.
+                    } @else if (selectedFolder()) {
+                      Ce dossier attend vos créations. Créez votre premier module ou déplacez-en un existant ici.
+                    } @else {
+                      Créez votre premier module JDR et donnez vie à vos histoires épiques. Votre monde imaginaire n'attend que vous !
+                    }
+                  </p>
+                  
+                  <div class="empty-actions">
+                    <div class="primary-action">
+                      <p-button 
+                        label="Créer un module"
+                        icon="pi pi-plus"
+                        size="large"
+                        (onClick)="resetModule()"
+                        routerLink="/new-module"
+                      ></p-button>
+                    </div>
+                    
+                    @if (searchValue()) {
+                      <div class="secondary-action">
+                        <p-button 
+                          label="Effacer la recherche"
+                          icon="pi pi-times"
+                          [outlined]="true"
+                          (onClick)="searchValue.set('')"
+                        ></p-button>
+                      </div>
+                    } @else {
+                      
+                    }
+                  </div>
+                </div>
+              </div>
+            }
           }
         </div>
       </div>
     </section>
   </main>
+  
+  <!-- Floating Action Button -->
+  <div class="fab-container">
+    <p-button 
+      icon="pi pi-plus"
+      [rounded]="true"
+      size="large"
+      (onClick)="resetModule()"
+      routerLink="/new-module"
+      title="Créer un nouveau module"
+    ></p-button>
+  </div>
 </div>
 
 <p-dialog
@@ -211,8 +294,8 @@
 >
   <div class="container-dialog">
     <div class="container-label">
-      <label for="username">Nom du dossier</label>
-      <input id="username" pInputText [(ngModel)]="folderName" />
+      <label for="foldername">Nom du dossier</label>
+      <input id="foldername" pInputText [(ngModel)]="folderName" />
     </div>
     <div class="container-button">
       <p-button

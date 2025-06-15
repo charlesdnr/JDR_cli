@@ -1,34 +1,55 @@
 <div 
   class="module-card" 
   [class.clickable]="clickable()"
+  [class.horizontal]="isHorizontal()"
   (click)="openModule()"
   [tabindex]="clickable() ? 0 : -1"
   (keyup.enter)="clickable() && openModule()">
   
-  <!-- Module Image -->
-  <div class="module-image">
-    <img 
-      [src]="getImageSrc()" 
-      [alt]="module().title"
-      loading="lazy">
-    
-    <!-- Published badge -->
-    @if (isPublished()) {
-      <div class="status-badge published">
-        <i class="pi pi-check-circle"></i>
-        Publié
-      </div>
-    } @else {
-      <div class="status-badge draft">
-        <i class="pi pi-file-edit"></i>
-        Brouillon
-      </div>
-    }
-  </div>
+  <!-- Module Image (only in grid view) -->
+  @if (!isHorizontal()) {
+    <div class="module-image">
+      <img 
+        [src]="getImageSrc()" 
+        [alt]="module().title"
+        loading="lazy">
+      
+      <!-- Published badge -->
+      @if (isPublished()) {
+        <div class="status-badge published">
+          <i class="pi pi-check-circle"></i>
+          Publié
+        </div>
+      } @else {
+        <div class="status-badge draft">
+          <i class="pi pi-file-edit"></i>
+          Brouillon
+        </div>
+      }
+    </div>
+  }
 
   <!-- Module Content -->
   <div class="module-content">
-    <h3 class="module-title">{{ module().title }}</h3>
+    <div class="content-header">
+      <h3 class="module-title">{{ module().title }}</h3>
+      
+      <!-- Status badge for horizontal view -->
+      @if (isHorizontal()) {
+        @if (isPublished()) {
+          <div class="status-badge published">
+            <i class="pi pi-check-circle"></i>
+            Publié
+          </div>
+        } @else {
+          <div class="status-badge draft">
+            <i class="pi pi-file-edit"></i>
+            Brouillon
+          </div>
+        }
+      }
+    </div>
+    
     <p class="module-description">{{ module().description }}</p>
     
     <!-- Module Footer -->
