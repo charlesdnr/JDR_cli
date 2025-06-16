@@ -6,8 +6,10 @@ export class UserProfile {
     password: string;
     user: User;
     picture: Picture | null = null;
-    modulesCreated: number = 0;
-    subscribersCount: number = 0;
+    isPublic = false;
+    profileViews = 0;
+    subsribersCount = 0;
+    isSubscribedByCurrentUser = false;
 
     constructor(username: string, password: string, user: User, picture?: Picture) {
         if (!username || !password || !user) {

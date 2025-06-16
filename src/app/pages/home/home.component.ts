@@ -6,6 +6,7 @@ import { BadgeModule } from 'primeng/badge';
 import { ChipModule } from 'primeng/chip';
 import { RatingModule } from 'primeng/rating';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink } from '@angular/router';
 import { ModuleHttpService } from '../../services/https/module-http.service';
@@ -16,6 +17,7 @@ import { WebSocketService } from '../../services/websocket.service';
 import { PlatformStatistics } from '../../interfaces/PlatformStatisticsDTO';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 
 @Component({
   selector: 'app-home',
@@ -26,10 +28,12 @@ import { FormsModule } from '@angular/forms';
     ChipModule, 
     RatingModule, 
     TagModule,
+    TooltipModule,
     TranslateModule, 
     RouterLink, 
     SkeletonModule,
-    FormsModule
+    FormsModule,
+    ModuleCardComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -174,5 +178,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     const views = 50 + (baseId * 11) % 500; // Stable calculation based on module ID (50-549)
     
     return { likes, views };
+  }
+
+  // Navigation method for user profiles
+  goToUserProfile(event: Event, userId?: number) {
+    event.stopPropagation(); // Empêcher la propagation vers le click du module
+    if (userId) {
+      this.router.navigate(['/user', userId]);
+    }
   }
 }

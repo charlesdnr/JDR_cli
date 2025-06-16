@@ -40,7 +40,22 @@ export class ModuleService {
       isCreator: false,
     };
 
-    if (!module || !currentUser) {
+    if (!module) {
+      return defaultRights;
+    }
+
+    // Si pas d'utilisateur connecté, vérifier si le module est publié
+    if (!currentUser) {
+      const isPublished = currentVersion && currentVersion.published;
+      if (isPublished) {
+        return {
+          canView: true,
+          canEdit: false,
+          canPublish: false,
+          canInvite: false,
+          isCreator: false,
+        };
+      }
       return defaultRights;
     }
 

@@ -14,25 +14,29 @@
         <span>{{ getBlockPreview(block()?.type ?? "stat") }}</span>
       </div>
       <div class="block-controls">
-        @if(block()?.id && !isReadOnly() && block()!.type === enum().paragraph){
-        <p-button
-          icon="pi pi-sparkles"
-          pTooltip="Générer avec l'IA"
-          tooltipPosition="top"
-          (click)="onGenerateAI(block()?.id!, block()!.type)"
-          [rounded]="true"
-          [text]="true"
-          severity="help"
-        />
-        <p-button
-          icon="pi pi-times"
-          (click)="onRemoveBlock(block()!.id!)"
-          pTooltip="Supprimer"
-          tooltipPosition="top"
-          [rounded]="true"
-          [text]="true"
-          severity="danger"
-        />
+        @if(block()?.id && !isReadOnly()) {
+          @if(block()!.type === enum().paragraph) {
+            <p-button
+              icon="pi pi-sparkles"
+              pTooltip="Générer avec l'IA"
+              tooltipPosition="top"
+              tooltipStyleClass="tooltip-ai"
+              (click)="onGenerateAI(block()?.id!, block()!.type)"
+              [rounded]="true"
+              [text]="true"
+              severity="help"
+            />
+          }
+          <p-button
+            icon="pi pi-times"
+            (click)="onRemoveBlock(block()!.id!)"
+            pTooltip="Supprimer"
+            tooltipPosition="top"
+            tooltipStyleClass="tooltip-delete"
+            [rounded]="true"
+            [text]="true"
+            severity="danger"
+          />
         }
       </div>
     </div>

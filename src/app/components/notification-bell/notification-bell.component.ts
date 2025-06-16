@@ -57,4 +57,9 @@ export class NotificationBellComponent {
       this.router.navigate(['/module', notification.moduleId]);
     }
   }
+
+  async onBellClick(): Promise<void> {
+    // Force refresh notifications when user clicks the bell
+    await this.notificationService.forceRefreshNotifications();
+  }
 }

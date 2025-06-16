@@ -6,7 +6,7 @@
     <!-- Logo et nom -->
     <div class="brand" routerLink="/home">
       <img src="/assets/images/logo.png" alt="JDR CLI" class="logo" />
-      <span class="brand-name">JDR CLI</span>
+      <span class="brand-name">QuestHub</span>
     </div>
 
     <!-- Barre de recherche moderne -->
@@ -43,6 +43,7 @@
           class="nav-item"
           [pTooltip]="button.name"
           tooltipPosition="bottom"
+          tooltipStyleClass="tooltip-info"
           appendTo="body"
         >
           <span class="material-symbols-outlined">{{ button.icon }}</span>
@@ -56,6 +57,7 @@
             routerLink="/account"
             [pTooltip]="'Mon profil'"
             tooltipPosition="bottom"
+            tooltipStyleClass="tooltip-info"
           >
             <span>{{
               currentUser()?.username?.charAt(0)?.toUpperCase() || "U"
@@ -66,6 +68,7 @@
             (click)="logout($event)"
             [pTooltip]="'Se déconnecter'"
             tooltipPosition="bottom"
+            tooltipStyleClass="tooltip-warning"
           >
             <i class="pi pi-sign-out"></i>
           </button>
@@ -104,6 +107,8 @@
         class="mobile-user-info"
         routerLink="/account"
         (click)="toggleMobileMenu()"
+        (keyup.enter)="toggleMobileMenu()"
+        tabindex="0"
       >
         <div class="user-avatar-large">
           <span>{{

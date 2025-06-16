@@ -204,7 +204,12 @@
             <h3 class="spotlight-title">{{ mostSavedModules()[0].title }}</h3>
             <p class="spotlight-description">{{ mostSavedModules()[0].description }}</p>
             
-            <div class="spotlight-author">
+            <div class="spotlight-author clickable-author" 
+                 (click)="goToUserProfile($event, mostSavedModules()[0].creator.id)"
+                 (keyup.enter)="goToUserProfile($event, mostSavedModules()[0].creator.id)"
+                 tabindex="0"
+                 pTooltip="Voir le profil de {{ mostSavedModules()[0].creator.username }}"
+                 tooltipStyleClass="tooltip-info">
               <div class="author-avatar-large">
                 {{ mostSavedModules()[0].creator.username.charAt(0) || 'A' }}
               </div>
@@ -259,70 +264,9 @@
         } @else {
           @if (mostSavedModules().length > 1) {
             @for (module of mostSavedModules().slice(1); track module.id) {
-              <p-card 
-                class="module-card-enhanced" 
-                (click)="navigateToModule(module.id)"
-                styleClass="h-full">
-                <ng-template pTemplate="header">
-                  <div class="module-image">
-                    <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
-                         [alt]="module.title"
-                         loading="lazy">
-                    <div class="module-overlay">
-                      <div class="module-stats">
-                        <p-badge 
-                          [value]="getModuleStats(module).likes" 
-                          icon="pi pi-heart" 
-                          styleClass="stat p-badge-info">
-                        </p-badge>
-                        <p-badge 
-                          [value]="getModuleStats(module).views" 
-                          icon="pi pi-eye" 
-                          styleClass="stat p-badge-secondary">
-                        </p-badge>
-                      </div>
-                      <p-button 
-                        class="quick-view-btn"
-                        icon="pi pi-search-plus"
-                        styleClass="p-button-rounded p-button-text"
-                        size="large">
-                      </p-button>
-                    </div>
-                  </div>
-                </ng-template>
-                
-                <ng-template pTemplate="content">
-                  <div class="module-content">
-                    <div class="module-meta">
-                      <p-tag value="Aventure" styleClass="module-category" severity="success"></p-tag>
-                      <p-tag value="Intermédiaire" styleClass="module-difficulty" severity="warn"></p-tag>
-                    </div>
-                    
-                    <h3 class="module-title">{{ module.title }}</h3>
-                    <p class="module-description">{{ module.description }}</p>
-                    
-                    <div class="module-footer">
-                      <div class="module-author">
-                        <div class="author-avatar">
-                          {{ module.creator.username.charAt(0) || 'A' }}
-                        </div>
-                        <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
-                      </div>
-                      
-                      <div class="module-tags">
-                        @if (module.tags && module.tags.length > 0) {
-                          @for (tag of module.tags.slice(0, 2); track tag.id) {
-                            <p-chip [label]="tag.name" styleClass="module-tag"></p-chip>
-                          }
-                        } @else {
-                          <p-chip label="Aventure" styleClass="module-tag"></p-chip>
-                          <p-chip label="JDR" styleClass="module-tag"></p-chip>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </ng-template>
-              </p-card>
+              <div class="module-card-wrapper">
+                <app-module-card [module]="module" />
+              </div>
             }
           } @else {
             <div class="empty-state">
@@ -355,51 +299,9 @@
         
         <div class="recent-modules-showcase">
           @for (module of mostRecentModules(); track module.id) {
-            <p-card 
-              class="module-card-recent" 
-              (click)="navigateToModule(module.id)"
-              styleClass="h-full">
-              <ng-template pTemplate="header">
-                <div class="module-image">
-                  <img [src]="module.picture.src || 'assets/images/baseImageModule.png'" 
-                       [alt]="module.title"
-                       loading="lazy">
-                  <div class="module-overlay">
-                    <p-badge value="Nouveau" icon="✨" styleClass="module-badge new p-badge-success"></p-badge>
-                  </div>
-                </div>
-              </ng-template>
-              
-              <ng-template pTemplate="content">
-                <div class="module-content">
-                  <div class="module-meta">
-                    <p-tag value="Récent" styleClass="module-category" severity="success"></p-tag>
-                    <span class="module-time">{{ getTimeAgo(module.createdAt) }}</span>
-                  </div>
-                  
-                  <h3 class="module-title">{{ module.title }}</h3>
-                  <p class="module-description">{{ module.description }}</p>
-                  
-                  <div class="module-footer">
-                    <div class="module-author">
-                      <div class="author-avatar">
-                        {{ module.creator.username.charAt(0) || 'A' }}
-                      </div>
-                      <span class="author-name">{{ module.creator.username || 'Anonyme' }}</span>
-                    </div>
-                    
-                    <div class="module-action">
-                      <p-button 
-                        icon="pi pi-play"
-                        label="Jouer"
-                        styleClass="btn-module-action p-button-sm p-button-rounded"
-                        size="small">
-                      </p-button>
-                    </div>
-                  </div>
-                </div>
-              </ng-template>
-            </p-card>
+            <div class="module-card-wrapper">
+              <app-module-card [module]="module" />
+            </div>
           }
         </div>
       </div>

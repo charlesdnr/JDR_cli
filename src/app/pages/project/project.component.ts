@@ -14,6 +14,10 @@ import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SelectModule } from 'primeng/select';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   MenuItem,
   MessageService,
@@ -26,11 +30,12 @@ import { UserFolder } from '../../classes/UserFolder';
 import { UserSavedModule } from '../../classes/UserSavedModule';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
+import { FolderService } from '../../services/folders.service';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { ModuleViewerComponent } from '../../components/module-viewer/module-viewer.component';
+import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 import {
   TreeModule,
   TreeNodeContextMenuSelectEvent,
@@ -45,7 +50,7 @@ import { DragDropModule } from 'primeng/dragdrop';
 import { ModuleSummary } from '../../classes/ModuleSummary';
 
 interface DisplayableSavedModule extends UserSavedModule {
-  moduleDetails?: Module | ModuleSummary;
+  moduleDetails?: ModuleSummary;
   isLoadingDetails?: boolean;
 }
 
@@ -65,11 +70,15 @@ interface DisplayableSavedModule extends UserSavedModule {
     FloatLabelModule,
     IconFieldModule,
     InputIconModule,
-    ModuleViewerComponent,
+    ModuleCardComponent,
     TreeModule,
     ContextMenuModule,
     RouterLink,
     DragDropModule,
+    SelectModule,
+    ToggleButtonModule,
+    SelectButtonModule,
+    TooltipModule,
   ],
   providers: [TreeDragDropService],
   templateUrl: './project.component.html',
@@ -84,16 +93,21 @@ export class ProjectComponent implements OnInit {
   private messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private folderService = inject(FolderService);
 
   currentUser = computed(() => this.httpUserService.currentJdrUser());
 
   // --- Signals pour l'état ---
-  folders: WritableSignal<UserFolder[]> = signal([]);
+  folders = this.folderService.currentFolders.asReadonly();
   selectedFolder: WritableSignal<TreeNode | null> = signal(null);
 
   displayedModules: WritableSignal<DisplayableSavedModule[]> = signal([]);
   moduleWithoutFolder = signal<DisplayableSavedModule[]>([]);
   modulesSummary: WritableSignal<ModuleSummary[]> = signal([]);
+
+  // Cache pour éviter les appels redondants
+  private folderModulesCache = new Map<number, DisplayableSavedModule[]>();
+  private isModulesSummaryLoaded = signal(false);
 
   isLoadingFolders = signal(false);
   isLoadingModules = signal(false);
@@ -102,6 +116,20 @@ export class ProjectComponent implements OnInit {
   
   // Sidebar state
   sidebarCollapsed = signal(false);
+  
+  // Display and sorting options
+  isGridView = signal(true);
+  viewOptions = [
+    { icon: 'pi pi-th-large', value: 'grid' },
+    { icon: 'pi pi-list', value: 'list' }
+  ];
+  sortOptions = [
+    { label: 'Récent', value: 'recent' },
+    { label: 'Nom A-Z', value: 'name-asc' },
+    { label: 'Nom Z-A', value: 'name-desc' },
+    { label: 'Date de création', value: 'date-created' }
+  ];
+  selectedSort = signal('recent');
 
   contextMenuItems: MenuItem[] = [
     {
@@ -215,16 +243,47 @@ export class ProjectComponent implements OnInit {
   folderName = '';
 
   async ngOnInit(): Promise<void> {
-    await this.loadFolders();
+    // Nettoyer le cache au début pour s'assurer qu'on part d'un état propre
+    this.clearCache();
+    
+    // Attendre que les dossiers soient chargés par le FolderService (s'ils ne le sont pas déjà)
+    if (this.folders().length === 0) {
+      await this.folderService.loadFolders();
+    }
+    
+    // Charger les modules sans dossier et les afficher par défaut
     await this.loadModulesWithoutFolder();
+    
+    // Charger les modules de tous les dossiers pour avoir des statistiques précises
+    await this.preloadAllFolderModules();
 
     // Résoudre le problème de chargement des dossiers imbriqués
     this.route.queryParamMap.subscribe((queryParams) => {
       const folderIdQueryParam = queryParams.get('folderId');
       if (folderIdQueryParam) {
         this.findAndExpandToFolder(parseInt(folderIdQueryParam, 10));
+      } else {
+        // Si pas de folderId en query param, sélectionner le premier dossier disponible
+        // ou laisser les modules sans dossier affichés
+        setTimeout(() => {
+          this.selectFirstFolderOrShowModulesWithoutFolder();
+        }, 100);
       }
     });
+  }
+
+  // Nouvelle méthode pour sélectionner le premier dossier ou afficher les modules sans dossier
+  selectFirstFolderOrShowModulesWithoutFolder(): void {
+    const nodes = this.treeNode();
+    if (nodes.length > 0) {
+      // Sélectionner le premier dossier disponible
+      const firstNode = nodes[0];
+      this.selectFolder(firstNode);
+    } else {
+      // Aucun dossier disponible, s'assurer que les modules sans dossier sont affichés
+      this.selectedFolder.set(null);
+      // Les modules sans dossier seront automatiquement affichés via filteredAndSortedModules()
+    }
   }
 
   // Nouvelle méthode pour trouver et développer jusqu'au dossier sélectionné
@@ -301,36 +360,72 @@ export class ProjectComponent implements OnInit {
     }
   }
 
+  selectNoFolder(): void {
+    this.selectedFolder.set(null);
+    // Les modules sans dossier seront automatiquement affichés via filteredAndSortedModules()
+  }
+
   /**
-   * Charge les dossiers de l'utilisateur
+   * Précharge les modules de tous les dossiers pour avoir des statistiques précises
    */
-  async loadFolders(): Promise<UserFolder[]> {
+  async preloadAllFolderModules(): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+
+    try {
+      // S'assurer que les modules summary sont chargés
+      await this.loadModulesSummary();
+
+      // Charger les modules pour chaque dossier
+      const folders = this.folders();
+      for (const folder of folders) {
+        if (folder.folderId && !this.folderModulesCache.has(folder.folderId)) {
+          try {
+            const savedModules = await this.httpUserSavedModuleService.getSavedModulesByFolder(folder.folderId);
+            
+            // Enrichir avec les détails des modules
+            const enrichedModules: DisplayableSavedModule[] = [];
+            for (const savedModule of savedModules) {
+              const moduleDetails = this.modulesSummary().find(
+                summary => summary.id === savedModule.moduleId
+              );
+              
+              if (moduleDetails) {
+                enrichedModules.push({
+                  ...savedModule,
+                  moduleDetails: moduleDetails,
+                });
+              }
+            }
+            
+            // Mettre en cache
+            this.folderModulesCache.set(folder.folderId, enrichedModules);
+          } catch (error) {
+            console.error(`Erreur lors du chargement des modules du dossier ${folder.folderId}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du préchargement des modules:', error);
+    }
+  }
+
+  /**
+   * Recharge les dossiers via le FolderService
+   */
+  async reloadFolders(): Promise<void> {
     this.isLoadingFolders.set(true);
     try {
-      const user = this.currentUser();
-      if (!user) return [];
-      const fetchedFolders = await this.httpUserFolderService.getAllUserFolders(
-        user.id
-      );
-      this.folders.set(fetchedFolders);
-
-      // Après avoir chargé les dossiers, chargez les modules pour chaque dossier
-      this.loadAllModulesForAllFolders(fetchedFolders);
-
-      return fetchedFolders;
-    } catch (error: unknown) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur Dossiers',
-        detail: 'Impossible de charger les dossiers.' + error,
-      });
-      return [];
+      await this.folderService.forceReloadFolders();
     } finally {
       this.isLoadingFolders.set(false);
     }
   }
 
   async loadModulesSummary(): Promise<void> {
+    // Éviter les appels redondants
+    if (this.isModulesSummaryLoaded()) return;
+
     try {
       const user = this.currentUser();
       if (!user) return;
@@ -338,60 +433,20 @@ export class ProjectComponent implements OnInit {
       // Charger tous les modules summary de l'utilisateur
       const summaries = await this.moduleHttpService.getModulesSummaryByUserId(user.id);
       this.modulesSummary.set(summaries);
+      this.isModulesSummaryLoaded.set(true);
     } catch (error) {
       console.error('Erreur lors du chargement des modules summary:', error);
     }
   }
 
-  async loadAllModulesForAllFolders(folders: UserFolder[]): Promise<void> {
-    try {
-      // Charger d'abord les modules summary
-      await this.loadModulesSummary();
-      
-      // Pour chaque dossier, charger ses modules et les ajouter à l'arbre
-      for (const folder of folders) {
-        if (folder.folderId) {
-          // Récupérer les modules sauvegardés pour ce dossier
-          const savedModules =
-            await this.httpUserSavedModuleService.getSavedModulesByFolder(
-              folder.folderId
-            );
+  // Méthodes pour gérer le cache
+  private clearCache(): void {
+    this.folderModulesCache.clear();
+    this.isModulesSummaryLoaded.set(false);
+  }
 
-          // Enrichir chaque savedModule avec les détails du module depuis le cache summary
-          const enrichedModules: DisplayableSavedModule[] = [];
-
-          for (const savedModule of savedModules) {
-            const moduleDetails = this.modulesSummary().find(
-              summary => summary.id === savedModule.moduleId
-            );
-            
-            if (moduleDetails) {
-              enrichedModules.push({
-                ...savedModule,
-                moduleDetails: moduleDetails,
-              });
-            } else {
-              // Fallback: charger le module complet si pas trouvé dans summary
-              const fullModule = await this.moduleHttpService.getModuleById(
-                savedModule.moduleId
-              );
-              enrichedModules.push({
-                ...savedModule,
-                moduleDetails: fullModule,
-              });
-            }
-          }
-
-          // Ajouter les modules enrichis à l'arbre
-          this.addModulesToTreeNode(folder.folderId, enrichedModules);
-        }
-      }
-    } catch (error) {
-      console.error(
-        'Erreur lors du chargement des modules pour tous les dossiers:',
-        error
-      );
-    }
+  private invalidateFolderCache(folderId: number): void {
+    this.folderModulesCache.delete(folderId);
   }
 
   /**
@@ -405,10 +460,16 @@ export class ProjectComponent implements OnInit {
       const folderId = folder?.folderId;
       if (!folderId) return;
 
-      // S'assurer que les modules summary sont chargés
-      if (this.modulesSummary().length === 0) {
-        await this.loadModulesSummary();
+      // Vérifier si les modules pour ce dossier sont déjà en cache
+      if (this.folderModulesCache.has(folderId)) {
+        const cachedModules = this.folderModulesCache.get(folderId)!;
+        this.displayedModules.set(cachedModules);
+        this.addModulesToTreeNode(folderId, cachedModules);
+        return;
       }
+
+      // S'assurer que les modules summary sont chargés
+      await this.loadModulesSummary();
 
       // Récupérer les modules sauvegardés
       const savedModules =
@@ -427,21 +488,12 @@ export class ProjectComponent implements OnInit {
             ...savedModule,
             moduleDetails: moduleDetails,
           });
-        } else {
-          // Fallback: charger le module complet si pas trouvé dans summary
-          const fullModule = await this.moduleHttpService.getModuleById(
-            savedModule.moduleId
-          );
-          enrichedModules.push({
-            ...savedModule,
-            moduleDetails: fullModule,
-          });
         }
       }
 
+      // Mettre en cache et afficher
+      this.folderModulesCache.set(folderId, enrichedModules);
       this.displayedModules.set(enrichedModules);
-
-      // Ajouter les modules enrichis à l'arbre
       this.addModulesToTreeNode(folderId, enrichedModules);
     } catch (error: unknown) {
       console.error(
@@ -465,8 +517,7 @@ export class ProjectComponent implements OnInit {
   ): void {
     // Fonction récursive pour trouver le nœud correspondant au folderId
     const findNodeAndAddModules = (nodes: TreeNode[]): boolean => {
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
+      for (const node of nodes) {
         if (node.data?.folderId === folderId) {
           // Filtrer les enfants existants qui sont des dossiers (pour garder la structure)
           const folderChildren = node.children
@@ -511,9 +562,33 @@ export class ProjectComponent implements OnInit {
     try {
       const user = this.currentUser();
       if (!user) return;
-      this.moduleWithoutFolder.set(
-        await this.httpUserSavedModuleService.getAllUserSavedModules(user.id)
-      );
+      
+      // S'assurer que les modules summary sont chargés
+      await this.loadModulesSummary();
+      
+      // Récupérer tous les modules sauvegardés de l'utilisateur
+      const allSavedModules = await this.httpUserSavedModuleService.getAllUserSavedModules(user.id);
+      
+      // Filtrer pour ne garder que ceux sans dossier
+      const modulesWithoutFolder = allSavedModules.filter(module => !module.folderId);
+      
+      // Enrichir chaque savedModule avec les détails du module depuis le cache summary
+      const enrichedModules: DisplayableSavedModule[] = [];
+
+      for (const savedModule of modulesWithoutFolder) {
+        const moduleDetails = this.modulesSummary().find(
+          summary => summary.id === savedModule.moduleId
+        );
+        
+        if (moduleDetails) {
+          enrichedModules.push({
+            ...savedModule,
+            moduleDetails: moduleDetails,
+          });
+        }
+      }
+      
+      this.moduleWithoutFolder.set(enrichedModules);
     } catch (error: unknown) {
       console.error(
         'Erreur lors du chargement des modules sauvegardés:',
@@ -560,11 +635,16 @@ export class ProjectComponent implements OnInit {
             summary: 'Succès',
             detail: 'Module déplacé avec succès',
           });
+          
+          // Invalider le cache des dossiers affectés
+          const originalFolderId = dragNode.data.folderId;
+          if (originalFolderId) {
+            this.invalidateFolderCache(originalFolderId);
+          }
+          this.invalidateFolderCache(targetFolderId);
+          
           dropNode.expanded = true;
           this.selectFolder(dropNode);
-          // Recharger l'arborescence et les modules
-          // this.loadFolders();
-          // this.loadModulesWithoutFolder();
         })
         .catch((error) => {
           this.messageService.add({
@@ -615,20 +695,49 @@ export class ProjectComponent implements OnInit {
 
   // Nouvelles méthodes pour les statistiques
   getTotalModulesCount(): number {
+    // Compter les modules sans dossier
     const withoutFolder = this.moduleWithoutFolder().length;
-    const inFolders = this.treeNode().reduce((total, node) => {
-      return total + (node.data?.modules?.length || 0);
-    }, 0);
+    
+    // Compter tous les modules dans tous les dossiers en parcourant le cache
+    let inFolders = 0;
+    this.folderModulesCache.forEach((modules) => {
+      inFolders += modules.length;
+    });
+    
     return withoutFolder + inFolders;
   }
 
   getFoldersCount(): number {
-    return this.treeNode().length;
+    return this.folders().length;
   }
 
   getRecentModulesCount(): number {
-    // Pour l'instant, retourne le nombre total, à améliorer avec une vraie logique de "récent"
-    return Math.min(this.getTotalModulesCount(), 5);
+    // Collecter tous les modules avec leurs dates de modification
+    const allModules: DisplayableSavedModule[] = [];
+    
+    // Ajouter les modules sans dossier
+    allModules.push(...this.moduleWithoutFolder());
+    
+    // Ajouter tous les modules des dossiers depuis le cache
+    this.folderModulesCache.forEach((modules) => {
+      allModules.push(...modules);
+    });
+    
+    // Trier par date de modification récente et prendre les 5 derniers
+    const recentModules = allModules
+      .filter(module => module.moduleDetails)
+      .sort((a, b) => {
+        const aUpdatedAt = 'updatedAt' in (a.moduleDetails || {}) 
+          ? (a.moduleDetails as any).updatedAt 
+          : a.moduleDetails?.versions?.[0]?.updatedAt || '';
+        const bUpdatedAt = 'updatedAt' in (b.moduleDetails || {}) 
+          ? (b.moduleDetails as any).updatedAt 
+          : b.moduleDetails?.versions?.[0]?.updatedAt || '';
+        return new Date(bUpdatedAt).getTime() - new Date(aUpdatedAt).getTime();
+      })
+      .slice(0, 5);
+    
+    return recentModules.length;
   }
 
   getDisplayedModulesLength(): number {
@@ -639,7 +748,7 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  onFolderDrop(event: any, node: TreeNode): void {
+  onFolderDrop(node: TreeNode): void {
     if (this.draggedModule && node.data && node.data.folderId) {
       const targetFolderId = node.data.folderId;
       const moduleId = this.draggedModule.moduleId;
@@ -657,7 +766,15 @@ export class ProjectComponent implements OnInit {
             summary: 'Succès',
             detail: 'Module déplacé avec succès',
           });
-          // Mettre à jour les listes de modules
+          
+          // Invalider le cache des dossiers affectés
+          const originalFolderId = this.draggedModule!.folderId;
+          if (originalFolderId) {
+            this.invalidateFolderCache(originalFolderId);
+          }
+          this.invalidateFolderCache(targetFolderId);
+          
+          // Recharger seulement si nécessaire
           this.loadModulesWithoutFolder();
           if (this.selectedFolder()?.data) {
             this.loadModulesForSelectedFolder(this.selectedFolder()!.data);
@@ -713,7 +830,9 @@ export class ProjectComponent implements OnInit {
             summary: 'Succès',
             detail: 'Dossier supprimé avec succès',
           });
-          this.loadFolders();
+          // Invalider le cache pour ce dossier
+          this.invalidateFolderCache(node.data.folderId);
+          this.reloadFolders();
         })
         .catch((error) => {
           this.messageService.add({
@@ -740,7 +859,8 @@ export class ProjectComponent implements OnInit {
           summary: 'Succès',
           detail: 'Dossier créé avec succès',
         });
-        this.loadFolders();
+        // Pas besoin d'invalider le cache car c'est un nouveau dossier vide
+        this.reloadFolders();
       })
       .catch((error) => {
         this.messageService.add({
@@ -771,7 +891,8 @@ export class ProjectComponent implements OnInit {
             summary: 'Succès',
             detail: 'Dossier renommé avec succès',
           });
-          this.loadFolders();
+          // Le renommage n'affecte pas le contenu, pas besoin d'invalider le cache des modules
+          this.reloadFolders();
         })
         .catch((error) => {
           this.messageService.add({
@@ -830,5 +951,71 @@ export class ProjectComponent implements OnInit {
 
   toggleSidebar() {
     this.sidebarCollapsed.set(!this.sidebarCollapsed());
+  }
+
+  // Computed for filtered and sorted modules
+  filteredAndSortedModules = computed(() => {
+    let modules = this.selectedFolder() ? this.displayedModules() : this.moduleWithoutFolder();
+    
+    // Apply search filter
+    const searchTerm = this.searchValue().toLowerCase();
+    if (searchTerm) {
+      modules = modules.filter(module => 
+        module.moduleDetails?.title?.toLowerCase().includes(searchTerm) ||
+        module.moduleDetails?.description?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply sorting
+    const sortBy = this.selectedSort();
+    return modules.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return (a.moduleDetails?.title || '').localeCompare(b.moduleDetails?.title || '');
+        case 'name-desc':
+          return (b.moduleDetails?.title || '').localeCompare(a.moduleDetails?.title || '');
+        case 'date-created': {
+          // Try to use Module's createdAt if available, otherwise use versions
+          const aCreatedAt = 'createdAt' in (a.moduleDetails || {}) 
+            ? (a.moduleDetails as Module).createdAt 
+            : a.moduleDetails?.versions?.[0]?.createdAt || '';
+          const bCreatedAt = 'createdAt' in (b.moduleDetails || {}) 
+            ? (b.moduleDetails as Module).createdAt 
+            : b.moduleDetails?.versions?.[0]?.createdAt || '';
+          return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
+        }
+        case 'recent':
+        default: {
+          // Try to use Module's updatedAt if available, otherwise use versions
+          const aUpdatedAt = 'updatedAt' in (a.moduleDetails || {}) 
+            ? (a.moduleDetails as Module).updatedAt 
+            : a.moduleDetails?.versions?.[0]?.updatedAt || '';
+          const bUpdatedAt = 'updatedAt' in (b.moduleDetails || {}) 
+            ? (b.moduleDetails as Module).updatedAt 
+            : b.moduleDetails?.versions?.[0]?.updatedAt || '';
+          return new Date(bUpdatedAt).getTime() - new Date(aUpdatedAt).getTime();
+        }
+      }
+    });
+  });
+
+  // Methods for view toggle
+  toggleGridView() {
+    this.isGridView.set(true);
+  }
+
+  toggleListView() {
+    this.isGridView.set(false);
+  }
+
+  // Method for sort change
+  onSortChange(selectedSort: string) {
+    this.selectedSort.set(selectedSort);
+  }
+  
+  // Method for handling select change events safely
+  onSelectChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    this.onSortChange(target?.value || '');
   }
 }

@@ -25,6 +25,7 @@ import { Module } from '../../classes/Module';
 import { UserFolderHttpService } from '../../services/https/user-folder-http.service';
 import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
 import { UserFolder } from '../../classes/UserFolder';
+import { FolderService } from '../../services/folders.service';
 import { MessageService, TreeNode } from 'primeng/api';
 import { UserSavedModule } from '../../classes/UserSavedModule';
 import { ModuleVersion } from '../../classes/ModuleVersion';
@@ -80,6 +81,7 @@ export class ProjectParametersComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private tagsHttpService = inject(TagHttpService);
   private fileuploadService = inject(FileHttpService);
+  private folderService = inject(FolderService);
 
   autocomplete = viewChild<AutoComplete>('autocomplete');
 
@@ -105,8 +107,8 @@ export class ProjectParametersComponent implements OnInit {
   deleteRequested = output<void>();
   versionUpdated = output<ModuleVersion>();
 
+  folders = this.folderService.currentFolders.asReadonly();
   foldersName = computed(() => this.folders().map((folder) => folder.name));
-  folders: WritableSignal<UserFolder[]> = signal([]);
   selectedFolder = signal<TreeNode | null>(null);
 
   gameLoading = false;
@@ -216,7 +218,12 @@ export class ProjectParametersComponent implements OnInit {
     }
     this.getTagsForModule();
     this.loadTags();
-    await this.loadFolders();
+    
+    // Attendre que les dossiers soient chargés par le FolderService (s'ils ne le sont pas déjà)
+    if (this.folders().length === 0) {
+      await this.folderService.loadFolders();
+    }
+    
     this.findInUserSavedModule();
     try {
       this.gameLoading = true;
@@ -364,31 +371,6 @@ export class ProjectParametersComponent implements OnInit {
     this.generateModuleRequested.emit();
   }
 
-  /**
-   * Charge les dossiers de l'utilisateur
-   */
-  async loadFolders(): Promise<UserFolder[]> {
-    // this.isLoadingFolders.set(true);
-    try {
-      this.folderLoading = true;
-      const user = this.currentUser();
-      if (!user) return [];
-      const fetchedFolders = await this.httpUserFolderService.getAllUserFolders(
-        user.id
-      );
-      this.folders.set(fetchedFolders);
-      return fetchedFolders;
-    } catch (error: unknown) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur Dossiers',
-        detail: 'Impossible de charger les dossiers.' + error,
-      });
-      return [];
-    } finally {
-      this.folderLoading = false;
-    }
-  }
 
   findInUserSavedModule() {
     const user = this.currentUser();

@@ -103,6 +103,13 @@
 
   --p-button-success-background: var(--success-color);
   --p-button-success-border-color: var(--success-color);
+  
+  // Border radius for all PrimeNG components
+  --p-button-border-radius: var(--radius-small);
+  --p-select-border-radius: var(--radius-small);
+  --p-selectbutton-border-radius: var(--radius-small);
+  --p-inputtext-border-radius: var(--radius-small);
+  --p-tree-border-radius: var(--radius-small);
 
   //select
   --p-select-disabled-background: light-dark(
@@ -123,6 +130,27 @@
   --p-select-option-focus-background: var(--background-color-lighter);
   --p-select-overlay-color: var(--font-color);
   --p-select-option-color: var(--font-color);
+  --p-select-border-color: var(--neutral-color);
+  --p-select-background: var(--background-color-lighter);
+  
+  // selectbutton
+  --p-selectbutton-background: transparent;
+  --p-selectbutton-border-color: var(--neutral-color);
+  --p-selectbutton-color: var(--font-color);
+  --p-selectbutton-hover-background: var(--background-color-lighter);
+  --p-selectbutton-hover-border-color: var(--primary-color);
+  --p-selectbutton-hover-color: var(--primary-color);
+  --p-selectbutton-active-background: var(--primary-color);
+  --p-selectbutton-active-border-color: var(--primary-color);
+  --p-selectbutton-active-color: white;
+  
+  // togglebutton pour p-select-button
+  --p-togglebutton-content-checked-background: var(--primary-color);
+  --p-togglebutton-content-checked-border-color: var(--primary-color);
+  --p-togglebutton-content-checked-color: white;
+  --p-togglebutton-content-checked-hover-background: var(--primary-color);
+  --p-togglebutton-content-checked-hover-border-color: var(--primary-color);
+  --p-togglebutton-content-checked-hover-color: white;
 
   //checkbox
   --p-checkbox-checked-background: var(--primary-color);
@@ -173,6 +201,17 @@
   --p-button-secondary-hover-background: transparent;
   --p-button-secondary-hover-border-color: var(--font-color);
   --p-button-secondary-hover-color: var(--font-color);
+  
+  // outlined button
+  --p-button-outlined-background: transparent;
+  --p-button-outlined-border-color: var(--neutral-color);
+  --p-button-outlined-color: var(--font-color);
+  --p-button-outlined-hover-background: var(--background-color-lighter);
+  --p-button-outlined-hover-border-color: var(--primary-color);
+  --p-button-outlined-hover-color: var(--primary-color);
+  --p-button-outlined-active-background: var(--primary-color-transparent-50);
+  --p-button-outlined-active-border-color: var(--primary-color);
+  --p-button-outlined-active-color: var(--primary-color);
 
   //button link
   --p-button-link-color: var(--primary-color);
@@ -444,4 +483,80 @@ body.resizing [contenteditable="true"] {
 
 app-auth {
   height: 100%;
+}
+
+// PrimeNG Component Style Overrides
+// Force outlined buttons to match app style
+.p-button.p-button-outlined {
+  background: transparent !important;
+  border: 1px solid var(--neutral-color) !important;
+  color: var(--font-color) !important;
+  border-radius: var(--radius-small) !important;
+  
+  &:hover {
+    background: var(--background-color-lighter) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+  }
+  
+  &:active, &:focus {
+    background: var(--primary-color-transparent-50) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 0 0 1px var(--primary-color) !important;
+  }
+}
+
+// Force selectbutton to match app style
+.p-selectbutton {
+  background: transparent !important;
+  border: none !important;
+  
+  .p-button {
+    background: transparent !important;
+    border: 1px solid var(--neutral-color) !important;
+    color: var(--font-color) !important;
+    border-radius: var(--radius-small) !important;
+    margin: 0 2px !important;
+    
+    &:hover:not(.p-button-active) {
+      background: var(--background-color-lighter) !important;
+      border-color: var(--primary-color) !important;
+      color: var(--primary-color) !important;
+    }
+    
+    &.p-button-active {
+      background: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+      color: white !important;
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 1px var(--primary-color) !important;
+    }
+  }
+}
+
+// Force select to match app style
+.p-select {
+  border: 1px solid var(--neutral-color) !important;
+  background: var(--background-color-lighter) !important;
+  color: var(--font-color) !important;
+  border-radius: var(--radius-small) !important;
+  
+  &:hover {
+    border-color: var(--primary-color) !important;
+  }
+  
+  &:focus, &.p-select-focused {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 1px var(--primary-color) !important;
+  }
+}
+
+// Tree component styling
+.p-tree {
+  border-radius: var(--radius-small) !important;
+  border: none !important;
+  background: transparent !important;
 }

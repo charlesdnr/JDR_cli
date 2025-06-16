@@ -142,7 +142,7 @@
         <div class="modules-grid">
           @for(module of displayedModules(); track module.id) {
             <div class="module-card-wrapper">
-              <app-module-viewer [moduleId]="module.id" [moduleData]="module" />
+              <app-module-card [module]="module" />
             </div>
           }
         </div>
