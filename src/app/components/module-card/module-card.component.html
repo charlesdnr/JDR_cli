@@ -31,6 +31,20 @@
 
   <!-- Module Content -->
   <div class="module-content">
+    <!-- Comments icon positioned at bottom right -->
+    @if (showComments()) {
+      <div class="module-comments-action" 
+           (click)="openComments($event)"
+           (keyup.enter)="openComments($event)"
+           tabindex="0"
+           pTooltip="Voir les commentaires"
+           tooltipPosition="top">
+        <i class="pi pi-comments"></i>
+        @if (commentCount() > 0) {
+          <span class="comment-badge">{{ commentCount() }}</span>
+        }
+      </div>
+    }
     <div class="content-header">
       <h3 class="module-title">{{ module().title }}</h3>
       
@@ -86,20 +100,6 @@
         </div>
       }
       
-      <!-- Comments icon -->
-      @if (showComments()) {
-        <div class="module-comments-action" 
-             (click)="openComments($event)"
-             (keyup.enter)="openComments($event)"
-             tabindex="0"
-             pTooltip="Voir les commentaires"
-             tooltipPosition="top">
-          <i class="pi pi-comments"></i>
-          @if (commentCount() > 0) {
-            <span class="comment-badge">{{ commentCount() }}</span>
-          }
-        </div>
-      }
     </div>
   </div>
 </div>

@@ -8,13 +8,14 @@ import { TagRequest } from '../../interfaces/TagRequest';
   providedIn: 'root',
 })
 export class TagHttpService extends BaseHttpService {
+  
   constructor() {
     super('api/tags');
   }
 
   /** GET /api/tags */
   getAllTags(): Promise<Tag[]> {
-    return this.get<Tag[]>();
+    return firstValueFrom(this.httpClient.get<Tag[]>(this.baseApiUrl));
   }
 
   /** GET /api/tags/{id} */

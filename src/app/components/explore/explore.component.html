@@ -1,174 +1,431 @@
 <div class="explore-container">
-    <!-- En-tête avec titre et statistiques -->
-    <div class="explore-header">
-      <div class="header-content">
-        <h1>{{ "Explorer les projets" | translate }}</h1>
-        <p class="subtitle">Découvrez des modules créés par la communauté</p>
-        @if(!loading()) {
-          <div class="stats">
-            <span class="stat-item">
-              <strong>{{ totalElements() }}</strong> 
-              {{ totalElements() === 1 ? 'module trouvé' : 'modules trouvés' }}
-            </span>
-          </div>
-        }
+  <!-- Hero Section avec background animé -->
+  <div class="hero-section">
+    <div class="hero-background">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
       </div>
     </div>
-  
-    <!-- Barre de recherche et filtres -->
-    <div class="filters-section">
-      <!-- Recherche principale -->
-      <div class="search-bar">
-        <p-iconfield>
-          <p-inputicon styleClass="pi pi-search" />
-          <input 
-            type="text" 
-            pInputText 
-            [placeholder]="'Rechercher un module...' | translate"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="onSearchChange($event)"
-          />
-        </p-iconfield>
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          <span class="gradient-text">Découvrez</span>
+          <span class="highlight-text">l'extraordinaire</span>
+        </h1>
+        <p class="hero-subtitle">
+          Des milliers de modules RPG créés par une communauté passionnée
+        </p>
+        @if(!loading()) {
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-number">{{ totalElements() }}</div>
+              <div class="stat-label">{{ totalElements() === 1 ? 'Module' : 'Modules' }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">{{ availableTags().length }}</div>
+              <div class="stat-label">Tags</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">{{ gameSystems().length }}</div>
+              <div class="stat-label">Systèmes</div>
+            </div>
+          </div>
+        }
+        
+        <!-- Barre de recherche intégrée dans le hero -->
+        <div class="hero-search">
+          <div class="search-input-wrapper">
+            <i class="pi pi-search search-icon"></i>
+            <input 
+              type="text" 
+              placeholder="Rechercher des modules épiques..."
+              [ngModel]="searchTerm()"
+              (ngModelChange)="onSearchChange($event)"
+              class="search-input"
+            />
+            <button 
+              class="filter-toggle-btn"
+              (click)="toggleFilters()"
+              [pTooltip]="showFilters() ? 'Masquer les filtres' : 'Afficher les filtres'"
+            >
+              <i class="pi pi-sliders-h"></i>
+            </button>
+          </div>
+        </div>
       </div>
-  
-      <!-- Filtres avancés -->
-      <div class="advanced-filters">
-        <!-- Système de jeu -->
-        <div class="filter-group">
-          <label for="game-system-select">{{ "Système de jeu" | translate }}</label>
+    </div>
+  </div>
+
+
+  <!-- Filtres rapides toujours visibles -->
+  <div class="quick-filters">
+    <div class="quick-filters-container">
+      
+      <!-- Filtres par type de module (pills) -->
+      <div class="filter-group">
+        <span class="filter-label">Type :</span>
+        <div class="filter-pills">
+          <button 
+            class="filter-pill"
+            [class.active]="selectedModuleType() === null"
+            (click)="onModuleTypeChange(null)"
+          >
+            <i class="pi pi-globe"></i>
+            Tous
+          </button>
+          @for(type of moduleTypes; track type.value) {
+            <button 
+              class="filter-pill"
+              [class.active]="selectedModuleType() === type.value"
+              (click)="onModuleTypeChange(type.value)"
+            >
+              @switch(type.value) {
+                @case('Scenario') { <i class="pi pi-book"></i> }
+                @case('Lore') { <i class="pi pi-feather"></i> }
+                @case('GameItem') { <i class="pi pi-shield"></i> }
+                @case('Bundle') { <i class="pi pi-box"></i> }
+                @default { <i class="pi pi-file"></i> }
+              }
+              {{ type.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Tri rapide -->
+      <div class="filter-group">
+        <span class="filter-label">Tri :</span>
+        <div class="filter-pills">
+          @for(sort of sortOptions; track sort.value) {
+            <button 
+              class="filter-pill sort-pill"
+              [class.active]="sortBy() === sort.value"
+              (click)="onSortChange(sort.value)"
+            >
+              @switch(sort.value) {
+                @case('recent') { <i class="pi pi-clock"></i> }
+                @case('popular') { <i class="pi pi-star"></i> }
+                @case('title') { <i class="pi pi-sort-alpha-down"></i> }
+              }
+              {{ sort.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Bouton filtres avancés -->
+      <div class="filter-group">
+        <button 
+          class="filter-pill advanced-btn"
+          [class.active]="showFilters()"
+          (click)="toggleFilters()"
+        >
+          <i class="pi pi-sliders-h"></i>
+          Filtres avancés
+          <i class="pi" [class.pi-chevron-down]="!showFilters()" [class.pi-chevron-up]="showFilters()"></i>
+        </button>
+      </div>
+
+      <!-- Reset rapide si filtres actifs -->
+      @if(hasActiveFilters()) {
+        <button class="reset-btn" (click)="clearFilters()">
+          <i class="pi pi-times"></i>
+          Effacer
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Filtres avancés (repliables) -->
+  @if (showFilters()) {
+    <div class="advanced-filters" [@slideInOut]>
+      <div class="advanced-content">
+        
+        <!-- Système de jeu avec recherche -->
+        <div class="advanced-group">
+          <label for="advanced-game-system">
+            <i class="pi pi-cog"></i>
+            Système de jeu
+          </label>
           <p-select
-            inputId="game-system-select"
+            inputId="advanced-game-system"
             [options]="gameSystems()"
             [ngModel]="selectedGameSystem()"
             (ngModelChange)="onGameSystemChange($event)"
             optionLabel="name"
-            [placeholder]="'Tous les systèmes' | translate"
+            placeholder="Sélectionner un système..."
             [showClear]="true"
+            [filter]="true"
+            filterPlaceholder="Rechercher..."
+            [appendTo]="'body'"
+            styleClass="modern-select"
           />
         </div>
-  
-        <!-- Type de module -->
-        <div class="filter-group">
-          <label for="module-type-select">{{ "Type de module" | translate }}</label>
-          <p-select
-            inputId="module-type-select"
-            [options]="moduleTypes"
-            [ngModel]="selectedModuleType()"
-            (ngModelChange)="onModuleTypeChange($event)"
-            optionLabel="label"
-            optionValue="value"
-            [placeholder]="'Tous les types' | translate"
-            [showClear]="true"
-          />
-        </div>
-  
-        <!-- Tri -->
-        <div class="filter-group">
-          <label for="sort-select">{{ "Trier par" | translate }}</label>
-          <p-select
-            inputId="sort-select"
-            [options]="sortOptions"
-            [ngModel]="sortBy()"
-            (ngModelChange)="onSortChange($event)"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-  
-        <!-- Bouton clear filters -->
-        <div class="filter-actions">
-          <p-button
-            label="Effacer les filtres"
-            icon="pi pi-filter-slash"
-            severity="secondary"
-            (onClick)="clearFilters()"
-            [disabled]="!searchTerm() && selectedTags().length === 0 && !selectedGameSystem() && !selectedModuleType()"
-          />
-        </div>
-      </div>
-  
-      <!-- Tags populaires -->
-      <div class="tags-filter">
-        <h3>{{ "Tags populaires" | translate }}</h3>
-        <div class="tags-container">
-          @for(tag of availableTags().slice(0, 15); track tag.id) {
-            <p-chip
-              [label]="tag.name"
-              [removable]="false"
-              (click)="onTagToggle(tag)"
-              [styleClass]="isTagSelected(tag) ? 'selected-tag' : 'clickable-tag'"
-            />
-          }
-        </div>
-      </div>
 
-      <!-- Tags sélectionnés -->
-      @if(selectedTags().length > 0) {
-        <div class="selected-tags">
-          <h4>Tags sélectionnés:</h4>
-          <div class="tags-container">
-            @for(tag of selectedTags(); track tag.id) {
-              <p-chip
-                [label]="tag.name"
-                [removable]="true"
-                (onRemove)="onTagToggle(tag)"
-                styleClass="selected-tag"
-              />
+        <!-- Tags avec recherche améliorée -->
+        <div class="advanced-group">
+          <h4>
+            <i class="pi pi-tags"></i>
+            Tags populaires
+          </h4>
+          <div class="tags-grid">
+            @for(tag of popularTags(); track tag.id) {
+              <button 
+                class="tag-chip"
+                [class.selected]="isTagSelected(tag)"
+                (click)="onTagToggle(tag)"
+                [attr.aria-pressed]="isTagSelected(tag)"
+              >
+                <span class="tag-name">{{ tag.name }}</span>
+                <span class="tag-count">{{ tag.moduleCount || 0 }}</span>
+              </button>
             }
           </div>
         </div>
+
+        <!-- Tags sélectionnés -->
+        @if(selectedTags().length > 0) {
+          <div class="advanced-group">
+            <h4>Tags actifs</h4>
+            <div class="selected-tags">
+              @for(tag of selectedTags(); track tag.id) {
+                <button 
+                  class="selected-tag" 
+                  (click)="onTagToggle(tag)"
+                  (keydown.enter)="onTagToggle(tag)"
+                  (keydown.space)="onTagToggle(tag)"
+                  [attr.aria-label]="'Supprimer le tag ' + tag.name"
+                >
+                  <span>{{ tag.name }}</span>
+                  <i class="pi pi-times"></i>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Header des résultats -->
+  <div class="results-header">
+    <div class="results-info">
+      <h2>
+        @if(hasActiveFilters()) {
+          Résultats de recherche
+        } @else {
+          Modules disponibles
+        }
+      </h2>
+      @if(!loading()) {
+        <p class="results-count">{{ getPaginationInfo() }}</p>
       }
     </div>
-  
-    <!-- Liste des modules -->
-    <div class="modules-section">
-      @if(loading()) {
-        <div class="loading-grid">
-          @for(i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
-            <p-skeleton height="250px" width="100%" />
-          }
+    
+    <div class="view-controls">
+      <p-selectbutton 
+        [options]="viewOptions"
+        [ngModel]="isGridView() ? 'grid' : 'list'"
+        (ngModelChange)="isGridView.set($event === 'grid')"
+        optionValue="value"
+        styleClass="view-toggle"
+      >
+        <ng-template let-item pTemplate="item">
+          <i [class]="item.icon"></i>
+        </ng-template>
+      </p-selectbutton>
+    </div>
+  </div>
+
+  <!-- Résultats avec masonry layout -->
+  <div class="results-section">
+    @if(loading()) {
+      <div class="loading-state">
+        <div class="loading-animation">
+          <div class="loading-spinner"></div>
+          <p>Chargement des merveilles...</p>
         </div>
-      } @else if(displayedModules().length === 0) {
-        <div class="no-results">
-          <div class="no-results-content">
-            <i class="pi pi-search" style="font-size: 3rem; color: var(--neutral-color);"></i>
-            <h3>Aucun module trouvé</h3>
-            <p>Essayez de modifier vos critères de recherche ou d'exploration.</p>
-            <p-button
-              label="Effacer les filtres"
-              icon="pi pi-refresh"
-              (onClick)="clearFilters()"
-            />
-          </div>
-        </div>
-      } @else {
-        <div class="modules-grid">
-          @for(module of displayedModules(); track module.id) {
-            <div class="module-card-wrapper">
-              <app-module-card [module]="module" />
+        <div class="skeleton-grid">
+          @for(i of skeletonArray; track i) {
+            <div class="skeleton-card">
+              <p-skeleton height="200px" width="100%" />
+              <div class="skeleton-content">
+                <p-skeleton height="20px" width="80%" />
+                <p-skeleton height="15px" width="60%" />
+                <p-skeleton height="15px" width="40%" />
+              </div>
             </div>
           }
         </div>
-      }
-
-      <!-- Pagination -->
-      @if(!loading() && totalElements() > pageSize()) {
-        <div class="pagination-section">
-          <p-paginator
-            [rows]="pageSize()"
-            [totalRecords]="totalElements()"
-            [first]="currentPage() * pageSize()"
-            (onPageChange)="onPageChange($event)"
-            [showCurrentPageReport]="true"
-            currentPageReportTemplate="Page {currentPage} sur {totalPages}"
-            [showFirstLastIcon]="true"
-            [showPageLinks]="true"
-            [pageLinkSize]="5"
-          />
-          <div class="pagination-info">
-            {{ getPaginationInfo() }}
-          </div>
+      </div>
+    } @else if(displayedModules().length === 0) {
+      <div class="empty-state">
+        <div class="empty-illustration">
+          <i class="pi pi-compass"></i>
         </div>
-      }
+        <h3>Aucune aventure trouvée</h3>
+        <p>Modifiez vos critères de recherche pour découvrir de nouveaux modules</p>
+        <div class="empty-actions">
+          <p-button
+            label="Effacer les filtres"
+            icon="pi pi-refresh"
+            (onClick)="clearFilters()"
+            severity="primary"
+          />
+          <p-button
+            label="Parcourir tout"
+            icon="pi pi-eye"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="showAllModules()"
+          />
+        </div>
+      </div>
+    } @else {
+      <!-- Grille masonry des modules -->
+      <div class="modules-masonry" [class.grid-view]="isGridView()" [class.list-view]="!isGridView()">
+        @for(module of displayedModules(); track module.id; let index = $index) {
+          <div 
+            class="module-item"
+            [style.animation-delay]="(index * 0.1) + 's'"
+            [@fadeInUp]
+          >
+            <div class="module-wrapper">
+              <app-module-card [module]="module" [isHorizontal]="!isGridView()" />
+              <div class="module-overlay">
+                <div class="module-actions">
+                  <div class="action-item">
+                    <p-button
+                      icon="pi pi-eye"
+                      severity="secondary"
+                      [rounded]="true"
+                      [text]="true"
+                      (onClick)="quickPreview(module)"
+                    />
+                    <span class="action-label">Aperçu</span>
+                  </div>
+                  <div class="action-item">
+                    <p-button
+                      icon="pi pi-heart"
+                      severity="secondary"
+                      [rounded]="true"
+                      [text]="true"
+                      (onClick)="toggleSave(module)"
+                      [class.saved]="isSaved(module)"
+                    />
+                    <span class="action-label">{{ isSaved(module) ? 'Sauvegardé' : 'Sauvegarder' }}</span>
+                  </div>
+                  <div class="action-item">
+                    <p-button
+                      icon="pi pi-share-alt"
+                      severity="secondary"
+                      [rounded]="true"
+                      [text]="true"
+                      (onClick)="shareModule(module)"
+                    />
+                    <span class="action-label">Partager</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Pagination moderne -->
+  @if(!loading() && totalElements() > pageSize()) {
+    <div class="pagination-section">
+      <div class="pagination-info">
+        <span class="results-count">
+          {{ getPaginationInfo() }}
+        </span>
+      </div>
+      <div class="pagination-controls">
+        <p-paginator
+          [rows]="pageSize()"
+          [totalRecords]="totalElements()"
+          [first]="currentPage() * pageSize()"
+          (onPageChange)="onPageChange($event)"
+          [showCurrentPageReport]="false"
+          [showFirstLastIcon]="true"
+          [showPageLinks]="true"
+          [pageLinkSize]="3"
+          [showJumpToPageDropdown]="totalPages() > 10"
+          [showJumpToPageInput]="totalPages() > 10"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Bouton scroll to top -->
+  @if(showScrollTop()) {
+    <p-button
+      icon="pi pi-arrow-up"
+      severity="secondary"
+      [rounded]="true"
+      class="scroll-top-btn"
+      (onClick)="scrollToTop()"
+      pTooltip="Retour en haut"
+      [@fadeInOut]
+    />
+  }
+</div>
+
+<!-- Dialog de sauvegarde -->
+<p-dialog 
+  header="Sauvegarder dans un dossier"
+  [(visible)]="showSaveDialog"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="save-dialog"
+>
+  <div class="save-dialog-content">
+    @if(moduleToSave()) {
+      <div class="module-info">
+        <h4>{{ moduleToSave()?.title }}</h4>
+        <p>{{ moduleToSave()?.description }}</p>
+      </div>
+    }
+    
+    <div class="folder-selection">
+      <label for="folder-select">Choisir un dossier :</label>
+      <p-treeselect
+        inputId="folder-select"
+        [options]="userFolders()"
+        [(ngModel)]="selectedFolder"
+        placeholder="Sélectionner un dossier"
+        [appendTo]="'body'"
+        [showClear]="true"
+        [filter]="true"
+        filterPlaceholder="Rechercher un dossier..."
+        class="folder-tree-select"
+      />
     </div>
   </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button 
+        label="Annuler"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="cancelSave()"
+      />
+      <p-button 
+        label="Sauvegarder"
+        icon="pi pi-save"
+        severity="primary"
+        (onClick)="saveToFolder()"
+        [disabled]="!selectedFolder()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

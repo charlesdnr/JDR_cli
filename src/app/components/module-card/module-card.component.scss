@@ -11,22 +11,9 @@
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   @include flex-responsive(column, nowrap);
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(52, 152, 219, 0.02) 50%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
 
   @include respond-to("tablet") {
     min-height: 280px;
@@ -45,48 +32,16 @@
     
     &:hover,
     &:focus-visible {
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.12),
-        0 3px 10px rgba(0, 0, 0, 0.08),
-        0 0 0 1px var(--primary-color);
       border-color: var(--primary-color);
       outline: none;
-      
-      &::before {
-        opacity: 1;
-      }
       
       .module-title {
         color: var(--primary-color);
       }
       
-      .module-image img {
-        transform: scale(1.02);
-      }
     }
     
-    &:focus-visible {
-      box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.12),
-        0 3px 10px rgba(0, 0, 0, 0.08),
-        0 0 0 2px var(--primary-color),
-        0 0 0 4px rgba(52, 152, 219, 0.2);
-    }
     
-    // Horizontal layout hover effects
-    &.horizontal:hover,
-    &.horizontal:focus-visible {
-      transform: translateY(-2px) scale(1.005);
-      box-shadow: 
-        0 6px 20px rgba(0, 0, 0, 0.1),
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        0 0 0 1px var(--primary-color);
-      
-      .module-image.horizontal-image img {
-        transform: scale(1.05);
-      }
-    }
   }
   
   // Horizontal layout styles
@@ -372,6 +327,7 @@
 }
 
 .module-content {
+  position: relative;
   flex-grow: 1;
   overflow: hidden;
   justify-content: space-between;
@@ -532,20 +488,23 @@
 }
 
 .module-comments-action {
-  position: relative;
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.4rem;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(var(--primary-color-rgb), 0.1);
   color: var(--primary-color);
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  width: 2rem;
+  height: 2rem;
   
   &:hover {
-    background: rgba(var(--primary-color-rgb), 0.1);
-    transform: scale(1.1);
+    background: rgba(var(--primary-color-rgb), 0.2);
   }
   
   &:focus-visible {
@@ -554,26 +513,26 @@
   }
   
   i {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--primary-color);
   }
   
   .comment-badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -4px;
+    right: -4px;
     background: var(--primary-color);
     color: white;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.125rem 0.25rem;
-    border-radius: 50px;
-    min-width: 1rem;
-    height: 1rem;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--background-color);
   }
 }
