@@ -1,9 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EBlockType } from '../../enum/BlockType';
 import { environment } from '../../../environments/environment';
 import { MessageService } from 'primeng/api';
+
+interface AIGenerationResponse {
+  content: string;
+  type: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -17,17 +22,17 @@ export class AIGenerationService {
    * Génère un contenu basé sur le type de bloc et les paramètres spécifiés
    * avec gestion d'erreur améliorée
    */
-  async generateContent(type: EBlockType, parameters: Record<string, string>): Promise<any> {
+  async generateContent(type: EBlockType, parameters: Record<string, string>): Promise<AIGenerationResponse> {
     try {
       return await firstValueFrom(
-        this.httpClient.post(`${this.baseApiUrl}/generate`, {
+        this.httpClient.post<AIGenerationResponse>(`${this.baseApiUrl}/generate`, {
           type,
           parameters
         })
       );
     } catch (error) {
       console.error(`Erreur lors de la génération de contenu de type ${type}:`, error);
-      this.handleError(error, `Erreur de génération pour ${type}`);
+      this.handleError(error as HttpErrorResponse, `Erreur de génération pour ${type}`);
       throw error;
     }
   }
@@ -40,7 +45,7 @@ export class AIGenerationService {
     tone: string,
     characters: string,
     gameSystemId: string
-  ): Promise<any> {
+  ): Promise<AIGenerationResponse> {
     return this.generateContent(EBlockType.paragraph, {
       context,
       tone,
@@ -54,8 +59,8 @@ export class AIGenerationService {
    */
   async generateMusicBlock(
     scene: string,
-    atmosphere: string = ''
-  ): Promise<any> {
+    atmosphere = ''
+  ): Promise<AIGenerationResponse> {
     return this.generateContent(EBlockType.music, {
       scene,
       atmosphere
@@ -67,11 +72,11 @@ export class AIGenerationService {
    */
   async generateStatBlock(
     entityType: string,
-    entityName: string = '',
-    powerLevel: string = 'moyen',
-    gameSystem: string = 'Donjon et Dragon',
-    gameSystemId: string = '1'
-  ): Promise<any> {
+    entityName = '',
+    powerLevel = 'moyen',
+    gameSystem = 'Donjon et Dragon',
+    gameSystemId = '1'
+  ): Promise<AIGenerationResponse> {
     return this.generateContent(EBlockType.stat, {
       entityType,
       entityName,
@@ -89,9 +94,9 @@ export class AIGenerationService {
     theme: string,
     title: string,
     description: string,
-    gameSystemId: string = '1',
-    userId: number = 1
-  ): Promise<any> {
+    gameSystemId = '1',
+    userId = 1
+  ): Promise<Map<string, unknown>> {
     try {
       // Afficher une notification pour indiquer que la génération est en cours
       this.messageService.add({
@@ -103,7 +108,7 @@ export class AIGenerationService {
       });
 
       const response = await firstValueFrom(
-        this.httpClient.post(`${this.baseApiUrl}/generate-module`, {
+        this.httpClient.post<Map<string, unknown>>(`${this.baseApiUrl}/generate-module`, {
           theme,
           title,
           description,
@@ -115,10 +120,10 @@ export class AIGenerationService {
       // Supprimer la notification de chargement
       this.messageService.clear('module-generation');
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       // Supprimer la notification de chargement
       this.messageService.clear('module-generation');
-      this.handleError(error, 'Erreur de génération de module');
+      this.handleError(error as HttpErrorResponse, 'Erreur de génération de module');
       throw error;
     }
   }
@@ -126,7 +131,7 @@ export class AIGenerationService {
   /**
    * Gestion générique des erreurs
    */
-  private handleError(error: any, defaultMessage: string): void {
+  private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     console.error(defaultMessage, error);
 
     let errorMessage = defaultMessage;

@@ -250,7 +250,7 @@ export class NotificationService {
     await this.loadNotificationsIfNeeded();
   }
 
-  subscribeToModuleAccessUpdates(moduleId: number, callback: (data: any) => void) {
+  subscribeToModuleAccessUpdates(moduleId: number, callback: (data: unknown) => void) {
     if (!this.stompClient || !this.isConnected()) {
       console.error("WebSocket non connecté. Impossible de s'abonner aux mises à jour d'accès.");
       return;

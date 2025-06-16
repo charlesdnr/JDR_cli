@@ -77,15 +77,15 @@ export class ModuleHttpService extends BaseHttpService {
   }
 
   /** GET /api/modules/most-saved */
-  getMostSavedModules(page: number = 0, limit: number = 10): Promise<Module[]> {
+  getMostSavedModules(page = 0, limit = 10): Promise<Module[]> {
     const url = `${this.baseApiUrl}/most-saved?page=${page}&limit=${limit}`;
     return firstValueFrom(this.httpClient.get<Module[]>(url));
   }
 
   /** GET /api/modules/most-recent */
   getMostRecentModules(
-    page: number = 0,
-    limit: number = 10
+    page = 0,
+    limit = 10
   ): Promise<Module[]> {
     const url = `${this.baseApiUrl}/most-recent?page=${page}&limit=${limit}`;
     return firstValueFrom(this.httpClient.get<Module[]>(url));
@@ -137,8 +137,8 @@ export class ModuleHttpService extends BaseHttpService {
    */
   searchModulesByText(
     searchText: string,
-    page: number = 0,
-    size: number = 10
+    page = 0,
+    size = 10
   ): Promise<PaginatedResponse<Module>> {
     return this.searchModules({
       page,
@@ -154,8 +154,8 @@ export class ModuleHttpService extends BaseHttpService {
    */
   searchModulesByTags(
     tagIds: number[],
-    page: number = 0,
-    size: number = 10
+    page = 0,
+    size = 10
   ): Promise<PaginatedResponse<Module>> {
     return this.searchModules({
       page,
@@ -171,8 +171,8 @@ export class ModuleHttpService extends BaseHttpService {
    */
   searchModulesByGameSystem(
     gameSystemId: number,
-    page: number = 0,
-    size: number = 10
+    page = 0,
+    size = 10
   ): Promise<PaginatedResponse<Module>> {
     return this.searchModules({
       page,
@@ -187,9 +187,9 @@ export class ModuleHttpService extends BaseHttpService {
    * GET /api/modules/public
    */
   getPublicModules(
-    page: number = 0,
-    size: number = 12,
-    sort: string = 'createdAt,desc'
+    page = 0,
+    size = 12,
+    sort = 'createdAt,desc'
   ): Promise<PaginatedResponse<Module>> {
     return this.searchModules({
       page,

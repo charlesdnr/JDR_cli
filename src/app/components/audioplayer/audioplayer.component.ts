@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, input, model, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -26,8 +26,8 @@ export class AudioplayerComponent {
 
   // Inputs/Outputs pour la communication avec le parent
   isReadOnly = input<boolean>(false);
-  onAudioUploaded = output<string>(); // Émet l'ID du fichier uploadé
-  onAudioRemoved = output<void>(); // Émet quand l'audio est supprimé
+  audioUploaded = output<string>(); // Émet l'ID du fichier uploadé
+  audioRemoved = output<void>(); // Émet quand l'audio est supprimé
 
   // Signals
   audioFiles = signal<AudioFile[]>([]);
@@ -89,7 +89,7 @@ export class AudioplayerComponent {
           }
 
           // Émettre l'ID du fichier uploadé vers le parent
-          this.onAudioUploaded.emit(fileId);
+          this.audioUploaded.emit(fileId);
 
           this.messageService.add({
             severity: 'success',
@@ -185,7 +185,7 @@ export class AudioplayerComponent {
       this.resetPlayer();
       
       // Émettre l'événement de suppression vers le parent
-      this.onAudioRemoved.emit();
+      this.audioRemoved.emit();
     }
 
     this.messageService.add({

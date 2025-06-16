@@ -34,8 +34,7 @@ import { EBlockType } from '../../../enum/BlockType';
 import { NotificationService } from '../../../services/Notification.service';
 import { ModuleUpdateDTO } from '../../../interfaces/ModuleUpdateDTO';
 import { ModuleBlockComponent } from '../moduleblock/moduleblock.component';
-import { Picture } from '../../../classes/Picture';
-import { LottieComponent } from 'ngx-lottie';
+import { AnimationOptions, LottieComponent } from 'ngx-lottie';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -66,7 +65,7 @@ export class BlockListComponent {
   blocks = input.required<Block[]>();
   isReadOnly = input<boolean>(false);
   showEmptyState = input<boolean>(false);
-  lottieOptions = input<any>(null);
+  lottieOptions = input<AnimationOptions | null>(null);
   isDraggingIcon = model<boolean>(false);
   isOverDropZone = model<boolean>(false);
   draggedIconType = model<EBlockType | null>(null);

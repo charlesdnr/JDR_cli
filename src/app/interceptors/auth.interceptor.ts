@@ -25,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (
       if (token) {
         // Cloner la requête si le token est obtenu
         // Pour FormData, ne pas modifier Content-Type
-        const headers: { [key: string]: string } = {
+        const headers: Record<string, string> = {
           Authorization: `Bearer ${token}`
         };
         

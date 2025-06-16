@@ -8,7 +8,7 @@ import { ChipModule } from 'primeng/chip';
 import { SkeletonModule } from 'primeng/skeleton';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { PaginatorModule } from 'primeng/paginator';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TranslateModule } from '@ngx-translate/core';
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 import { ModuleHttpService } from '../../services/https/module-http.service';
@@ -145,7 +145,16 @@ export class ExploreComponent implements OnInit {
 
   private async searchModules(): Promise<PaginatedResponse<Module>> {
     // Construire les paramètres de recherche
-    const params: any = {
+    const params: {  
+      page: number;
+      size: number;
+      sort: string;
+      published: boolean;
+      search?: string;
+      tagIds?: string;
+      gameSystemId?: number;
+      moduleType?: string;
+    } = {
       page: this.currentPage(),
       size: this.pageSize(),
       sort: this.getSortParameter(),
@@ -168,7 +177,7 @@ export class ExploreComponent implements OnInit {
     }
 
     if (this.selectedModuleType()) {
-      params.moduleType = this.selectedModuleType();
+      params.moduleType = this.selectedModuleType()!.toString();
     }
 
     try {
@@ -184,7 +193,16 @@ export class ExploreComponent implements OnInit {
   // Méthode de fallback pour simuler la recherche paginée
   // À supprimer quand l'API backend sera prête
   private async mockPaginatedSearch(
-    params: any
+    params: {  
+      page: number;
+      size: number;
+      sort: string;
+      published: boolean;
+      search?: string;
+      tagIds?: string;
+      gameSystemId?: number;
+      moduleType?: string;
+    }
   ): Promise<PaginatedResponse<Module>> {
     // Charger tous les modules publics pour la simulation
     const allModules = await this.loadPublicModules();
@@ -336,8 +354,8 @@ export class ExploreComponent implements OnInit {
     this.loadModules();
   }
 
-  onPageChange(event: any) {
-    this.currentPage.set(event.page);
+  onPageChange(event: PaginatorState) {
+    this.currentPage.set(event.page ?? 0);
     this.loadModules();
   }
 

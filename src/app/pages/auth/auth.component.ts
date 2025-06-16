@@ -109,7 +109,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       } else {
         this.loading.set(true);
         this.httpAuth
-          .signup(user.email, user.password, {})
+          .signup(user.email, user.password)
           .then(() => {
             this.loginUser(user);
           })
@@ -187,7 +187,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (!this.isLogin()) {
       try {
         const email = value.user.email;
-        const username = (this.formgroup().value as any).login;
+        const username = (this.formgroup().value as { login:string }).login;
         const resp: User = await this.httpUser.post({ email: email, username: username });
         this.httpUser.currentJdrUser.set(resp);
         console.log(resp);

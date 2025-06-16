@@ -72,7 +72,7 @@ export class AiConfigComponent implements OnInit, OnDestroy {
     context: new FormControl('', Validators.required),
     tone: new FormControl(''),
     characters: new FormControl(''),
-    gameSystemId: new FormControl(1),
+    gameSystemId: new FormControl<number>(1),
   });
 
   // Formulaire pour les musiques
@@ -86,7 +86,7 @@ export class AiConfigComponent implements OnInit, OnDestroy {
     entityType: new FormControl('', Validators.required),
     entityName: new FormControl(''),
     powerLevel: new FormControl('moyen'),
-    gameSystemId: new FormControl(1),
+    gameSystemId: new FormControl<number>(1),
   });
 
   // Formulaire pour la génération complète de module
@@ -94,7 +94,7 @@ export class AiConfigComponent implements OnInit, OnDestroy {
     theme: new FormControl('', Validators.required),
     title: new FormControl('', Validators.required),
     description: new FormControl(''),
-    gameSystemId: new FormControl(1),
+    gameSystemId: new FormControl<number>(1),
   });
 
   // Placeholders
@@ -132,8 +132,8 @@ export class AiConfigComponent implements OnInit, OnDestroy {
 
   private readonly WORD_ANIMATION_DELAY = 10; // millisecondes entre chaque lettre
   isWritingParagraph = signal(false);
-  animatedWords = signal<any[]>([]);
-  private animationTimeout: any;
+  animatedWords = signal<unknown[]>([]);
+  private animationTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
   async ngOnInit() {
     // Charge les systèmes de jeu pour le dropdown
@@ -142,9 +142,9 @@ export class AiConfigComponent implements OnInit, OnDestroy {
       this.gameSystems.set(systems);
 
       // Pré-sélectionne le premier système
-      if (systems.length > 0) {
-        this.formgroupCompleteModule.get('gameSystemId')?.setValue(systems[0].id.toString());
-        this.formgroupStat.get('gameSystemId')?.setValue(systems[0].id.toString());
+      if (systems.length > 0 && systems[0].id) {
+        this.formgroupCompleteModule.get('gameSystemId')?.setValue(systems[0].id);
+        this.formgroupStat.get('gameSystemId')?.setValue(systems[0].id);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des systèmes de jeu:', error);

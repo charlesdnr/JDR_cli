@@ -1,11 +1,6 @@
 import {
-  AfterViewInit,
   Component,
-  ElementRef,
   input,
-  OnDestroy,
-  output,
-  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TextareaModule } from 'primeng/textarea';
@@ -13,7 +8,7 @@ import { ParagraphBlock } from '../../../classes/ParagraphBlock';
 import { TranslateModule } from '@ngx-translate/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { Editor, EditorModule } from 'primeng/editor';
+import { EditorModule } from 'primeng/editor';
 
 @Component({
   selector: 'app-paragraph-block',

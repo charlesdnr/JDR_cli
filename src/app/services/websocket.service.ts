@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 interface WebSocketMessage {
   type: string;
   destination?: string;
-  body?: any;
+  body?: PlatformStatistics | string;
 }
 
 @Injectable({
@@ -73,7 +73,7 @@ export class WebSocketService implements OnDestroy {
     switch (message.type) {
       case 'STATISTICS_UPDATE':
         if (message.body) {
-          const stats: PlatformStatistics = message.body;
+          const stats: PlatformStatistics = message.body as PlatformStatistics;
           this.statisticsService.updatePlatformStatistics(stats);
         }
         break;

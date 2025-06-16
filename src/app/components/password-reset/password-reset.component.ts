@@ -18,6 +18,7 @@ import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { MessageService } from 'primeng/api';
 import { passwordMatchValidator } from '../../validators/equalPattern';
+import { FirebaseError } from '@angular/fire/app';
 
 @Component({
   selector: 'app-password-reset',
@@ -101,12 +102,12 @@ export class PasswordResetComponent implements OnInit {
       setTimeout(() => {
         this.router.navigate(['/auth/login']);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error resetting password:', error);
 
       let errorMessage = 'Une erreur est survenue';
 
-      switch (error.code) {
+      switch ((error as FirebaseError).code) {
         case 'auth/expired-action-code':
           errorMessage = 'Le lien a expiré';
           break;
@@ -117,7 +118,7 @@ export class PasswordResetComponent implements OnInit {
           errorMessage = 'Le mot de passe est trop faible';
           break;
         default:
-          errorMessage = error.message;
+          errorMessage = (error as FirebaseError).message;
       }
 
       this.messageService.add({

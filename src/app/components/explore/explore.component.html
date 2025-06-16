@@ -35,8 +35,9 @@
       <div class="advanced-filters">
         <!-- Système de jeu -->
         <div class="filter-group">
-          <label>{{ "Système de jeu" | translate }}</label>
+          <label for="game-system-select">{{ "Système de jeu" | translate }}</label>
           <p-select
+            inputId="game-system-select"
             [options]="gameSystems()"
             [ngModel]="selectedGameSystem()"
             (ngModelChange)="onGameSystemChange($event)"
@@ -48,8 +49,9 @@
   
         <!-- Type de module -->
         <div class="filter-group">
-          <label>{{ "Type de module" | translate }}</label>
+          <label for="module-type-select">{{ "Type de module" | translate }}</label>
           <p-select
+            inputId="module-type-select"
             [options]="moduleTypes"
             [ngModel]="selectedModuleType()"
             (ngModelChange)="onModuleTypeChange($event)"
@@ -62,8 +64,9 @@
   
         <!-- Tri -->
         <div class="filter-group">
-          <label>{{ "Trier par" | translate }}</label>
+          <label for="sort-select">{{ "Trier par" | translate }}</label>
           <p-select
+            inputId="sort-select"
             [options]="sortOptions"
             [ngModel]="sortBy()"
             (ngModelChange)="onSortChange($event)"
@@ -86,7 +89,7 @@
   
       <!-- Tags populaires -->
       <div class="tags-filter">
-        <label>{{ "Tags populaires" | translate }}</label>
+        <h3>{{ "Tags populaires" | translate }}</h3>
         <div class="tags-container">
           @for(tag of availableTags().slice(0, 15); track tag.id) {
             <p-chip
@@ -102,7 +105,7 @@
       <!-- Tags sélectionnés -->
       @if(selectedTags().length > 0) {
         <div class="selected-tags">
-          <label>Tags sélectionnés:</label>
+          <h4>Tags sélectionnés:</h4>
           <div class="tags-container">
             @for(tag of selectedTags(); track tag.id) {
               <p-chip

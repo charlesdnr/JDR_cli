@@ -44,7 +44,6 @@ export class FolderService {
     if (!currentFbUser) return [];
 
     try {
-      const idToken = await currentFbUser.getIdToken();
       const user = this.jdrAppUser();
       if (!user) return [];
 

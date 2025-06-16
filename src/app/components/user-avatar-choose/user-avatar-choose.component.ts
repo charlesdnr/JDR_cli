@@ -25,7 +25,6 @@ import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { NotificationService } from '../../services/Notification.service';
 
 @Component({
   selector: 'app-user-avatar-choose',
@@ -176,8 +175,7 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   }
 
   getImageForUser(user: User): string | undefined {
-    // console.log(user)
-    return '';
+    return user.email;
   }
 
   getModuleAccessByUser(user: User): ModuleAccess | undefined {

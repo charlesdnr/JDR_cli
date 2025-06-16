@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { defer, firstValueFrom, Observable } from 'rxjs';
 import { Auth } from '@angular/fire/auth';
 import {
   createUserWithEmailAndPassword,
@@ -22,7 +21,7 @@ export class AuthHttpService {
     return signInWithEmailAndPassword(this.auth, email, password);
   }
   // the sign up uses createUserWithEmailAndPassword
-  signup(email: string, password: string, custom: any) {
+  signup(email: string, password: string) {
     return createUserWithEmailAndPassword(this.auth, email, password);
   }
   loginGoogle() {

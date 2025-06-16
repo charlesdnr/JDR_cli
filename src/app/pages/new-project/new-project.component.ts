@@ -21,7 +21,6 @@ import { IntegratedModuleBlock } from '../../classes/IntegratedModuleBlock';
 import { GameSystem } from '../../classes/GameSystem';
 import { StatBlock } from '../../classes/StatBlock';
 import { PictureBlock } from '../../classes/PictureBlock';
-import { Picture } from '../../classes/Picture';
 import { EBlockType } from '../../enum/BlockType';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { BlockHttpService } from '../../services/https/block-http.service';
@@ -38,7 +37,7 @@ import {
 import { ModuleRequest } from '../../classes/ModuleRequest';
 import { ModuleService } from '../../services/module.service';
 import { Module } from '../../classes/Module';
-import { LottieComponent, AnimationOptions } from 'ngx-lottie';
+import { AnimationOptions } from 'ngx-lottie';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -136,14 +135,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   private mouseMoveThrottle = 0;
 
   constructor() {
-    effect(() => {
-      if (
-        this.notificationService.isConnected() == true &&
-        this.currentModule()?.id
-      ) {
-        this.subscribeToAccessChanges(this.currentModule()!.id);
-      }
-    });
 
     effect(() => {
       const module = this.currentModule();
@@ -402,39 +393,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         this.router.navigate(['/projects']);
       }
     });
-  }
-
-  private subscribeToAccessChanges(moduleId: number): void {
-    // S'assurer d'être connecté au WebSocket
-    if (!this.notificationService.isConnected()) {
-      this.notificationService.connect().then(() => {
-        this.setupAccessSubscription(moduleId);
-      });
-    } else {
-      this.setupAccessSubscription(moduleId);
-    }
-  }
-
-  private setupAccessSubscription(moduleId: number): void {
-    const currentUser = this.userService.currentJdrUser();
-    if (!currentUser) return;
-
-    // Utiliser la méthode du NotificationService pour s'abonner
-    this.subscription = this.notificationService.subscribeToModuleAccessUpdates(
-      moduleId,
-      (accessUpdate) => {
-        // Si la mise à jour concerne l'utilisateur actuel, rafraîchir le module
-        console.log(accessUpdate);
-        if (accessUpdate.access.user.id === currentUser.id) {
-          // this.messageService.add({
-          //   severity: 'info',
-          //   summary: "Droits d'accès mis à jour",
-          //   detail: 'Vos permissions ont été modifiées',
-          // });
-          this.moduleService.updateModuleAccess(accessUpdate.access);
-        }
-      }
-    );
   }
 
   selectDefaultVersionAndUpdateURL() {

@@ -116,7 +116,7 @@
 
   <!-- 2. Image du module -->
   <div class="container-label">
-    <label>{{ "Image du module" | translate }}</label>
+    <label for="moduleImage">{{ "Image du module" | translate }}</label>
     <div class="module-image-section">
       @if(hasModuleImage()) {
       <div class="module-image-container">
@@ -163,6 +163,7 @@
           [auto]="true"
           [disabled]="isReadOnly()"
           styleClass="upload-button"
+          inputId="moduleImage"
         />
 
         <div class="upload-info">
@@ -246,8 +247,8 @@
   <!-- 6. Collaborateurs (si privé) -->
   @if(!currentVersion().published){
   <div class="container-label">
-    <label>{{ "Collaborateurs" | translate }}</label>
-    <app-user-avatar-choose [disabled]="!canInvite()" />
+    <label for="collaborators">{{ "Collaborateurs" | translate }}</label>
+    <app-user-avatar-choose id="collaborators" [disabled]="!canInvite()" />
   </div>
   }
 

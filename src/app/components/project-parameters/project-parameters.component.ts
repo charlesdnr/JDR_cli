@@ -8,7 +8,6 @@ import {
   output,
   signal,
   viewChild,
-  WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -251,8 +250,7 @@ export class ProjectParametersComponent implements OnInit {
     }
   }
   getImageForUser(user: User): string | undefined {
-    // console.log(user)
-    return '';
+    return user.email;
   }
   getGameSystemName(id: number){
     return this.gameSystems().find(g => g.id === id)?.name
@@ -338,8 +336,9 @@ export class ProjectParametersComponent implements OnInit {
 
       const resultat = await this.tagsHttpService.searchTags(search);
       this.suggestionsTags.set(resultat);
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.suggestionsTags.set([]);
+      console.error('Erreur lors de la recherche de tags:', error);
     }
   }
 
@@ -445,7 +444,7 @@ export class ProjectParametersComponent implements OnInit {
         );
 
         // Si des associations existantes sont trouvées dans d'autres dossiers que celui sélectionné
-        const promises: Promise<any>[] = [];
+        const promises: Promise<unknown>[] = [];
 
         existingModuleAssociations.forEach((association) => {
           // Si l'association n'est pas avec le dossier actuellement sélectionné

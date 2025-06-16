@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { UserHttpService } from '../../services/https/user-http.service';
 import {
   FormControl,
@@ -27,6 +27,7 @@ import { FileHttpService } from '../../services/https/file-http.service';
 import { StatisticsService } from '../../services/statistics.service';
 import { UserStatistics } from '../../interfaces/UserStatisticsDTO';
 import { Subscription } from 'rxjs';
+import { FirebaseError } from '@angular/fire/app';
 
 @Component({
   selector: 'app-account',
@@ -49,7 +50,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
 })
-export class AccountComponent implements OnInit {
+export class AccountComponent implements OnInit, OnDestroy {
   private userService = inject(UserHttpService);
   private messageService = inject(MessageService);
   private router = inject(Router);
@@ -91,9 +92,6 @@ export class AccountComponent implements OnInit {
   profileImagePreview = signal<string | null>(null);
   uploadingProfileImage = signal(false);
   memberSince = computed(() => {
-    const user = this.currentUser();
-    // Since User class doesn't have createdAt, we'll use a default for now
-    // TODO: Add createdAt field to User class or get from Firebase
     return '2024';
   });
 
@@ -284,10 +282,10 @@ export class AccountComponent implements OnInit {
         detail: 'Email de réinitialisation envoyé avec succès',
       });
       this.showPasswordResetDialog.set(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Une erreur est survenue';
 
-      switch (error.code) {
+      switch ((error as FirebaseError).code) {
         case 'auth/user-not-found':
           errorMessage = 'Aucun utilisateur trouvé avec cette adresse email';
           break;
@@ -298,7 +296,7 @@ export class AccountComponent implements OnInit {
           errorMessage = 'Trop de tentatives. Réessayez plus tard';
           break;
         default:
-          errorMessage = error.message;
+          errorMessage = (error as FirebaseError).message;
       }
 
       this.messageService.add({

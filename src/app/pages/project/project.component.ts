@@ -728,10 +728,10 @@ export class ProjectComponent implements OnInit {
       .filter(module => module.moduleDetails)
       .sort((a, b) => {
         const aUpdatedAt = 'updatedAt' in (a.moduleDetails || {}) 
-          ? (a.moduleDetails as any).updatedAt 
+          ? (a.moduleDetails as Module).updatedAt 
           : a.moduleDetails?.versions?.[0]?.updatedAt || '';
         const bUpdatedAt = 'updatedAt' in (b.moduleDetails || {}) 
-          ? (b.moduleDetails as any).updatedAt 
+          ? (b.moduleDetails as Module).updatedAt 
           : b.moduleDetails?.versions?.[0]?.updatedAt || '';
         return new Date(bUpdatedAt).getTime() - new Date(aUpdatedAt).getTime();
       })

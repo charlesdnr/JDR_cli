@@ -22,7 +22,7 @@ export const dateFormatInterceptor: HttpInterceptorFn = (
   return next(req);
 };
 
-function processDateFields(obj: any): any {
+function processDateFields(obj: unknown): unknown {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -32,13 +32,13 @@ function processDateFields(obj: any): any {
   }
 
   if (typeof obj === 'object') {
-    const result = { ...obj };
+    const result = { ...obj } as Record<string, unknown>;
 
     Object.keys(result).forEach(key => {
       // Remove createdAt and updatedAt dates from User objects
       if ((key === 'createdAt' || key === 'updatedAt') &&
            // Only remove date fields from User objects to avoid removing dates that should be updated
-           (result['username'] !== undefined || (result['user'] && result['user']['username'] !== undefined))) {
+           (result['username'] !== undefined || (result['user'] && typeof result['user'] === 'object' && result['user'] !== null && (result['user'] as Record<string, unknown>)['username'] !== undefined))) {
         delete result[key];
       } else if (typeof result[key] === 'object' && result[key] !== null) {
         result[key] = processDateFields(result[key]);
