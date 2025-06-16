@@ -35,6 +35,21 @@ jobs:
 
       - name: Run Linting
         run: npm run lint
+      
+      - name: Create environment.secret.ts
+        run: |
+          mkdir -p src/environments
+          cat > src/environments/environment.secret.ts << EOF
+          export const firebaseConfig = {
+            projectId: '${{ secrets.projectId }}',
+            appId: '${{ secrets.appId }}',
+            storageBucket: '${{ secrets.storageBucket }}',
+            apiKey: '${{ secrets.apiKey }}',
+            authDomain: '${{ secrets.authDomain }}',
+            messagingSenderId: '${{ secrets.messagingSenderId }}',
+            measurementId: '${{ secrets.measurementId }}'
+          }
+          EOF
 
       - name: Check Types
         run: npm run type-check
