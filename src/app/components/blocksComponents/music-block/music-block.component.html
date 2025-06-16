@@ -27,8 +27,8 @@
   <div class="audio-section">
     <app-audioplayer 
       [isReadOnly]="isReadOnly()"
-      (onAudioUploaded)="onAudioUploaded($event)"
-      (onAudioRemoved)="onAudioRemoved()"
+      (audioUploaded)="onAudioUploaded($event)"
+      (audioRemoved)="onAudioRemoved()"
     />
   </div>
 </div>

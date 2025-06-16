@@ -25,6 +25,11 @@ import { EditorModule } from 'primeng/editor';
 import { GameSystem } from '../../classes/GameSystem';
 import { HttpErrorResponse } from '@angular/common/http';
 
+interface AnimatedWord {
+  text: string;
+  opacity: number;
+}
+
 @Component({
   selector: 'app-ai-config',
   imports: [
@@ -132,7 +137,7 @@ export class AiConfigComponent implements OnInit, OnDestroy {
 
   private readonly WORD_ANIMATION_DELAY = 10; // millisecondes entre chaque lettre
   isWritingParagraph = signal(false);
-  animatedWords = signal<unknown[]>([]);
+  animatedWords = signal<AnimatedWord[]>([]);
   private animationTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
   async ngOnInit() {
