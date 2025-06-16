@@ -215,6 +215,7 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
 .remote-cursor {
   position: absolute;
   z-index: 1000;
@@ -245,3 +246,4 @@
     transform: translateX(-50%);
   }
 }
+

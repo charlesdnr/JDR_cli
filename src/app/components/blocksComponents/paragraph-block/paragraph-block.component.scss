@@ -60,15 +60,15 @@
   }
   
   .block-title {
-    @include font-responsive(var(--font-size-xl));
     color: var(--primary-color);
-    @include spacing-responsive(margin-bottom, 1rem);
     font-weight: 600;
+    @include font-responsive(var(--font-size-xl));
+    @include spacing-responsive(margin-bottom, 1rem);
   }
   
   .block-content {
-    @include font-responsive(var(--font-size-lg));
     line-height: 1.8;
+    @include font-responsive(var(--font-size-lg));
     @include spacing-responsive(margin-bottom, 1.5rem);
     
     p {

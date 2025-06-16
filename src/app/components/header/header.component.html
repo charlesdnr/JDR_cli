@@ -1,3 +1,5 @@
+@let $folders = folders();
+
 <header class="modern-header">
   <!-- Arrière-plan avec effet de flou -->
   <div class="header-backdrop"></div>
@@ -36,7 +38,7 @@
         <a
           [routerLink]="[button.link]"
           [queryParams]="
-            button.name === 'Projets' && folders()[0]?.folderId
+            button.name === 'Projets' && $folders[0]?.folderId
               ? { folderId: folders()[0]?.folderId }
               : null
           "

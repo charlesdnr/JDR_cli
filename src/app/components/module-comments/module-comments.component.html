@@ -1,0 +1,194 @@
+<div class="module-comments">
+  <div class="comments-header">
+    <h3 class="comments-title">
+      <i class="pi pi-comments"></i>
+      Commentaires
+      <span class="comments-count">({{ comments().length }})</span>
+    </h3>
+    
+    <!-- Sélecteur de version -->
+    <div class="version-selector" *ngIf="availableVersions().length > 1">
+      <label for="version-dropdown" class="version-label">
+        <i class="pi pi-code-branch"></i>
+        Commenter sur :
+      </label>
+      <p-select 
+        id="version-dropdown"
+        [options]="availableVersions()" 
+        [(ngModel)]="selectedVersionId"
+        (onChange)="onVersionChange($event.value)"
+        optionLabel="label" 
+        optionValue="value"
+        placeholder="Sélectionner une version"
+        [style]="{'min-width': '280px'}">
+      </p-select>
+    </div>
+  </div>
+
+  <!-- New Comment Form -->
+  <div class="new-comment-form" *ngIf="currentUser()">
+    <div class="comment-input-wrapper">
+      <p-avatar 
+        [label]="getUserInitials(currentUser())" 
+        size="large" 
+        shape="circle"
+        class="user-avatar clickable-avatar"
+        (click)="goToUserProfile($event, currentUser())"
+        (keyup.enter)="goToUserProfile($event, currentUser())"
+        tabindex="0"
+        pTooltip="Voir le profil de {{ currentUser()?.username || 'utilisateur' }}"
+        tooltipPosition="top"
+        tooltipStyleClass="tooltip-info">
+      </p-avatar>
+      <div class="input-container">
+        <textarea
+          pInputTextarea
+          [(ngModel)]="newComment"
+          placeholder="Partagez votre avis sur ce module... (Ctrl+Entrée pour publier)"
+          [autoResize]="true"
+          rows="3"
+          class="comment-input"
+          [disabled]="loading()"
+          (keydown)="onTextareaKeydown($event)">
+        </textarea>
+        <div class="comment-actions">
+          <button
+            type="button"
+            class="btn-publish"
+            (click)="submitComment()"
+            [disabled]="!newComment().trim() || loading() || !selectedVersionId()">
+            @if (loading()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else {
+              <i class="pi pi-send"></i>
+            }
+            <span>Publier</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Prompt -->
+  <div class="login-prompt" *ngIf="!currentUser()">
+    <p class="prompt-text">
+      <i class="pi pi-info-circle"></i>
+      Connectez-vous pour laisser un commentaire
+    </p>
+  </div>
+
+  <!-- Comments List -->
+  <div class="comments-list">
+    <div class="loading-skeleton" *ngIf="loading() && comments().length === 0">
+      <div class="skeleton-comment" *ngFor="let i of [1,2,3]">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-text"></div>
+          <div class="skeleton-text short"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && comments().length === 0">
+      <i class="pi pi-comment"></i>
+      <h4>Aucun commentaire</h4>
+      <p>Soyez le premier à commenter ce module !</p>
+    </div>
+
+    <div class="comment-item" *ngFor="let comment of comments(); trackBy: trackByCommentId">
+      <div class="comment-avatar">
+        <p-avatar 
+          [label]="getUserInitials(comment.user)" 
+          size="large" 
+          shape="circle"
+          class="clickable-avatar"
+          (click)="goToUserProfile($event, comment.user)"
+          (keyup.enter)="goToUserProfile($event, comment.user)"
+          tabindex="0"
+          pTooltip="Voir le profil de {{ comment.user?.username || 'utilisateur' }}"
+          tooltipPosition="top"
+          tooltipStyleClass="tooltip-info">
+        </p-avatar>
+      </div>
+      
+      <div class="comment-content">
+        <div class="comment-header">
+          <div class="comment-user-info">
+            <span class="username">{{ comment.user?.username || 'Utilisateur anonyme' }}</span>
+            <span class="comment-date">{{ getTimeAgo(comment.createdAt) }}</span>
+            <span class="version-indicator" *ngIf="comment.moduleVersionId">
+              <i class="pi pi-code-branch"></i>
+              {{ getVersionLabel(comment.moduleVersionId) }}
+            </span>
+            <span class="edited-indicator" *ngIf="comment.updatedAt !== comment.createdAt">
+              (modifié)
+            </span>
+          </div>
+          
+          <div class="comment-actions" *ngIf="canEditComment(comment)">
+            <button
+              type="button"
+              class="action-btn edit-btn"
+              (click)="startEdit(comment)"
+              pTooltip="Modifier ce commentaire"
+              tooltipPosition="top"
+              tooltipStyleClass="tooltip-info">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button
+              type="button"
+              class="action-btn delete-btn"
+              (click)="confirmDelete(comment)"
+              pTooltip="Supprimer ce commentaire"
+              tooltipPosition="top"
+              tooltipStyleClass="tooltip-danger">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Display Mode -->
+        <div class="comment-text" *ngIf="editingComment()?.id !== comment.id">
+          {{ comment.comment }}
+        </div>
+        
+        <!-- Edit Mode -->
+        <div class="comment-edit" *ngIf="editingComment()?.id === comment.id">
+          <textarea
+            pInputTextarea
+            [(ngModel)]="editText"
+            [autoResize]="true"
+            rows="3"
+            class="edit-input"
+            (keydown)="onEditTextareaKeydown($event)">
+          </textarea>
+          <div class="edit-actions">
+            <button
+              type="button"
+              class="btn-cancel"
+              (click)="cancelEdit()">
+              <i class="pi pi-times"></i>
+              <span>Annuler</span>
+            </button>
+            <button
+              type="button"
+              class="btn-save"
+              (click)="saveEdit()"
+              [disabled]="!editText().trim() || loading()">
+              @if (loading()) {
+                <i class="pi pi-spin pi-spinner"></i>
+              } @else {
+                <i class="pi pi-check"></i>
+              }
+              <span>Sauvegarder</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+</div>

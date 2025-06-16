@@ -12,7 +12,7 @@
   --p-button-outlined-secondary-color: var(--font-color);
   --p-dialog-background: var(--background-color);
 
-  --scrollbar-bg: rgba(0, 0, 0, 0);
+  --scrollbar-bg: transparent;
   --scrollbar-thumb-bg: var(--primary-color);
   --scrollbar-thumb-hover: #2980b9;
   --scrollbar-width: 8px;
@@ -371,7 +371,7 @@ body.resizing [contenteditable="true"] {
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb-bg);
   border-radius: var(--scrollbar-border-radius);
-  transition: background 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -559,4 +559,18 @@ app-auth {
   border-radius: var(--radius-small) !important;
   border: none !important;
   background: transparent !important;
+}
+
+// Hide tooltip arrow globally
+.p-tooltip .p-tooltip-arrow,
+.p-tooltip::before,
+.p-tooltip::after,
+.p-tooltip-arrow {
+  display: none !important;
+}
+
+// Improve tooltip appearance
+.p-tooltip {
+  border-radius: var(--radius-small) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }

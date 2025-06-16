@@ -63,9 +63,9 @@
   }
 
   .texte {
-    @include flex-responsive(row, nowrap, var(--gap));
     align-items: center;
     justify-content: center;
+    @include flex-responsive(row, nowrap, var(--gap));
     
     @include respond-to('mobile') {
       gap: var(--gap-mobile);
@@ -105,9 +105,9 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   min-width: 200px;
   min-height: 80px;
-  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
+  @include flex-responsive(column, nowrap);
   
   @include respond-to('mobile') {
     min-width: 150px;
@@ -127,11 +127,11 @@
   border: 2px dashed rgba(59, 130, 246, 0.4);
   border-radius: var(--radius-mobile);
   min-height: 180px !important;
-  @include spacing-responsive(margin, 15px 0);
   animation: pulse-blue 1.5s infinite;
-  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
+  @include spacing-responsive(margin, 15px 0);
+  @include flex-responsive(column, nowrap);
   
   @include respond-to('mobile') {
     min-height: 140px !important;

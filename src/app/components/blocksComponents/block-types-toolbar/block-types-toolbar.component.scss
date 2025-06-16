@@ -31,15 +31,15 @@
 }
 
 .icon-item {
-  @include flex-responsive(row, nowrap, var(--gap));
   align-items: center;
-  @include spacing-responsive(padding, var(--padding-small));
   background-color: var(--primary-color-transparent-50);
   color: var(--font-color);
   font-weight: 600;
   border-radius: var(--radius-small);
   cursor: grab;
   transition: all 0.2s;
+  @include flex-responsive(row, nowrap, var(--gap));
+  @include spacing-responsive(padding, var(--padding-small));
   
   @include respond-to('mobile') {
     gap: var(--gap-mobile);
@@ -69,25 +69,25 @@
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
   background-color: white;
-  @include spacing-responsive(padding, 15px);
   border-radius: var(--radius-small);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   transform: translate(-50%, -50%);
+  @include flex-responsive(column, nowrap);
+  @include spacing-responsive(padding, 15px);
 
   i {
-    @include font-responsive(var(--font-size-2xl));
     margin-bottom: 5px;
     color: var(--neutral-color);
+    @include font-responsive(var(--font-size-2xl));
   }
 
   span {
-    @include font-responsive(var(--font-size-xs));
     font-weight: 500;
     color: var(--neutral-color);
+    @include font-responsive(var(--font-size-xs));
   }
 
 }

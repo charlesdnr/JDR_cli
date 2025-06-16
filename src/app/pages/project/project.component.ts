@@ -115,7 +115,7 @@ export class ProjectComponent implements OnInit {
   draggedModule: DisplayableSavedModule | null = null;
   
   // Sidebar state
-  sidebarCollapsed = signal(false);
+  sidebarCollapsed = signal(true);
   
   // Display and sorting options
   isGridView = signal(true);

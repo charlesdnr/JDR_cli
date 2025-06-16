@@ -73,10 +73,10 @@
 
 .highlight-drop-zone {
   min-height: 100%;
-  @include spacing-responsive(padding, var(--padding));
   background-color: rgba(59, 130, 246, 0.05);
   border: 1px dashed rgba(59, 130, 246, 0.2);
   border-radius: var(--radius-mobile);
+  @include spacing-responsive(padding, var(--padding));
 
   @include respond-to("xs") {
     border-radius: var(--radius-small);
@@ -88,11 +88,11 @@
   border: 2px dashed rgba(59, 130, 246, 0.4);
   border-radius: var(--radius-mobile);
   min-height: 180px !important;
-  @include spacing-responsive(margin, 15px 0);
   animation: pulse-blue 1.5s infinite;
-  @include flex-responsive(column, nowrap);
   align-items: center;
   justify-content: center;
+  @include spacing-responsive(margin, 15px 0);
+  @include flex-responsive(column, nowrap);
 
   @include respond-to("mobile") {
     min-height: 140px !important;

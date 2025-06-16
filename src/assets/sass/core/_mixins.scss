@@ -329,7 +329,9 @@ Fichier contenant toutes les mixins SASS
 
 /// Mixin pour les tailles de police responsives
 @mixin font-responsive($base-size: var.$font-size-base) {
-   font-size: $base-size;
+   & {
+    font-size: $base-size;
+  }
    
    @include respond-to('mobile') {
       font-size: calc(#{$base-size} * 0.9);

@@ -1,5 +1,5 @@
 export class UserFolder {
-  folderId?: number;
+  folderId?: number = undefined
   userId: number;
   name?: string;
   parentFolder?: number;
