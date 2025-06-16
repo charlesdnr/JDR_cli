@@ -410,3 +410,8 @@ FodyWeavers.xsd
 
 src/environments/environment.secret.ts
 .vercel
+dist/
+.claude
+./CLAUDE.md
+CLAUDE.md
+./SCSS_RULES.md
