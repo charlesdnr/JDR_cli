@@ -61,7 +61,6 @@ import { ModuleUpdateDTO } from '../../interfaces/ModuleUpdateDTO';
     BlockListComponent,
     TranslateModule,
     DynamicDialogModule,
-    LottieComponent,
     SkeletonModule,
     ConfirmDialogModule,
     ButtonModule,

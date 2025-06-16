@@ -6,15 +6,15 @@
   [tabindex]="clickable() ? 0 : -1"
   (keyup.enter)="clickable() && openModule()">
   
-  <!-- Module Image (only in grid view) -->
-  @if (!isHorizontal()) {
-    <div class="module-image">
-      <img 
-        [src]="getImageSrc()" 
-        [alt]="module().title"
-        loading="lazy">
-      
-      <!-- Published badge -->
+  <!-- Module Image -->
+  <div class="module-image" [class.horizontal-image]="isHorizontal()">
+    <img 
+      [src]="getImageSrc()" 
+      [alt]="module().title"
+      loading="lazy">
+    
+    <!-- Published badge (only in grid view) -->
+    @if (!isHorizontal()) {
       @if (isPublished()) {
         <div class="status-badge published">
           <i class="pi pi-check-circle"></i>
@@ -26,8 +26,8 @@
           Brouillon
         </div>
       }
-    </div>
-  }
+    }
+  </div>
 
   <!-- Module Content -->
   <div class="module-content">

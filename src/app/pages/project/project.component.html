@@ -65,21 +65,23 @@
   <main class="main-layout">
     <!-- Compact Sidebar -->
     <aside class="compact-sidebar" [class.collapsed]="sidebarCollapsed()">
-      <div class="sidebar-header">
-        <div class="sidebar-title">
-          <span>Dossiers</span>
+      <!-- Normal Sidebar Content (visible when not collapsed) -->
+      <div class="sidebar-normal">
+        <div class="sidebar-header">
+          <div class="sidebar-title">
+            <span>Dossiers</span>
+          </div>
+          <p-button 
+            [outlined]="true"
+            size="small"
+            icon="pi pi-plus"
+            (onClick)="showNewFolderDialog(null)"
+            title="Nouveau dossier"
+          ></p-button>
         </div>
-        <p-button 
-          [outlined]="true"
-          size="small"
-          icon="pi pi-plus"
-          (onClick)="showNewFolderDialog(null)"
-          title="Nouveau dossier"
-        ></p-button>
-      </div>
       
-      <div class="sidebar-content">
-        <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+        <div class="sidebar-content">
+          <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
         
         <div class="tree-container">
           <!-- Section pour les modules sans dossier -->
@@ -135,6 +137,49 @@
             </ng-template>
           </p-tree>
         </div>
+        </div>
+      </div>
+      
+      <!-- Icons Bar for Collapsed State -->
+      <div class="sidebar-icons-bar">
+        <!-- Icon for modules without folder -->
+        @if (moduleWithoutFolder().length > 0) {
+          <div 
+            class="folder-icon" 
+            [class.selected]="!selectedFolder()"
+            (click)="selectNoFolder()"
+            [pTooltip]="'Modules sans dossier (' + moduleWithoutFolder().length + ')'"
+            tooltipPosition="right"
+            [showDelay]="300"
+          >
+            <i class="pi pi-home"></i>
+          </div>
+        }
+        
+        <!-- Icons for root folders -->
+        @for (node of getRootFolderNodes(); track $index) {
+          <div 
+            class="folder-icon" 
+            [class.selected]="selectedFolder()?.key === node.key"
+            (click)="selectFolderFromIcon(node)"
+            [pTooltip]="node.label"
+            tooltipPosition="right"
+            [showDelay]="300"
+          >
+            <i class="pi pi-folder"></i>
+          </div>
+        }
+        
+        <!-- Add folder button -->
+        <div 
+          class="folder-icon add-folder" 
+          (click)="showNewFolderDialog(null)"
+          pTooltip="Nouveau dossier"
+          tooltipPosition="right"
+          [showDelay]="300"
+        >
+          <i class="pi pi-plus"></i>
+        </div>
       </div>
     </aside>
 
@@ -175,7 +220,7 @@
             </div>
           } @else {
             @if (filteredAndSortedModules().length > 0) {
-              <div class="modules-grid">
+              <div class="modules-grid" [class.list-view]="!isGridView()">
                 @for (module of filteredAndSortedModules(); track module.savedModuleId) {
                   <div
                     class="module-wrapper"

@@ -1018,4 +1018,26 @@ export class ProjectComponent implements OnInit {
     const target = event.target as HTMLSelectElement;
     this.onSortChange(target?.value || '');
   }
+
+  // Methods for icon bar
+  getRootFolderNodes(): TreeNode[] {
+    return this.treeNode().filter(node => !node.parent);
+  }
+
+  selectFolderFromIcon(node: TreeNode): void {
+    this.selectedFolder.set(node);
+    if (node.data) {
+      this.loadModulesForSelectedFolder(node.data);
+      
+      // Mise à jour de l'URL avec le folderId en query parameter
+      const folderId = node.data.folderId;
+      if (folderId) {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { folderId: folderId },
+          queryParamsHandling: 'merge',
+        });
+      }
+    }
+  }
 }

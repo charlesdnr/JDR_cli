@@ -19,11 +19,13 @@ import { IntegratedModuleBlock } from '../../../classes/IntegratedModuleBlock';
 import { Module } from '../../../classes/Module';
 import { ModuleHttpService } from '../../../services/https/module-http.service';
 import { UserHttpService } from '../../../services/https/user-http.service';
+import { ModuleVersionHttpService } from '../../../services/https/module-version-http.service';
 
 interface ModuleOption {
   label: string;
   value: number;
   description?: string;
+  isPrivate?: boolean;
 }
 
 @Component({
@@ -49,23 +51,53 @@ export class ModuleBlockComponent implements OnInit {
 
   private moduleHttpService = inject(ModuleHttpService);
   private userService = inject(UserHttpService);
+  private moduleVersionHttpService = inject(ModuleVersionHttpService);
 
   // État du composant
   availableModules = signal<Module[]>([]);
+  privateModules = signal<Module[]>([]);
   selectedModule = signal<Module | null>(null);
   loadingModules = signal(false);
   loadingSelectedModule = signal(false);
+  currentModuleId = signal<number | null>(null);
+  currentUserId = signal<number | null>(null);
 
   // Computed pour les options du select
   moduleOptions = computed<ModuleOption[]>(() => {
-    return this.availableModules().map((module) => ({
+    const currentModule = this.currentModuleId();
+    
+    // Modules publics (excluant le module courant)
+    const filteredPublicModules = this.availableModules().filter(
+      (module) => module.id !== currentModule
+    );
+    
+    // Modules privés de l'utilisateur (excluant le module courant)
+    const filteredPrivateModules = this.privateModules().filter(
+      (module) => module.id !== currentModule
+    );
+    
+    const publicOptions: ModuleOption[] = filteredPublicModules.map((module) => ({
       label: module.title,
       value: module.id,
       description:
         module.description.length > 100
           ? module.description.substring(0, 100) + '...'
           : module.description,
+      isPrivate: false,
     }));
+    
+    const privateOptions: ModuleOption[] = filteredPrivateModules.map((module) => ({
+      label: `🔒 ${module.title}`,
+      value: module.id,
+      description:
+        (module.description.length > 100
+          ? module.description.substring(0, 100) + '...'
+          : module.description) + ' (Privé)',
+      isPrivate: true,
+    }));
+    
+    // Combiner les options avec les modules privés en premier
+    return [...privateOptions, ...publicOptions];
   });
 
   // Computed pour vérifier si un module est sélectionné
@@ -74,11 +106,43 @@ export class ModuleBlockComponent implements OnInit {
   );
 
   async ngOnInit() {
+    // D'abord, obtenir l'ID du module courant et l'utilisateur courant
+    await Promise.all([
+      this.loadCurrentModuleId(),
+      this.loadCurrentUser()
+    ]);
+    
     await this.loadAvailableModules();
 
     // Si le bloc a déjà un moduleId, charger ce module
     if (this.moduleBlock().moduleId) {
       await this.loadSelectedModuleDetails();
+    }
+  }
+
+  private async loadCurrentModuleId() {
+    try {
+      const moduleVersion = await this.moduleVersionHttpService.getModuleVersionById(
+        this.moduleBlock().moduleVersionId
+      );
+      this.currentModuleId.set(moduleVersion.moduleId);
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'ID du module courant:', error);
+      this.currentModuleId.set(null);
+    }
+  }
+
+  private async loadCurrentUser() {
+    try {
+      const currentUser = this.userService.currentJdrUser();
+      if (currentUser) {
+        this.currentUserId.set(currentUser.id);
+      } else {
+        this.currentUserId.set(null);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'utilisateur courant:', error);
+      this.currentUserId.set(null);
     }
   }
 
@@ -95,7 +159,24 @@ export class ModuleBlockComponent implements OnInit {
         module.versions.some((version) => version.published)
       );
 
-      this.availableModules.set(publicModules);
+      // Séparer les modules privés de l'utilisateur des modules publics
+      const currentUserId = this.currentUserId();
+      if (currentUserId) {
+        const userPrivateModules = allModules.filter((module) =>
+          module.creator?.id === currentUserId && 
+          !module.versions.some((version) => version.published)
+        );
+        this.privateModules.set(userPrivateModules);
+        
+        // Ne garder que les modules publics qui ne sont pas de l'utilisateur courant
+        const publicModulesNotOwned = publicModules.filter((module) =>
+          module.creator?.id !== currentUserId
+        );
+        this.availableModules.set(publicModulesNotOwned);
+      } else {
+        this.availableModules.set(publicModules);
+        this.privateModules.set([]);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des modules:', error);
     } finally {
@@ -124,15 +205,27 @@ export class ModuleBlockComponent implements OnInit {
   onModuleSelect(moduleId: number | null) {
     if (this.isReadOnly()) return;
 
+    // Empêcher la sélection du module courant
+    if (moduleId === this.currentModuleId()) {
+      console.warn('Impossible de sélectionner le module courant');
+      return;
+    }
+
     this.moduleBlock().moduleId = moduleId || undefined;
 
     if (moduleId) {
-      // Trouver le module sélectionné dans la liste
-      const selected = this.availableModules().find((m) => m.id === moduleId);
+      // Trouver le module sélectionné dans les listes publiques et privées
+      let selected = this.availableModules().find((m) => m.id === moduleId);
+      if (!selected) {
+        selected = this.privateModules().find((m) => m.id === moduleId);
+      }
+      
       if (selected) {
         this.selectedModule.set(selected);
         // Mettre à jour le titre du bloc avec le titre du module sélectionné
-        this.moduleBlock().title = `Module intégré: ${selected.title}`;
+        const isPrivate = this.privateModules().some((m) => m.id === moduleId);
+        const prefix = isPrivate ? '🔒 Module intégré' : 'Module intégré';
+        this.moduleBlock().title = `${prefix}: ${selected.title}`;
       }
     } else {
       this.selectedModule.set(null);

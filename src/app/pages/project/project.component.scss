@@ -185,68 +185,101 @@
   @include flex-responsive(column, nowrap);
   transition: all 0.3s ease;
   
-  &.collapsed {
-    width: 50px;
-    overflow: hidden;
-    
-    .sidebar-title span,
-    ::ng-deep .p-tree .p-tree-node-label {
-      display: none;
-    }
+  // Normal sidebar content (visible by default)
+  .sidebar-normal {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     
     .sidebar-header {
-      justify-content: center;
-      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      @include spacing-responsive(padding, 1rem);
+      border-bottom: 1px solid var(--neutral-color);
       
       .sidebar-title {
-        display: none;
-      }
-      
-      .new-folder-btn {
-        display: none;
+        @include font-responsive(var(--font-size-sm));
+        font-weight: 600;
+        color: var(--font-color);
       }
     }
     
     .sidebar-content {
-      padding: 0.25rem;
+      flex: 1;
+      overflow-y: auto;
+      @include spacing-responsive(padding, 0.5rem);
+    }
+  }
+
+  // Icons Bar for collapsed state (hidden by default)
+  .sidebar-icons-bar {
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    align-items: center;
+    height: 100%;
+    
+    .folder-icon {
+      width: 36px;
+      height: 36px;
+      @include flex-responsive(row, nowrap);
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-small);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: 1px solid transparent;
       
-      .modules-without-folder {
-        .folder-node {
-          padding: 0.5rem 0.25rem;
-          justify-content: center;
-          
-          span {
-            display: none;
-          }
-          
-          i {
-            margin: 0;
-          }
+      &:hover {
+        background: rgba(52, 152, 219, 0.08);
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+      }
+      
+      &.selected {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        
+        i {
+          color: white;
         }
       }
       
-      ::ng-deep .p-tree {
-        .p-tree-node-content {
-          padding: 0.5rem 0.25rem;
-          justify-content: center;
-          cursor: pointer;
-          border-radius: var(--radius-small);
-          transition: all 0.2s ease;
-          
-          &:hover {
-            background: rgba(52, 152, 219, 0.08) !important;
-          }
-          
-          .p-tree-node-label {
-            display: none;
-          }
-          
-          .p-tree-node-icon {
-            margin: 0;
-            color: var(--primary-color);
-          }
+      &.add-folder {
+        border: 1px dashed var(--neutral-color);
+        
+        &:hover {
+          border-color: var(--primary-color);
+          background: rgba(52, 152, 219, 0.05);
+        }
+        
+        i {
+          color: var(--primary-color);
         }
       }
+      
+      i {
+        @include font-responsive(var(--font-size-base));
+        color: var(--primary-color);
+        transition: color 0.2s ease;
+      }
+    }
+  }
+
+  &.collapsed {
+    width: 50px;
+    overflow: hidden;
+    
+    .sidebar-normal {
+      display: none;
+    }
+    
+    .sidebar-icons-bar {
+      display: flex;
     }
   }
   
@@ -262,49 +295,7 @@
     }
   }
   
-  .sidebar-header {
-    @include flex-responsive(row, nowrap);
-    justify-content: space-between;
-    align-items: center;
-    @include spacing-responsive(padding, 1rem);
-    border-bottom: 1px solid var(--neutral-color);
-    
-    .sidebar-title {
-      @include font-responsive(var(--font-size-sm));
-      font-weight: 600;
-      color: var(--font-color);
-    }
-    
-    .new-folder-btn {
-      width: 28px;
-      height: 28px;
-      border: none;
-      background: var(--primary-color);
-      color: white;
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      @include flex-responsive(row, nowrap);
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      
-      &:hover {
-        background: var(--primary-color);
-        transform: scale(1.1);
-      }
-      
-      i {
-        @include font-responsive(var(--font-size-xs));
-      }
-    }
-  }
-  
-  .sidebar-content {
-    flex: 1;
-    overflow-y: auto;
-    @include spacing-responsive(padding, 0.5rem);
-    
-    .tree-container {
+  .tree-container {
       .modules-without-folder {
         margin-bottom: 0.5rem;
         
@@ -431,7 +422,6 @@
       }
     }
   }
-}
 
 // Content Workspace
 .content-workspace {
@@ -541,10 +531,11 @@
         &.list-view {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.75rem;
           
           .module-wrapper {
             width: 100%;
+            flex-shrink: 0;
             
             app-module-card {
               width: 100%;
@@ -553,6 +544,9 @@
               ::ng-deep .module-card.horizontal {
                 width: 100%;
                 max-width: 100%;
+                display: flex;
+                box-sizing: border-box;
+                min-height: 90px;
               }
             }
           }
