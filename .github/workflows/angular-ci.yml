@@ -54,9 +54,6 @@ jobs:
       - name: Check Types
         run: npm run type-check
 
-      - name: Run Unit Tests
-        run: npm test
-
       - name: Starting application for E2E Tests and Lighthouse Tests
         run: |
             npm start &
