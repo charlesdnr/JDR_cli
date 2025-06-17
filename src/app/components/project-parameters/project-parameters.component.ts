@@ -43,6 +43,8 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
 import { AvatarModule } from 'primeng/avatar';
 import { FileUploadModule, FileSelectEvent } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
+import { TagModule } from 'primeng/tag';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { FileHttpService } from '../../services/https/file-http.service';
 import { Picture } from '../../classes/Picture';
 
@@ -63,6 +65,8 @@ import { Picture } from '../../classes/Picture';
     AvatarGroupModule,
     FileUploadModule,
     ImageModule,
+    TagModule,
+    ProgressSpinnerModule,
   ],
   templateUrl: './project-parameters.component.html',
   styleUrl: './project-parameters.component.scss',

@@ -8,253 +8,431 @@
   overflow-x: hidden;
   max-height: 500px;
 }
-::ng-deep .p-tabpanels {
-  padding: 0;
-}
-.container-parametres {
+
+.sidebar-parameters {
   padding: var(--padding);
   display: flex;
   flex-direction: column;
-
-
-
-  
-  gap: 10px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-
-  ::ng-deep .p-button {
-    width: 100%;
-  }
+  height: 100%;
+  overflow-y: auto;
 }
 
-.container-label {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+// =======================
+// MODE LECTURE - ULTRA COMPACT
+// =======================
 
-  input,
-  textarea,
-  .p-select,
-  .p-autocomplete,
-  .p-treeselect {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-}
-.chips-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-::ng-deep {
-  .p-autocomplete-input-multiple {
-    padding: 2px;
-    padding-left: var(--padding);
-    padding-bottom: 5px;
-  }
-}
-.param-section {
-  h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    border-bottom: 1px solid var(--neutral-color);
-    padding-bottom: 0.5rem;
-  }
-
-  p {
-    margin: 0;
-    padding: 0.5rem;
-    border-radius: 4px;
-    background-color: var(--background-color-lighter-lighter);
-  }
-
-  .description-text {
-    white-space: pre-line;
-    line-height: 1.6;
-  }
-
-  .tags-readonly {
+.readonly-compact {
+  .essential-info {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--padding);
-    padding-top: var(--padding);
+    flex-direction: column;
+    gap: var(--padding-small);
   }
-
-  .no-tags {
-    font-style: italic;
-    color: var(--font-color);
+  
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-small);
+    padding: var(--padding-small);
+    background: var(--background-color-lighter);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-sm);
+    
+    .info-icon {
+      flex-shrink: 0;
+      width: 20px;
+      
+      i {
+        color: var(--primary-color);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .info-text {
+      flex: 1;
+      color: var(--font-color);
+      font-weight: 500;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .tags-compact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      flex: 1;
+    }
+    
+    .collaborators-compact {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
   }
 }
 
-.read {
+// =======================
+// MODE ÉDITION - SIDEBAR VERTICAL
+// =======================
+
+.edit-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.param-section {
+  border: 1px solid var(--neutral-color);
+  border-radius: var(--radius-small);
+  background: var(--background-color-lighter);
+  overflow: hidden;
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-small);
+    padding: var(--padding-small) var(--padding);
+    background: var(--container-color);
+    border-bottom: 1px solid var(--neutral-color);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--font-color);
+    
+    i {
+      color: var(--primary-color);
+      font-size: 0.9rem;
+    }
+  }
+  
+  > .p-select,
+  > .field-compact,
+  > .field-stack,
+  > .tags-section,
+  > .image-compact,
+  > .upload-compact,
+  > .version-content {
+    padding: var(--padding);
+  }
+}
+
+// Version content
+.version-content {
   display: flex;
   flex-direction: column;
 }
 
-// Module image section styling
-.module-image-section {
+// Champs de formulaire
+.field-stack {
   display: flex;
   flex-direction: column;
   gap: var(--padding);
-  margin-top: 0.5rem;
+  padding: var(--padding) !important;
+}
 
-  .module-image-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-
-    .module-image-wrapper {
-      position: relative;
-      display: inline-block;
-
-      ::ng-deep .p-image {
-        border-radius: calc(var(--radius) / 2);
-        overflow: hidden;
-
-        img {
-          border-radius: calc(var(--radius) / 2);
-          transition: transform var(--transition-duration) ease;
-
-          &:hover {
-            transform: scale(1.02);
-          }
-        }
-      }
-
-      .module-image-actions {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        opacity: 0;
-        transition: opacity var(--transition-duration) ease;
-
-        ::ng-deep .p-button {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.7);
-          border: none;
-          backdrop-filter: blur(4px);
-
-          .p-button-icon {
-            font-size: 0.8rem;
-            color: white;
-          }
-        }
-      }
-
-      &:hover .module-image-actions {
-        opacity: 1;
-      }
-    }
+.field-compact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding-small);
+  
+  label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--font-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
+}
 
-  .module-image-caption {
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--font-secondary-color);
-    font-style: italic;
-    margin-top: -0.5rem;
+// =======================
+// STYLES SPÉCIFIQUES SIDEBAR
+// =======================
+
+// Image compacte
+.image-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--padding);
+  
+  ::ng-deep .sidebar-image {
+    border-radius: var(--radius-small);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-
-  .module-upload-zone {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--padding);
-    padding: calc(var(--padding) * 2);
-    border: 2px dashed var(--neutral-color);
-    border-radius: var(--radius);
-    background-color: var(--background-color-lighter-lighter);
-    transition: all var(--transition-duration) ease;
-
-    &:hover {
-      border-color: var(--primary-color);
-      background-color: var(--primary-color-transparent-50);
-    }
-
-    .uploading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--primary-color);
-
-      i {
-        color: var(--primary-color);
-      }
-
-      p {
-        margin: 0;
-        font-weight: 500;
-      }
-    }
-
-    ::ng-deep .p-fileupload {
-      .p-button {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        border-radius: var(--radius);
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        transition: all var(--transition-duration) ease;
-
-        &:hover {
-          background: color-mix(in srgb, var(--primary-color) 85%, black);
-          border-color: color-mix(in srgb, var(--primary-color) 85%, black);
-          transform: translateY(-1px);
-          box-shadow: var(--box-shadow);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
-      }
-    }
-
-    .upload-info {
-      text-align: center;
-
-      .upload-text {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin: 0 0 0.5rem 0;
-        font-weight: 500;
-        color: var(--font-color);
-
-        i {
-          font-size: 1.2rem;
-          color: var(--primary-color);
-        }
-      }
-
-      .upload-hint {
-        margin: 0;
-        font-size: 0.85rem;
-        color: var(--font-secondary-color);
-        line-height: 1.4;
-      }
+  
+  ::ng-deep .image-remove {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: var(--danger-color) !important;
+    border: none !important;
+    
+    .p-button-icon {
+      color: white !important;
+      font-size: 0.8rem;
     }
   }
 }
 
-// Actions section styling
-.actions-section {
+// Upload compacte
+.upload-compact {
+  display: flex;
+  justify-content: center;
+  
+  .upload-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-small);
+    justify-content: center;
+    
+    span {
+      color: var(--primary-color);
+      font-size: var(--font-size-sm);
+    }
+  }
+}
+
+// Tags
+.tags-section {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--neutral-color);
+  gap: var(--padding-small);
+  
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+}
+
+// =======================
+// STYLES PRIMENG SIDEBAR
+// =======================
+
+::ng-deep {
+  // Tags micro pour lecture
+  .micro-tag {
+    background: var(--primary-color-transparent-50) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+    height: auto !important;
+    font-weight: 500;
+  }
+  
+  // Status mini
+  .mini-status {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+    height: auto !important;
+    
+    .p-tag-icon {
+      font-size: 0.7rem !important;
+      margin-right: 0.2rem !important;
+    }
+  }
+  
+  // Avatar micro
+  .micro-avatar {
+    background: var(--primary-color) !important;
+    color: var(--font-color-invert) !important;
+    font-weight: 600;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.6rem !important;
+  }
+  
+  // Tags sidebar
+  .sidebar-tag {
+    background: var(--primary-color) !important;
+    color: var(--font-color-invert) !important;
+    font-weight: 500;
+    font-size: var(--font-size-xs) !important;
+    padding: 0.25rem 0.5rem !important;
+    height: auto !important;
+    
+    .p-chip-remove-icon {
+      color: rgba(255, 255, 255, 0.8) !important;
+      
+      &:hover {
+        color: var(--font-color-invert) !important;
+      }
+    }
+  }
+  
+  // Inputs sidebar
+  .sidebar-input,
+  .sidebar-textarea {
+    font-size: var(--font-size-sm) !important;
+    padding: var(--padding-small) !important;
+    border-radius: var(--radius-small) !important;
+    border: 1px solid var(--neutral-color) !important;
+    width: 100% !important;
+    
+    &:hover {
+      border-color: var(--primary-color) !important;
+    }
+    
+    &:focus {
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 0 0 2px var(--primary-color-transparent-50) !important;
+    }
+  }
+  
+  .sidebar-textarea {
+    resize: vertical;
+    min-height: 60px !important;
+  }
+  
+  // Selects sidebar
+  .sidebar-select,
+  .sidebar-autocomplete,
+  .sidebar-tree {
+    .p-dropdown,
+    .p-autocomplete,
+    .p-treeselect {
+      font-size: var(--font-size-sm) !important;
+      min-height: 36px !important;
+      border-radius: var(--radius-small) !important;
+      border: 1px solid var(--neutral-color) !important;
+      width: 100% !important;
+      
+      &:hover {
+        border-color: var(--primary-color) !important;
+      }
+      
+      &:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 2px var(--primary-color-transparent-50) !important;
+      }
+    }
+    
+    .p-dropdown-label,
+    .p-autocomplete-input,
+    .p-treeselect-label {
+      font-size: var(--font-size-sm) !important;
+      padding: var(--padding-small) !important;
+    }
+  }
+  
+  // Upload sidebar
+  .sidebar-upload .p-button {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    border-radius: var(--radius-small) !important;
+    padding: var(--padding-small) !important;
+    font-size: var(--font-size-sm) !important;
+    font-weight: 500;
+    width: 100% !important;
+    
+    &:hover {
+      background: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+      opacity: 0.9;
+    }
+  }
+  
+  // Footer select
+  .select-footer {
+    padding: var(--padding-small);
+    border-top: 1px solid var(--neutral-color);
+    
+    .footer-btn {
+      width: 100% !important;
+      justify-content: center;
+      font-size: var(--font-size-xs) !important;
+      padding: var(--padding-small) !important;
+    }
+  }
+  
+  // Micro spinner
+  .micro-spinner {
+    width: 16px !important;
+    height: 16px !important;
+    
+    .p-progress-spinner-circle {
+      stroke: var(--primary-color) !important;
+    }
+  }
+}
+
+// =======================
+// RESPONSIVITÉ MOBILE
+// =======================
+
+@media (max-width: 768px) {
+  .sidebar-parameters {
+    padding: var(--padding-mobile);
+  }
+  
+  .readonly-compact .info-row {
+    padding: var(--padding-mobile);
+    flex-wrap: wrap;
+    
+    .info-text {
+      white-space: normal;
+      word-break: break-word;
+    }
+  }
+  
+  .param-section {
+    .section-title {
+      padding: var(--padding-mobile);
+      font-size: var(--font-size-xs);
+    }
+    
+    > .p-select,
+    > .field-compact,
+    > .field-stack,
+    > .tags-section,
+    > .image-compact,
+    > .upload-compact,
+    > .version-content {
+      padding: var(--padding-mobile);
+    }
+  }
+  
+  .field-stack {
+    gap: var(--padding-mobile);
+  }
+}
+
+// =======================
+// ANIMATIONS SUBTILES
+// =======================
+
+.param-section {
+  transition: all var(--transition-duration) ease;
+  
+  &:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.info-row {
+  transition: all var(--transition-duration) ease;
+  
+  &:hover {
+    background: var(--background-color) !important;
+    transform: translateX(2px);
+  }
+}
+
+// =======================
+// OPTIMISATIONS SCROLL
+// =======================
+
+.edit-sidebar {
+  scroll-behavior: smooth;
+  
+  // Améliore les performances de scroll sur les longues listes
+  .tags-list,
+  .collaborators-compact {
+    will-change: transform;
+    contain: layout;
+  }
 }

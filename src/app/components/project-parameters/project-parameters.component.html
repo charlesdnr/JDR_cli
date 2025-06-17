@@ -1,244 +1,253 @@
-<div class="container-parametres">
-  @if(isReadOnly()) {
-  <div class="read">
-    <div class="param-section">
-      <h3>Version</h3>
-      <p>{{ currentVersion().version }}</p>
-    </div>
-
-    <div class="param-section">
-      <h3>{{ "Titre" | translate }}</h3>
-      <p>{{ currentModule().title }}</p>
-    </div>
-
-    <div class="param-section">
-      <h3>{{ "Description" | translate }}</h3>
-      <p class="description-text">{{ currentModule().description }}</p>
-    </div>
-
-    <div class="param-section">
-      <h3>{{ "Système de jeu" | translate }}</h3>
-      <p>{{ getGameSystemName(currentVersion().gameSystemId ?? 0) }}</p>
-    </div>
-
-    <div class="param-section">
-      <h3>Tags</h3>
-      <div class="tags-readonly">
-        @for (tag of tagsSearch(); track tag.id) {
-        <p-chip [label]="tag.name" class="m-1"></p-chip>
-        } @if(tagsSearch().length === 0) {
-        <p class="no-tags">Aucun tag</p>
+<div class="sidebar-parameters">
+  @if (isReadOnly()) {
+    <!-- Mode lecture - Ultra compacte pour sidebar -->
+    <div class="readonly-compact">
+      <!-- Informations essentielles seulement -->
+      <div class="essential-info">
+        <div class="info-row">
+          <span class="info-icon"><i class="pi pi-bookmark"></i></span>
+          <span class="info-text">Version {{ currentVersion().version }}</span>
+          @if (currentVersion().published) {
+            <p-tag value="Public" severity="success" icon="pi pi-globe" styleClass="mini-status" />
+          } @else {
+            <p-tag value="Privé" severity="secondary" icon="pi pi-eye-slash" styleClass="mini-status" />
+          }
+        </div>
+        
+        <div class="info-row">
+          <span class="info-icon"><i class="pi pi-gamepad-2"></i></span>
+          <span class="info-text">{{ getGameSystemName(currentVersion().gameSystemId ?? 0) }}</span>
+        </div>
+        
+        @if (tagsSearch().length > 0) {
+          <div class="info-row">
+            <span class="info-icon"><i class="pi pi-tags"></i></span>
+            <div class="tags-compact">
+              @for (tag of tagsSearch(); track tag.id) {
+                <p-chip [label]="tag.name" styleClass="micro-tag" />
+              }
+            </div>
+          </div>
+        }
+        
+        @if (selectedUsers().length > 0) {
+          <div class="info-row">
+            <span class="info-icon"><i class="pi pi-users"></i></span>
+            <div class="collaborators-compact">
+              @for (user of selectedUsers(); track user) {
+                <p-avatar
+                  [label]="getUserInitials(user)"
+                  size="normal"
+                  shape="circle"
+                  [pTooltip]="user.email"
+                  styleClass="micro-avatar"
+                />
+              }
+            </div>
+          </div>
         }
       </div>
     </div>
-
-    <div class="param-section">
-      <h3>Statut</h3>
-      <p>
-        @if(currentVersion().published) {
-        <i class="pi pi-globe"></i> Ce module est public } @else {
-        <i class="pi pi-eye-slash"></i> Ce module est privé }
-      </p>
-    </div>
-
-    <div class="param-section">
-      <h3>Collaborateurs</h3>
-      <p-avatar-group>
-        @for(user of selectedUsers(); track user){
-        <p-avatar
-          [label]="getUserInitials(user)"
-          size="normal"
-          shape="circle"
-          [pTooltip]="user.email"
-        />
-        }
-      </p-avatar-group>
-    </div>
-  </div>
   } @else {
-  <!-- 0. Gestion des versions -->
-  <div class="container-label">
-    <label for="versions">{{ "Version du module" | translate }}</label>
-    <p-select
-      [filter]="true"
-      fluid
-      [options]="versions()"
-      [disabled]="isReadOnly()"
-      optionLabel="version"
-      [(ngModel)]="currentVersion"
-    >
-      <ng-template #footer>
-        <p-button
-          (onClick)="createNewVersion()"
-          label="Nouvelle version"
-          [fluid]="true"
-          severity="secondary"
-          text
-          size="small"
-          icon="pi pi-plus"
-        />
-      </ng-template>
-    </p-select>
-  </div>
-  <!-- 1. Informations de base -->
-  <div class="container-label">
-    <label for="moduleName">{{ "Titre" | translate }}</label>
-    <input
-      class="input"
-      id="moduleName"
-      type="text"
-      pInputText
-      [(ngModel)]="currentModule().title"
-      [disabled]="isReadOnly()"
-      autocomplete="false"
-    />
-  </div>
+    <!-- Mode édition - Layout vertical optimisé sidebar -->
+    <div class="edit-sidebar">
+      <!-- Version -->
+      <div class="param-section">
+        <h4 class="section-title">
+          <i class="pi pi-bookmark"></i>
+          Version
+        </h4>
+        <div class="version-content">
+          <p-select
+            [filter]="true"
+            [options]="versions()"
+            [disabled]="isReadOnly()"
+            optionLabel="version"
+            [(ngModel)]="currentVersion"
+            placeholder="Choisir version"
+            appendTo="body"
+            styleClass="sidebar-select"
+          >
+            <ng-template #footer>
+              <div class="select-footer">
+                <p-button
+                  (onClick)="createNewVersion()"
+                  label="Nouvelle version"
+                  severity="secondary"
+                  text
+                  size="small"
+                  icon="pi pi-plus"
+                  styleClass="footer-btn"
+                />
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
 
-  <div class="container-label">
-    <label for="moduleDescription">{{ "Description" | translate }}</label>
-    <textarea
-      class="input"
-      id="moduleDescription"
-      type="text"
-      pTextarea
-      [(ngModel)]="currentModule().description"
-      [disabled]="isReadOnly()"
-      autocomplete="false"
-    ></textarea>
-  </div>
+      <!-- Informations de base -->
+      <div class="param-section">
+        <h4 class="section-title">
+          <i class="pi pi-info-circle"></i>
+          Informations
+        </h4>
+        <div class="field-stack">
+          <div class="field-compact">
+            <label for="moduleName">{{ "Titre" | translate }}</label>
+            <input
+              id="moduleName"
+              type="text"
+              pInputText
+              [(ngModel)]="currentModule().title"
+              [disabled]="isReadOnly()"
+              placeholder="Nom du module"
+              class="sidebar-input"
+            />
+          </div>
 
-  <!-- 2. Image du module -->
-  <div class="container-label">
-    <label for="moduleImage">{{ "Image du module" | translate }}</label>
-    <div class="module-image-section">
-      @if(hasModuleImage()) {
-      <div class="module-image-container">
-        <div class="module-image-wrapper">
-          <p-image
-            [src]="getModuleImageSrc()"
-            [alt]="getModuleImageTitle()"
-            width="200px"
-            [preview]="true"
-            [style]="{ maxWidth: '200px', height: 'auto' }"
-          />
-          <div class="module-image-actions">
+          <div class="field-compact">
+            <label for="moduleDescription">{{ "Description" | translate }}</label>
+            <textarea
+              id="moduleDescription"
+              pTextarea
+              [(ngModel)]="currentModule().description"
+              [disabled]="isReadOnly()"
+              placeholder="Description..."
+              rows="2"
+              class="sidebar-textarea"
+            ></textarea>
+          </div>
+
+          <div class="field-compact">
+            <label for="gameSystem">{{ "Système de jeu" | translate }}</label>
+            <p-select
+              [options]="gameSystems()"
+              [loading]="gameLoading"
+              [disabled]="isReadOnly()"
+              [(ngModel)]="currentGameSystem"
+              optionLabel="name"
+              placeholder="Système"
+              inputId="gameSystem"
+              styleClass="sidebar-select"
+              appendTo="body"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Image -->
+      <div class="param-section">
+        <h4 class="section-title">
+          <i class="pi pi-image"></i>
+          Image
+        </h4>
+        @if (hasModuleImage()) {
+          <div class="image-compact">
+            <p-image
+              [src]="getModuleImageSrc()"
+              [alt]="getModuleImageTitle()"
+              width="80px"
+              [preview]="true"
+              styleClass="sidebar-image"
+            />
             <p-button
               icon="pi pi-trash"
               severity="danger"
               size="small"
               (onClick)="removeModuleImage()"
               [disabled]="isReadOnly()"
+              styleClass="image-remove"
+              pTooltip="Supprimer"
             />
           </div>
-        </div>
-
-        @if(currentModule().picture.title) {
-        <div class="module-image-caption">
-          {{ currentModule().picture.title }}
-        </div>
-        }
-      </div>
-      } @else {
-      <div class="module-upload-zone">
-        @if(uploadingModuleImage()) {
-        <div class="uploading-state">
-          <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
-          <p>Téléchargement en cours...</p>
-        </div>
         } @else {
-        <p-fileUpload
-          mode="basic"
-          chooseLabel="Choisir une image"
-          accept="image/*"
-          maxFileSize="5000000"
-          (onSelect)="onModuleImageSelect($event)"
-          [showUploadButton]="false"
-          [auto]="true"
-          [disabled]="isReadOnly()"
-          styleClass="upload-button"
-          inputId="moduleImage"
-        />
-
-        <div class="upload-info">
-          <p class="upload-text">
-            <i class="pi pi-image"></i>
-            Image représentant le module
-          </p>
-          <p class="upload-hint">
-            Formats acceptés: JPG, PNG, GIF, WebP (max 5MB)
-          </p>
-        </div>
+          <div class="upload-compact">
+            @if (uploadingModuleImage()) {
+              <div class="upload-progress">
+                <p-progressSpinner styleClass="micro-spinner" />
+                <span>Upload...</span>
+              </div>
+            } @else {
+              <p-fileUpload
+                mode="basic"
+                chooseLabel="Ajouter image"
+                accept="image/*"
+                maxFileSize="5000000"
+                (onSelect)="onModuleImageSelect($event)"
+                [showUploadButton]="false"
+                [auto]="true"
+                [disabled]="isReadOnly()"
+                styleClass="sidebar-upload"
+              />
+            }
+          </div>
         }
       </div>
-      }
+
+      <!-- Tags -->
+      <div class="param-section">
+        <h4 class="section-title">
+          <i class="pi pi-tags"></i>
+          Tags
+        </h4>
+        <div class="tags-section">
+          <p-autocomplete
+            #autocomplete
+            [(ngModel)]="tagsSearch"
+            [disabled]="isReadOnly()"
+            (completeMethod)="autoCompleteRes($event.query)"
+            [suggestions]="suggestionsTags()"
+            (onSelect)="onSelect($event.value.name)"
+            (onUnselect)="onUnSelect($event.value.id)"
+            [dropdown]="true"
+            [dropdownMode]="'current'"
+            [forceSelection]="false"
+            (onDropdownClick)="showInitialTags()"
+            (keydown.enter)="onEnterKeyForTags($event)"
+            placeholder="Ajouter tag"
+            [multiple]="true"
+            optionLabel="name"
+            styleClass="sidebar-autocomplete"
+            appendTo="body"
+          >
+            <ng-template pTemplate="selectedItem"></ng-template>
+          </p-autocomplete>
+          @if (tagsSearch().length > 0) {
+            <div class="tags-list">
+              @for (tag of tagsSearch(); track tag.id) {
+                <p-chip
+                  [label]="tag.name"
+                  [removable]="!isReadOnly()"
+                  (onRemove)="onUnSelect(tag.id)"
+                  styleClass="sidebar-tag"
+                />
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Organisation -->
+      <div class="param-section">
+        <h4 class="section-title">
+          <i class="pi pi-folder"></i>
+          Organisation
+        </h4>
+        <div class="field-compact">
+          <label for="stockage">{{ "Dossier" | translate }}</label>
+          <p-treeselect
+            [options]="treeNode()"
+            [disabled]="needToCreate()"
+            metaKeySelection="true"
+            [loading]="folderLoading"
+            [(ngModel)]="selectedFolder"
+            (ngModelChange)="saveFolder()"
+            placeholder="Choisir dossier"
+            styleClass="sidebar-tree"
+            appendTo="body"
+          />
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- 3. Configuration du jeu -->
-  <div class="container-label">
-    <label for="gameSystem">{{ "Système de jeu" | translate }}</label>
-    <p-select
-      [options]="gameSystems()"
-      [loading]="gameLoading"
-      [disabled]="isReadOnly()"
-      [(ngModel)]="currentGameSystem"
-      optionLabel="name"
-      placeholder="Sélectionner un système de jeu"
-      inputId="gameSystem"
-    ></p-select>
-  </div>
-
-  <!-- 4. Tags -->
-  <div class="container-label">
-    <label for="tags">{{ "Tags" | translate }}</label>
-    <p-autocomplete
-      #autocomplete
-      [(ngModel)]="tagsSearch"
-      [disabled]="isReadOnly()"
-      (completeMethod)="autoCompleteRes($event.query)"
-      [suggestions]="suggestionsTags()"
-      (onSelect)="onSelect($event.value.name)"
-      (onUnselect)="onUnSelect($event.value.id)"
-      [dropdown]="true"
-      [dropdownMode]="'current'"
-      [forceSelection]="false"
-      (onDropdownClick)="showInitialTags()"
-      (keydown.enter)="onEnterKeyForTags($event)"
-      placeholder="Rechercher ou créer un tag"
-      [multiple]="true"
-      optionLabel="name"
-    >
-      <ng-template pTemplate="selectedItem" style="width: 0%"> </ng-template>
-    </p-autocomplete>
-    <div class="chips-container">
-      @for (tag of tagsSearch(); track tag.id) {
-      <p-chip
-        [label]="tag.name"
-        [removable]="true"
-        [removable]="!isReadOnly()"
-        (onRemove)="onUnSelect(tag.id)"
-        class="m-1"
-      ></p-chip>
-      }
-    </div>
-  </div>
-
-  <!-- 5. Organisation -->
-  <div class="container-label">
-    <label for="stockage">{{ "Dossier de stockage" | translate }}</label>
-    <p-treeselect
-      [options]="treeNode()"
-      [disabled]="needToCreate()"
-      metaKeySelection="true"
-      [loading]="folderLoading"
-      [(ngModel)]="selectedFolder"
-      (ngModelChange)="saveFolder()"
-      [fluid]="true"
-    />
-  </div>
-
-  <!-- Collaborators section removed - now handled by floating action bar share button -->
-
-  <!-- Actions section removed - now handled by floating action bar -->
   }
 </div>
