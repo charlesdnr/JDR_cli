@@ -2,6 +2,7 @@ import { Picture } from "./Picture";
 import { User } from "./User";
 
 export class UserProfile {
+    id: number | null = null;
     username: string;
     password: string;
     user: User;

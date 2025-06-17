@@ -26,6 +26,9 @@ import { FileUploadModule, FileSelectEvent } from 'primeng/fileupload';
 import { FileHttpService } from '../../services/https/file-http.service';
 import { Subscription } from 'rxjs';
 import { FirebaseError } from '@angular/fire/app';
+import { UserProfileHttpService } from '../../services/https/user-profile-http.service';
+import { UserProfile } from '../../classes/UserProfile';
+import { Picture } from '../../classes/Picture';
 
 @Component({
   selector: 'app-account',
@@ -54,6 +57,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(Auth);
   private fileHttpService = inject(FileHttpService);
+  private userProfileHttpService = inject(UserProfileHttpService);
 
   private subscriptions = new Subscription();
 
@@ -164,16 +168,35 @@ export class AccountComponent implements OnInit, OnDestroy {
     },
   ]);
 
+  currentUserProfile = signal<UserProfile | null>(null);
+
   ngOnInit() {
     const user = this.currentUser();
     if (user?.username) {
       this.originalUsername.set(user.username);
       this.editableUsername.set(user.username); // Initialiser les deux
     }
+    this.loadUserProfile();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  loadUserProfile() {
+    const user = this.currentUser();
+    if (!user?.id) return;
+    this.userProfileHttpService.getUserProfileByUserId(user.id).then((profile: UserProfile) => {
+        this.currentUserProfile.set(profile);
+        this.profileImageUrl.set(profile.picture?.src || null);
+        this.profileImagePreview.set(profile.picture?.src || null);
+    }).catch((err: HttpErrorResponse) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: `Erreur lors du chargement du profil utilisateur : ${err.message}`,
+        });
+      });
   }
 
   saveUser() {
@@ -303,12 +326,17 @@ export class AccountComponent implements OnInit, OnDestroy {
       .uploadFile(file)
       .then((fileId: string) => {
         this.profileImageUrl.set(fileId);
-        // TODO: Sauvegarder l'URL dans le profil utilisateur
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: 'Photo de profil mise à jour avec succès',
-        });
+        
+        if(this.currentUserProfile()) {
+          this.currentUserProfile()!.picture = new Picture("Photo de profil", fileId);
+          this.userProfileHttpService.updateUserProfile(this.currentUserProfile()!).then(() => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Profil utilisateur mis à jour avec la nouvelle photo',
+            });
+          })
+        }
       })
       .catch((error) => {
         console.error("Erreur lors de l'upload:", error);

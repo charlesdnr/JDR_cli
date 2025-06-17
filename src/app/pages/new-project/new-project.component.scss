@@ -1,3 +1,5 @@
+// ===== REVOLUTIONARY MODULE EDITOR STYLES =====
+
 :host {
   display: flex;
   height: 100%;
@@ -6,248 +8,721 @@
   position: relative;
   margin: 0;
   padding: 0;
+  background: var(--background-color);
 }
 
-.container-edit {
+// ===== MAIN WORKSPACE LAYOUT =====
+.module-editor-workspace {
   display: flex;
   width: 100%;
-  gap: 20px;
+  height: 100%;
   position: relative;
-  align-items: flex-start;
+  
+  &.read-only-mode {
+    .modern-sidebar {
+      border-right-color: var(--danger-color);
+      
+      .module-header-section {
+        background: linear-gradient(135deg, 
+          color-mix(in srgb, var(--danger-color), transparent 95%) 0%, 
+          transparent 100%);
+      }
+    }
+  }
 }
 
-.toolbar {
-  background-color: var(--background-color-lighter);
-  max-width: 270px;
-  min-width: 270px;
-  width: 270px;
-  padding: 3px;
+// ===== MODERN SIDEBAR =====
+.modern-sidebar {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  height: 100vh;
+  background: var(--background-color-lighter);
   border-right: 1px solid var(--neutral-color);
-  box-shadow: 5px 0 5px -5px var(--neutral-color);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-
-  ::ng-deep .p-tabs {
-    display: flex;
-    flex-direction: column;
-  }
-
-  ::ng-deep .p-tablist {
-    flex-shrink: 0;
-    background-color: var(--background-color-lighter);
-  }
-
-  ::ng-deep .p-tabpanels {
-    background-color: var(--background-color-lighter);
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: calc(100vh - 200px); // Hauteur maximum pour le contenu des tabs
-    
-    // Scrollbar invisible
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: transparent;
-      border-radius: 3px;
-      transition: background 0.25s ease;
-    }
-    
-    &:hover::-webkit-scrollbar-thumb {
-      background: var(--neutral-color);
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: var(--primary-color);
-    }
-    
-    // Pour Firefox
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-    
-    &:hover {
-      scrollbar-color: var(--neutral-color) transparent;
-    }
-  }
-
-  ::ng-deep .p-tabpanel {
-    display: flex;
-    flex-direction: column;
-
-    app-block-types-toolbar {
-      flex-shrink: 0;
-    }
-
-    app-project-parameters {
-      flex-shrink: 0;
-    }
-  }
-
-  ::ng-deep .p-tablist-tab-list {
-    background-color: var(--background-color-lighter);
-  }
-}
-
-.editor {
-  width: 100%;
-  height: calc(100vh - 140px); // Hauteur maximum fixe
-  max-height: calc(100vh - 140px);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  background-color: var(--background-color);
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
+  z-index: 100;
+  
+  // Glassmorphism effect
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    inset -1px 0 0 rgba(255, 255, 255, 0.1),
+    2px 0 20px rgba(0, 0, 0, 0.03);
+
+  @media (max-width: 1024px) {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+  }
+
+  @media (max-width: 768px) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    &.mobile-open {
+      transform: translateX(0);
+    }
+    
+    // Ajustements des hauteurs pour mobile
+    .module-header-section {
+      min-height: 180px;
+      max-height: 200px;
+    }
+    
+    .sidebar-footer {
+      min-height: 60px;
+      max-height: 80px;
+    }
+    
+    .panel-content {
+      // Mobile : utilise flexbox au lieu de hauteurs fixes
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+  }
 }
 
-.blocks-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  // height: 100%;
-  padding-bottom: 6rem;
-  gap: 15px;
-  padding: var(--padding);
-  border: 1px dashed transparent;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+// ===== MODULE HEADER SECTION =====
+.module-header-section {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, 
+    var(--background-color-lighter) 0%, 
+    color-mix(in srgb, var(--primary-color), transparent 98%) 100%);
+  border-bottom: 1px solid var(--neutral-color);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0; // Empêche la compression
+  min-height: 200px; // Hauteur minimum garantie
+  max-height: 250px; // Hauteur maximum
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, 
+      color-mix(in srgb, var(--primary-color), transparent 90%) 0%, 
+      transparent 70%);
+    pointer-events: none;
+  }
 }
 
-.highlight-drop-zone {
-  padding: 5px;
-  background-color: rgba(59, 130, 246, 0.05);
-  border: 1px dashed rgba(59, 130, 246, 0.2);
-  border-radius: 8px;
-}
-
-.cdk-drag-placeholder {
-  opacity: 1 !important;
-}
-
-.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-::ng-deep .p-button-icon-only {
-  width: 2.5rem;
-}
-
-:host ::ng-deep {
-  .ai-dialog {
-    .p-dialog-header {
-      background: linear-gradient(90deg, var(--primary-color) 0%, var(--background-color-lighter) 100%);
+.module-avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  
+  .avatar-gradient {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    
+    .module-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+    
+    .module-icon {
+      font-size: 1.5rem;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+  }
+  
+  .status-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--background-color-lighter);
+    font-size: 0.7rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    &.read-only {
+      background: var(--danger-color);
       color: white;
     }
-
-    .p-dialog-content {
-      padding: 0;
-      overflow: visible;
+    
+    &.published {
+      background: var(--success-color);
+      color: white;
+    }
+    
+    &.draft {
+      background: var(--warn-color);
+      color: white;
     }
   }
 }
 
-
-
-.readonly-toolbar {
-  .p-tabs-tab:last-child {
-    display: none;
+.module-info {
+  .module-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--font-color);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .module-meta {
+    font-size: 0.875rem;
+    color: var(--neutral-color);
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .separator {
+      opacity: 0.5;
+    }
+  }
+  
+  .version-selector {
+    :deep(.version-dropdown) {
+      .p-select {
+        background: color-mix(in srgb, var(--primary-color), transparent 95%);
+        border: 1px solid color-mix(in srgb, var(--primary-color), transparent 80%);
+        border-radius: 10px;
+        font-size: 0.8rem;
+        min-height: 32px;
+        
+        &:hover {
+          border-color: var(--primary-color);
+        }
+        
+        .p-select-label {
+          padding: 0.5rem 0.75rem;
+        }
+      }
+    }
+    
+    .selected-version,
+    .version-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      i {
+        color: var(--primary-color);
+        font-size: 0.8rem;
+      }
+      
+      .published-icon {
+        color: var(--success-color);
+        margin-left: auto;
+      }
+    }
   }
 }
 
-.readonly-editor {
-  background-color: var(--background-color-lighter);
-  padding: 2rem;
-  border-radius: 8px;
+// ===== SIDEBAR NAVIGATION =====
+.sidebar-navigation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; // Important pour le flexbox
+  overflow: hidden;
+  
+  :deep(.modern-tabs) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    .p-tablist {
+      background: transparent;
+      border: none;
+      padding: 0 1rem;
+      flex-shrink: 0;
+      
+      .p-tabs-tab-list {
+        display: flex;
+        gap: 0.25rem;
+      }
+    }
+    
+    .p-tab {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      flex: 1;
+      
+      &.p-tab-active {
+        background: color-mix(in srgb, var(--primary-color), transparent 90%);
+        
+        .tab-content {
+          color: var(--primary-color);
+          
+          .tab-icon {
+            color: var(--primary-color);
+          }
+        }
+      }
+      
+      &:hover:not(.p-tab-active) {
+        background: var(--background-color);
+        
+        .tab-content {
+          color: var(--font-color);
+        }
+      }
+    }
+    
+    .p-tabpanels {
+      flex: 1;
+      background: transparent;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      
+      .p-tabpanel {
+        height: 100%;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        
+        .panel-content {
+          // Approche plus simple : on laisse le contenu se développer naturellement
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 1rem;
+          min-height: 0; // Important pour permettre le shrinking du flexbox
+          
+          // Custom scrollbar comme avant
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 3px;
+            transition: background 0.25s ease;
+          }
+          
+          &:hover::-webkit-scrollbar-thumb {
+            background: var(--neutral-color);
+          }
+          
+          &::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+          }
+          
+          // Pour Firefox
+          scrollbar-width: thin;
+          scrollbar-color: transparent transparent;
+          
+          &:hover {
+            scrollbar-color: var(--neutral-color) transparent;
+          }
+          
+          // S'assurer que les composants enfants peuvent scroller
+          :deep(app-project-parameters) {
+            width: 100%;
+            height: auto !important;
+            display: block;
+            overflow: visible !important;
+          }
+          
+          :deep(app-block-types-toolbar) {
+            width: 100%;
+            height: auto !important;
+            display: block;
+            overflow: visible !important;
+          }
+          
+          // Forcer le scroll sur tous les éléments PrimeNG qui pourraient être contraints
+          :deep(.p-component) {
+            overflow: visible !important;
+          }
+          
+          :deep(.p-tabpanel) {
+            overflow: visible !important;
+          }
+        }
+      }
+    }
+  }
+  
+  .tab-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--neutral-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    
+    .tab-icon {
+      font-size: 1rem;
+      color: var(--neutral-color);
+      transition: color 0.2s ease;
+    }
+    
+    .tab-label {
+      flex: 1;
+    }
+    
+    .tab-badge {
+      background: var(--primary-color);
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 6px;
+      font-weight: 600;
+      min-width: 18px;
+      text-align: center;
+    }
+  }
 }
 
-.read-only-notice {
-  background-color: rgba(255, 41, 41, 0.15);
-  color: var(--danger-color);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: 500;
+// ===== BLOCKS SECTION =====
+.blocks-section-header {
+  margin-bottom: 1.5rem;
+  
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--font-color);
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i {
+      color: var(--primary-color);
+      font-size: 0.9rem;
+    }
+  }
+  
+  .section-description {
+    font-size: 0.8rem;
+    color: var(--neutral-color);
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+// ===== SIDEBAR FOOTER =====
+.sidebar-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--neutral-color);
+  background: linear-gradient(135deg, 
+    transparent 0%, 
+    color-mix(in srgb, var(--primary-color), transparent 98%) 100%);
+  flex-shrink: 0; // Empêche la compression
+  min-height: 80px; // Hauteur minimum garantie
+  max-height: 100px; // Hauteur maximum
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  
+  .stat-item {
+    text-align: center;
+    
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--neutral-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+  }
+}
+
+// ===== MAIN CONTENT AREA =====
+.editor-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  position: relative;
+  height: 100vh;
+}
+
+// ===== EDITOR HEADER =====
+.editor-header {
+  height: 60px;
+  padding: 0 1.5rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 2rem;
-  width: fit-content;
-}
-
-
-.remote-cursor {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: none;
-  transition: transform 0.1s ease;
-
-  .cursor-pointer {
-    width: 2px;
-    height: 20px;
-    background-color: var(--user-color, #3B82F6);
-    position: absolute;
-    animation: blink 1s infinite;
-  }
-
-  .cursor-label {
-    position: absolute;
-    top: -25px;
-    left: 0;
-    background-color: var(--user-color, #3B82F6);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0.9;
-    transform: translateX(-50%);
+  justify-content: space-between;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--neutral-color);
+  position: relative;
+  z-index: 10;
+  
+  // Subtle glassmorphism
+  backdrop-filter: blur(10px);
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    height: 56px;
   }
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.header-left {
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    .breadcrumb-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: transparent;
+      color: var(--neutral-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: var(--background-color-lighter);
+        color: var(--font-color);
+      }
+      
+      i {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .separator {
+      color: var(--neutral-color);
+      font-size: 0.8rem;
+    }
+    
+    .current-page {
+      font-weight: 600;
+      color: var(--font-color);
+      font-size: 0.9rem;
+    }
+  }
 }
 
-.remote-cursor {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: none;
-  transition:
-    left 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0),
-    top 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0);
-
-  .cursor-pointer {
-    width: 2px;
-    height: var(--caret-height, 20px);
-    background-color: var(--user-color, #3B82F6);
-    position: absolute;
-    animation: blink 1s infinite;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  .auto-save-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--success-color);
+    font-weight: 500;
+    
+    &.saving {
+      color: var(--primary-color);
+    }
+    
+    i {
+      font-size: 0.9rem;
+    }
   }
-
-  .cursor-label {
-    position: absolute;
-    top: calc(-25px - 0.5 * var(--caret-height, 20px));
-    left: 0;
-    background-color: var(--user-color, #3B82F6);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0.9;
-    transform: translateX(-50%);
+  
+  .collaborative-users {
+    display: flex;
+    gap: 0.25rem;
+    
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border: 2px solid var(--background-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .share-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary-color), transparent 90%);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    i {
+      font-size: 0.9rem;
+    }
   }
 }
 
-// ===== MODERN FLOATING ACTION BAR =====
+// ===== EDITOR CONTENT =====
+.editor-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+}
+
+.read-only-banner {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--danger-color), transparent 90%) 0%, 
+    color-mix(in srgb, var(--danger-color), transparent 95%) 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--danger-color), transparent 80%);
+  
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    
+    .banner-icon {
+      color: var(--danger-color);
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .banner-text {
+      h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--danger-color);
+        margin: 0 0 0.25rem 0;
+      }
+      
+      p {
+        font-size: 0.875rem;
+        color: var(--neutral-color);
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+.blocks-workspace {
+  flex: 1;
+  height: calc(100vh - 140px); // Hauteur fixe comme avant
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  padding-bottom: 6rem; // Espace pour la barre d'actions
+  
+  &.read-only {
+    background: linear-gradient(135deg, 
+      transparent 0%, 
+      color-mix(in srgb, var(--danger-color), transparent 99%) 100%);
+  }
+  
+  // Scrollbar comme avant
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+    transition: background 0.25s ease;
+  }
+  
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--neutral-color);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+  }
+  
+  // Pour Firefox
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  
+  &:hover {
+    scrollbar-color: var(--neutral-color) transparent;
+  }
+  
+  :deep(app-block-list) {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+// ===== FLOATING ACTION BAR (RESTAURÉE ORIGINALE) =====
 .floating-action-bar {
   position: fixed;
   bottom: 0;
@@ -261,7 +736,7 @@
     max-width: 500px;
     margin: 0 auto;
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(117, 142, 165, 0.12);
+    border: 1px solid color-mix(in srgb, var(--neutral-color), transparent 88%);
     border-radius: 14px;
     padding: 0.625rem 0.875rem;
     display: flex;
@@ -545,20 +1020,118 @@
   }
 }
 
-// Dark theme adaptations
-.dark-theme {
-  .floating-action-bar .action-bar-container {
-    background: rgba(30, 30, 30, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+// ===== REMOTE CURSORS =====
+.remote-cursor {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  transition: all 0.12s cubic-bezier(0.05, 0.7, 0.1, 1.0);
+
+  .cursor-pointer {
+    width: 2px;
+    height: 20px;
+    background-color: var(--user-color, var(--primary-color));
+    position: absolute;
+    animation: blink 1s infinite;
+    border-radius: 1px;
   }
 
-  .floating-action-bar .secondary-actions .dropdown-menu {
-    background: rgba(30, 30, 30, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+  .cursor-label {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    background-color: var(--user-color, var(--primary-color));
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0.9;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--user-color, var(--primary-color));
+    }
   }
 }
 
-// Animations
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+// ===== RESPONSIVE DESIGN =====
+@media (max-width: 1200px) {
+  .modern-sidebar {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .module-editor-workspace {
+    flex-direction: column;
+  }
+  
+  .modern-sidebar {
+    order: 2;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 50vh;
+    border-right: none;
+    border-top: 1px solid var(--neutral-color);
+  }
+  
+  .editor-main-content {
+    order: 1;
+    flex: 1;
+  }
+  
+  .floating-action-bar {
+    .action-bar-container {
+      margin: 0 1rem;
+      padding: 0.625rem 0.75rem;
+    }
+    
+    .action-btn {
+      min-width: 40px;
+      padding: 0.5rem;
+      
+      .btn-content span {
+        display: none;
+      }
+    }
+  }
+}
+
+// ===== DARK THEME ADAPTATIONS =====
+.dark-theme {
+  .module-editor-workspace {
+    .modern-sidebar {
+      box-shadow: 
+        inset -1px 0 0 rgba(255, 255, 255, 0.05),
+        2px 0 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .floating-action-bar .action-bar-container {
+      background: rgba(30, 30, 30, 0.95);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// ===== ANIMATIONS =====
 @keyframes slideUpFade {
   from {
     opacity: 0;
@@ -570,3 +1143,56 @@
   }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// ===== CUSTOM SCROLLBARS =====
+.panel-content,
+.blocks-workspace {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neutral-color) transparent;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--neutral-color);
+    border-radius: 3px;
+    opacity: 0.5;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// ===== ACCESSIBILITY =====
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== HIGH CONTRAST MODE =====
+@media (prefers-contrast: high) {
+  .modern-sidebar {
+    border-right-width: 2px;
+  }
+  
+  .module-avatar .avatar-gradient {
+    border: 2px solid var(--font-color);
+  }
+  
+  .action-btn {
+    border: 2px solid currentColor !important;
+  }
+}

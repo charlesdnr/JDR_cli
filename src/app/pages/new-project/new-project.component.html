@@ -1,70 +1,250 @@
 @let $module = currentModule(); @let $currentBlocks = blocks(); @if($module){
-<div class="toolbar">
-  <p-tabs value="0">
-    <p-tablist>
-      <p-tab value="0"> {{ "Paramètres" | translate }} </p-tab>
-      @if(!isReadOnly()) {
-        <p-tab value="1"> {{ "Blocks" | translate }} </p-tab>
-      }
-    </p-tablist>
-    <p-tabpanels>
-      <p-tabpanel value="0">
-        @if(currentVersion() !== undefined){
-        <app-project-parameters
-          [currentModule]="$module"
-          [currentUser]="currentUser()"
-          [(currentGameSystem)]="currentGameSystem"
-          (saveRequested)="save()"
-          [loadingSave]="loadingSave()"
-          (generateModuleRequested)="generateCompleteModule()"
-          (deleteRequested)="deleteModule()"
-          [currentVersion]="currentVersion()!"
-          (currentVersionChange)="this.updateCurrentVersion($event)"
-          [isReadOnly]="isReadOnly()"
-          [canPublish]="canPublish()"
-          [canInvite]="canInvite()"
-        ></app-project-parameters>
+<!-- ===== REVOLUTIONARY MODULE EDITOR LAYOUT ===== -->
+<div class="module-editor-workspace" [class.read-only-mode]="isReadOnly()">
+  
+  <!-- Modern Sidebar with Revolutionary Design -->
+  <aside class="modern-sidebar" [@slideInFromLeft]>
+    
+    <!-- Module Header Section -->
+    <div class="module-header-section">
+      <div class="module-avatar">
+        <div class="avatar-gradient" [style.background]="getModuleGradient($module)">
+          @if($module.picture && $module.picture.src) {
+            <img [src]="$module.picture.src" [alt]="$module.title" class="module-image" />
+          } @else {
+            <i class="pi pi-bookmark module-icon"></i>
+          }
+        </div>
+        @if(isReadOnly()) {
+          <div class="status-badge read-only">
+            <i class="pi pi-lock"></i>
+          </div>
+        } @else if(currentVersion()?.published) {
+          <div class="status-badge published">
+            <i class="pi pi-globe"></i>
+          </div>
+        } @else {
+          <div class="status-badge draft">
+            <i class="pi pi-edit"></i>
+          </div>
         }
-      </p-tabpanel>
-      <p-tabpanel value="1">
-        <app-block-types-toolbar
-          [availableBlocks]="availableBlocks"
-          [isDraggingIcon]="isDraggingIcon()"
-          [dragPosition]="dragPosition"
-          [draggedIconType]="draggedIconType"
-          (blockDragStarted)="startIconDrag($event)"
-        ></app-block-types-toolbar>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
-</div>
-<div class="container-edit">
-  <div class="editor">
-    @if(isReadOnly()) {
-    <div class="read-only-notice">
-      <i class="pi pi-lock"></i> Mode lecture seule
+      </div>
+      
+      <div class="module-info">
+        <h1 class="module-title" [title]="$module.title">{{ $module.title }}</h1>
+        <p class="module-meta">
+          <span class="creator-name">{{ $module.creator && $module.creator.username }}</span>
+          <span class="separator">•</span>
+          <span class="last-modified">{{ getTimeAgo($module.updatedAt) }}</span>
+        </p>
+        @if(currentVersion()) {
+          <div class="version-selector">
+            <p-select 
+              [options]="$module.versions" 
+              [ngModel]="currentVersion()" 
+              (ngModelChange)="updateCurrentVersion($event)"
+              optionLabel="version"
+              placeholder="Version"
+              styleClass="version-dropdown"
+              [disabled]="$module.versions.length <= 1"
+            >
+              <ng-template pTemplate="selectedItem">
+                <div class="selected-version">
+                  <i class="pi pi-code-branch"></i>
+                  <span>{{ currentVersion()?.version || 'v1.0' }}</span>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="item" let-version>
+                <div class="version-option">
+                  <span>{{ version.version }}</span>
+                  @if(version.published) {
+                    <i class="pi pi-check-circle published-icon"></i>
+                  }
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+        }
+      </div>
     </div>
-    } @if($currentBlocks){
-    <app-block-list
-      style="height: 100%"
-      [blocks]="$currentBlocks"
-      [(isDraggingIcon)]="isDraggingIcon"
-      [(isOverDropZone)]="isOverDropZone"
-      [(draggedIconType)]="draggedIconType"
-      [(insertPosition)]="insertPosition"
-      [(activeIconElement)]="activeIconElement"
-      [(dragPosition)]="dragPosition"
-      [isReadOnly]="isReadOnly()"
-      [showEmptyState]="$currentBlocks.length === 0 && !isDraggingIcon()"
-      [lottieOptions]="options"
-    ></app-block-list>
-    }
-  </div>
+
+    <!-- Navigation Tabs with Modern Design -->
+    <nav class="sidebar-navigation">
+      <p-tabs value="0" styleClass="modern-tabs">
+        <p-tablist>
+          <p-tab value="0" class="nav-tab">
+            <div class="tab-content">
+              <i class="pi pi-cog tab-icon"></i>
+              <span class="tab-label">Paramètres</span>
+            </div>
+          </p-tab>
+          @if(!isReadOnly()) {
+            <p-tab value="1" class="nav-tab">
+              <div class="tab-content">
+                <i class="pi pi-th-large tab-icon"></i>
+                <span class="tab-label">Blocs</span>
+                <div class="tab-badge">{{ availableBlocks.length }}</div>
+              </div>
+            </p-tab>
+          }
+        </p-tablist>
+        
+        <p-tabpanels class="tab-panels">
+          <p-tabpanel value="0" class="tab-panel">
+            @if(currentVersion() !== undefined){
+              <div class="panel-content" [@fadeSlideIn]>
+                <app-project-parameters
+                  [currentModule]="$module"
+                  [currentUser]="currentUser()"
+                  [(currentGameSystem)]="currentGameSystem"
+                  (saveRequested)="save()"
+                  [loadingSave]="loadingSave()"
+                  (generateModuleRequested)="generateCompleteModule()"
+                  (deleteRequested)="deleteModule()"
+                  [currentVersion]="currentVersion()!"
+                  (currentVersionChange)="this.updateCurrentVersion($event)"
+                  [isReadOnly]="isReadOnly()"
+                  [canPublish]="canPublish()"
+                  [canInvite]="canInvite()"
+                ></app-project-parameters>
+              </div>
+            }
+          </p-tabpanel>
+          
+          <p-tabpanel value="1" class="tab-panel">
+            <div class="panel-content" [@fadeSlideIn]>
+              <div class="blocks-section-header">
+                <h3 class="section-title">
+                  <i class="pi pi-plus-circle"></i>
+                  Ajouter un bloc
+                </h3>
+                <p class="section-description">Glissez-déposez les éléments dans votre module</p>
+              </div>
+              
+              <app-block-types-toolbar
+                [availableBlocks]="availableBlocks"
+                [isDraggingIcon]="isDraggingIcon()"
+                [dragPosition]="dragPosition"
+                [draggedIconType]="draggedIconType"
+                (blockDragStarted)="startIconDrag($event)"
+              ></app-block-types-toolbar>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    </nav>
+    
+    <!-- Sidebar Footer with Stats -->
+    <div class="sidebar-footer">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ $currentBlocks?.length || 0 }}</div>
+          <div class="stat-label">Blocs</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ calculateWordCount($currentBlocks) }}</div>
+          <div class="stat-label">Mots</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ getReadingTime($currentBlocks) }}min</div>
+          <div class="stat-label">Lecture</div>
+        </div>
+      </div>
+    </div>
+    
+  </aside>
+
+  <!-- Main Content Area with Revolutionary Design -->
+  <main class="editor-main-content">
+    
+    <!-- Top Action Bar -->
+    <header class="editor-header" [@slideInFromTop]>
+      <div class="header-left">
+        <div class="breadcrumb">
+          <button class="breadcrumb-btn" (click)="navigateToProjects()">
+            <i class="pi pi-arrow-left"></i>
+            <span>Projets</span>
+          </button>
+          <i class="pi pi-angle-right separator"></i>
+          <span class="current-page">{{ $module.title }}</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Auto-save indicator -->
+        <div class="auto-save-indicator" [class.saving]="loadingSave()">
+          @if(loadingSave()) {
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Sauvegarde...</span>
+          } @else {
+            <i class="pi pi-check-circle"></i>
+            <span>Sauvegardé</span>
+          }
+        </div>
+        
+        <!-- Collaborative users -->
+        @if(otherUserCursors().length > 0) {
+          <div class="collaborative-users">
+            @for(cursor of otherUserCursors(); track cursor.userId) {
+              <div 
+                class="user-avatar" 
+                [style.background]="cursor.userColor"
+                [title]="cursor.username"
+              >
+                {{ getInitials(cursor.username) }}
+              </div>
+            }
+          </div>
+        }
+        
+        <!-- Share button -->
+        @if(!needToCreate()) {
+          <button class="share-btn" (click)="shareModule()" pTooltip="Partager le module">
+            <i class="pi pi-share-alt"></i>
+          </button>
+        }
+      </div>
+    </header>
+    
+    <!-- Content Editor Area -->
+    <section class="editor-content" [@fadeIn]>
+      @if(isReadOnly()) {
+        <div class="read-only-banner" [@slideInFromTop]>
+          <div class="banner-content">
+            <i class="pi pi-lock banner-icon"></i>
+            <div class="banner-text">
+              <h4>Mode lecture seule</h4>
+              <p>Vous consultez ce module en lecture seule. Contactez le créateur pour obtenir les droits d'édition.</p>
+            </div>
+          </div>
+        </div>
+      }
+      
+      @if($currentBlocks) {
+        <div class="blocks-workspace" [class.read-only]="isReadOnly()">
+          <app-block-list
+            [blocks]="$currentBlocks"
+            [(isDraggingIcon)]="isDraggingIcon"
+            [(isOverDropZone)]="isOverDropZone"
+            [(draggedIconType)]="draggedIconType"
+            [(insertPosition)]="insertPosition"
+            [(activeIconElement)]="activeIconElement"
+            [(dragPosition)]="dragPosition"
+            [isReadOnly]="isReadOnly()"
+            [showEmptyState]="$currentBlocks.length === 0 && !isDraggingIcon()"
+            [lottieOptions]="options"
+          ></app-block-list>
+        </div>
+      }
+    </section>
+    
+  </main>
+  
 </div>
 }
 <p-confirmDialog />
 
-<!-- ===== MODERN FLOATING ACTION BAR ===== -->
+<!-- ===== FLOATING ACTION BAR (RESTAURÉE) ===== -->
 @if($module) {
   <div class="floating-action-bar" [@slideUpFade]>
     <div class="action-bar-container">

@@ -45,6 +45,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
+import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../services/Notification.service';
 import { StompSubscription } from '@stomp/stompjs';
 import { CursorPosition } from '../../interfaces/CursorPosition';
@@ -69,6 +72,9 @@ import { UserSavedModule } from '../../classes/UserSavedModule';
     SkeletonModule,
     ConfirmDialogModule,
     ButtonModule,
+    SelectModule,
+    TooltipModule,
+    FormsModule,
   ],
   providers: [ConfirmationService],
   templateUrl: './new-project.component.html',
@@ -79,6 +85,33 @@ import { UserSavedModule } from '../../classes/UserSavedModule';
         style({ opacity: 0, transform: 'translateY(40px)' }),
         animate('0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', 
           style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    trigger('slideInFromLeft', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-30px)' }),
+        animate('0.5s cubic-bezier(0.23, 1, 0.32, 1)', 
+          style({ opacity: 1, transform: 'translateX(0)' }))
+      ])
+    ]),
+    trigger('slideInFromTop', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-20px)' }),
+        animate('0.4s cubic-bezier(0.23, 1, 0.32, 1)', 
+          style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    trigger('fadeSlideIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(15px)' }),
+        animate('0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+          style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('0.3s ease-out', style({ opacity: 1 }))
       ])
     ])
   ],
@@ -1012,5 +1045,92 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       summary: 'Paramètres',
       detail: 'Ouverture des paramètres...'
     });
+  }
+
+  // ===== UTILITY METHODS FOR NEW UI =====
+  
+  /**
+   * Generate a unique gradient for module avatar based on module properties
+   */
+  getModuleGradient(module: Module): string {
+    if (!module) return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    
+    const id = module.id || 1;
+    const gradients = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)',
+      'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+    ];
+    
+    return gradients[id % gradients.length];
+  }
+
+  /**
+   * Get user initials for avatar display
+   */
+  getInitials(name: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  }
+
+  /**
+   * Navigate back to projects page
+   */
+  navigateToProjects(): void {
+    this.router.navigate(['/projects']);
+  }
+
+  /**
+   * Calculate total word count in all blocks
+   */
+  calculateWordCount(blocks: Block[] | undefined): number {
+    if (!blocks) return 0;
+    
+    let totalWords = 0;
+    blocks.forEach(block => {
+      if (block instanceof ParagraphBlock) {
+        const text = block.paragraph || '';
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        totalWords += words.length;
+      }
+    });
+    
+    return totalWords;
+  }
+
+  /**
+   * Estimate reading time based on word count (average 200 words per minute)
+   */
+  getReadingTime(blocks: Block[] | undefined): number {
+    const wordCount = this.calculateWordCount(blocks);
+    return Math.max(1, Math.ceil(wordCount / 200));
+  }
+
+  /**
+   * Format time ago in French
+   */
+  getTimeAgo(date: string | Date | undefined): string {
+    if (!date) return 'Inconnu';
+    
+    const now = new Date();
+    const past = new Date(date);
+    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'À l\'instant';
+    if (diffInSeconds < 3600) return `Il y a ${Math.floor(diffInSeconds / 60)}min`;
+    if (diffInSeconds < 86400) return `Il y a ${Math.floor(diffInSeconds / 3600)}h`;
+    if (diffInSeconds < 2592000) return `Il y a ${Math.floor(diffInSeconds / 86400)}j`;
+    if (diffInSeconds < 31536000) return `Il y a ${Math.floor(diffInSeconds / 2592000)}mois`;
+    return `Il y a ${Math.floor(diffInSeconds / 31536000)}an`;
   }
 }
