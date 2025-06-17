@@ -26,9 +26,7 @@ import { FileUploadModule, FileSelectEvent } from 'primeng/fileupload';
 import { FileHttpService } from '../../services/https/file-http.service';
 import { Subscription } from 'rxjs';
 import { FirebaseError } from '@angular/fire/app';
-import { UserProfileHttpService } from '../../services/https/user-profile-http.service';
-import { UserProfile } from '../../classes/UserProfile';
-import { Picture } from '../../classes/Picture';
+import { UserProfileService } from '../../services/user-profile.service';
 
 @Component({
   selector: 'app-account',
@@ -57,7 +55,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(Auth);
   private fileHttpService = inject(FileHttpService);
-  private userProfileHttpService = inject(UserProfileHttpService);
+  private userProfileService = inject(UserProfileService);
 
   private subscriptions = new Subscription();
 
@@ -84,9 +82,12 @@ export class AccountComponent implements OnInit, OnDestroy {
   currentUser = computed(() => this.userService.currentJdrUser());
 
   // Profile page specific properties
-  profileImageUrl = signal<string | null>(null);
   profileImagePreview = signal<string | null>(null);
   uploadingProfileImage = signal(false);
+  
+  // Computed properties from service
+  currentUserProfile = computed(() => this.userProfileService.currentUserProfile());
+  profileImageUrl = computed(() => this.userProfileService.currentUserProfileImageUrl());
   memberSince = computed(() => {
     return '2024';
   });
@@ -168,7 +169,6 @@ export class AccountComponent implements OnInit, OnDestroy {
     },
   ]);
 
-  currentUserProfile = signal<UserProfile | null>(null);
 
   ngOnInit() {
     const user = this.currentUser();
@@ -176,28 +176,18 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.originalUsername.set(user.username);
       this.editableUsername.set(user.username); // Initialiser les deux
     }
-    this.loadUserProfile();
+    
+    // Initialiser l'aperçu de l'image avec l'image du profil actuel
+    const profileImage = this.profileImageUrl();
+    if (profileImage) {
+      this.profileImagePreview.set(profileImage);
+    }
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
-  loadUserProfile() {
-    const user = this.currentUser();
-    if (!user?.id) return;
-    this.userProfileHttpService.getUserProfileByUserId(user.id).then((profile: UserProfile) => {
-        this.currentUserProfile.set(profile);
-        this.profileImageUrl.set(profile.picture?.src || null);
-        this.profileImagePreview.set(profile.picture?.src || null);
-    }).catch((err: HttpErrorResponse) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: `Erreur lors du chargement du profil utilisateur : ${err.message}`,
-        });
-      });
-  }
 
   saveUser() {
     const user = this.currentUser();
@@ -324,18 +314,22 @@ export class AccountComponent implements OnInit, OnDestroy {
     // Upload vers le serveur
     this.fileHttpService
       .uploadFile(file)
-      .then((fileId: string) => {
-        this.profileImageUrl.set(fileId);
-        
-        if(this.currentUserProfile()) {
-          this.currentUserProfile()!.picture = new Picture("Photo de profil", fileId);
-          this.userProfileHttpService.updateUserProfile(this.currentUserProfile()!).then(() => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Profil utilisateur mis à jour avec la nouvelle photo',
-            });
-          })
+      .then(async (fileId: string) => {
+        try {
+          await this.userProfileService.updateProfileImage(fileId);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Photo de profil mise à jour avec succès',
+          });
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour du profil:", error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Erreur lors de la mise à jour du profil utilisateur',
+          });
+          this.profileImagePreview.set(null);
         }
       })
       .catch((error) => {
@@ -352,23 +346,30 @@ export class AccountComponent implements OnInit, OnDestroy {
       });
   }
 
-  deletePhoto() {
-    this.profileImageUrl.set(null);
-    this.profileImagePreview.set(null);
-    // TODO: Supprimer l'URL du profil utilisateur
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Succès',
-      detail: 'Photo de profil supprimée',
-    });
+  async deletePhoto() {
+    try {
+      await this.userProfileService.removeProfileImage();
+      this.profileImagePreview.set(null);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Succès',
+        detail: 'Photo de profil supprimée avec succès',
+      });
+    } catch (error) {
+      console.error("Erreur lors de la suppression de la photo:", error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Erreur lors de la suppression de la photo de profil',
+      });
+    }
   }
 
   getCurrentProfileImage(): string {
     // Priorité : aperçu local > URL serveur > image par défaut
     return (
       this.profileImagePreview() ||
-      this.profileImageUrl() ||
-      'assets/images/default-avatar.png'
+      this.userProfileService.currentUserProfileImage()
     );
   }
 

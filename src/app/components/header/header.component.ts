@@ -10,6 +10,7 @@ import { AuthHttpService } from '../../services/https/auth-http.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { UserProfileService } from '../../services/user-profile.service';
 import { FolderService } from '../../services/folders.service';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 
@@ -39,6 +40,7 @@ export interface buttonHeader {
 export class HeaderComponent {
   private httpAuth = inject(AuthHttpService);
   private userService = inject(UserHttpService);
+  private userProfileService = inject(UserProfileService);
   private router = inject(Router);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
@@ -55,6 +57,16 @@ export class HeaderComponent {
   })
 
   currentUser = computed(() => this.userService.currentJdrUser());
+  
+  // Photo de profil de l'utilisateur connecté
+  currentUserProfileImage = computed(() => this.userProfileService.currentUserProfileImage());
+  
+  // Initiales de l'utilisateur pour fallback
+  userInitials = computed(() => {
+    const user = this.currentUser();
+    if (!user?.username) return '';
+    return user.username.charAt(0).toUpperCase();
+  });
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(value => !value);

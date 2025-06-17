@@ -6,16 +6,14 @@
   label="Partager"
 />
 <p-avatar-group>
-  @for(user of fourUsers(); track user){ @if(getImageForUser(user)){
-  <p-avatar [image]="getImageForUser(user)" size="normal" shape="circle" />
-  } @else {
+  @for(user of fourUsers(); track user){
   <p-avatar
-    icon="pi pi-user"
+    [label]="getUserInitials(user)"
     size="normal"
     shape="circle"
     [pTooltip]="user.email"
   />
-  } } @if(moreThanFourUser()){
+  } @if(moreThanFourUser()){
   <p-avatar
     [label]="'+' + (selectedUsers.length - 4).toString()"
     size="normal"
@@ -46,11 +44,7 @@
     >
       <ng-template let-user pTemplate="item">
         <div class="container-item-auto">
-          @if(getImageForUser(user)){
-          <p-avatar [image]="getImageForUser(user)" shape="circle" />
-          } @else {
-          <p-avatar icon="pi pi-user" shape="circle" />
-          }
+          <p-avatar [label]="getUserInitials(user)" shape="circle" />
           <div>
             <div>{{ user.username || user.email.split("@")[0] }}</div>
             <div class="text-sm text-gray-600">{{ user.email }}</div>
@@ -65,15 +59,11 @@
     @for(user of selectedUsers(); track user){
     <div class="user-row">
       <div class="container-row">
-        @if(getImageForUser(user)){
         <p-avatar
-          [image]="getImageForUser(user)"
+          [label]="getUserInitials(user)"
           size="normal"
           shape="circle"
         />
-        } @else {
-        <p-avatar icon="pi pi-user" size="normal" shape="circle" />
-        }
         <div class="container-span">
           <span>{{ user.username || user.email.split("@")[0] }}</span>
           <span>{{ user.email }}</span>

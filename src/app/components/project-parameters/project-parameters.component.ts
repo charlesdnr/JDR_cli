@@ -18,6 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { GameSystem } from '../../classes/GameSystem';
 import { DialogService } from 'primeng/dynamicdialog';
 import { User } from '../../classes/User';
+import { UserAvatarService } from '../../services/user-avatar.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { Module } from '../../classes/Module';
 import { UserFolderHttpService } from '../../services/https/user-folder-http.service';
@@ -79,6 +80,7 @@ export class ProjectParametersComponent implements OnInit {
   private tagsHttpService = inject(TagHttpService);
   private fileuploadService = inject(FileHttpService);
   private folderService = inject(FolderService);
+  private userAvatarService = inject(UserAvatarService);
 
   autocomplete = viewChild<AutoComplete>('autocomplete');
 
@@ -245,8 +247,15 @@ export class ProjectParametersComponent implements OnInit {
       this.createNewTag(value);
     }
   }
-  getImageForUser(user: User): string | undefined {
-    return user.email;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getImageForUser(_user: User): string | undefined {
+    // Cette méthode est conservée pour compatibilité mais ne retourne plus d'image
+    // L'image est gérée via getUserInitials et le template
+    return undefined;
+  }
+
+  getUserInitials(user: User): string {
+    return this.userAvatarService.getUserInitials(user);
   }
   getGameSystemName(id: number){
     return this.gameSystems().find(g => g.id === id)?.name

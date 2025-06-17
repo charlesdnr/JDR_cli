@@ -21,6 +21,7 @@ import { ModuleService } from '../../services/module.service';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { User } from '../../classes/User';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { UserAvatarService } from '../../services/user-avatar.service';
 import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
@@ -44,6 +45,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 })
 export class UserAvatarChooseComponent implements OnInit, OnDestroy {
   private userService = inject(UserHttpService);
+  private userAvatarService = inject(UserAvatarService);
   private httpAccessRightService = inject(ModuleAccessHttpService);
   private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
@@ -173,8 +175,15 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
     }
   }
 
-  getImageForUser(user: User): string | undefined {
-    return user.email;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getImageForUser(_user: User): string | undefined {
+    // Cette méthode est conservée pour compatibilité mais ne retourne plus d'image
+    // L'image est gérée via getUserInitials et le template
+    return undefined;
+  }
+
+  getUserInitials(user: User): string {
+    return this.userAvatarService.getUserInitials(user);
   }
 
   getModuleAccessByUser(user: User): ModuleAccess | undefined {

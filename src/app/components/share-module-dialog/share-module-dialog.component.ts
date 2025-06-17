@@ -17,6 +17,7 @@ import { User } from '../../classes/User';
 import { ModuleAccess } from '../../classes/ModuleAccess';
 import { AccessRight } from '../../enum/AccessRight';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { UserAvatarService } from '../../services/user-avatar.service';
 import { ModuleAccessHttpService } from '../../services/https/module-access-http.service';
 import { ModuleService } from '../../services/module.service';
 
@@ -65,11 +66,7 @@ import { ModuleService } from '../../services/module.service';
         >
           <ng-template let-user pTemplate="item">
             <div class="search-result-item">
-              @if(getImageForUser(user)){
-              <p-avatar [image]="getImageForUser(user)" shape="circle" size="normal" />
-              } @else {
-              <p-avatar icon="pi pi-user" shape="circle" size="normal" />
-              }
+              <p-avatar [label]="getUserInitials(user)" shape="circle" size="normal" />
               <div class="user-info">
                 <div class="user-name">{{ user.username || user.email.split("@")[0] }}</div>
                 <div class="user-email">{{ user.email }}</div>
@@ -91,15 +88,11 @@ import { ModuleService } from '../../services/module.service';
           @for(user of selectedUsers(); track user){
           <div class="collaborator-item">
             <div class="collaborator-info">
-              @if(getImageForUser(user)){
               <p-avatar
-                [image]="getImageForUser(user)"
+                [label]="getUserInitials(user)"
                 size="normal"
                 shape="circle"
               />
-              } @else {
-              <p-avatar icon="pi pi-user" size="normal" shape="circle" />
-              }
               <div class="user-details">
                 <span class="user-name">{{ user.username || user.email.split("@")[0] }}</span>
                 <span class="user-email">{{ user.email }}</span>
@@ -362,6 +355,7 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
   private dialogRef = inject(DynamicDialogRef);
   private config = inject(DynamicDialogConfig);
   private userService = inject(UserHttpService);
+  private userAvatarService = inject(UserAvatarService);
   private httpAccessRightService = inject(ModuleAccessHttpService);
   private moduleService = inject(ModuleService);
   private messageService = inject(MessageService);
@@ -495,8 +489,15 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-  getImageForUser(user: User): string | undefined {
-    return user.email;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getImageForUser(_user: User): string | undefined {
+    // Cette méthode est conservée pour compatibilité mais ne retourne plus d'image
+    // L'image est gérée via getUserInitials et le template
+    return undefined;
+  }
+
+  getUserInitials(user: User): string {
+    return this.userAvatarService.getUserInitials(user);
   }
 
   getModuleAccessByUser(user: User): ModuleAccess | undefined {

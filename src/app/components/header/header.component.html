@@ -61,9 +61,11 @@
             tooltipPosition="bottom"
             tooltipStyleClass="tooltip-info"
           >
-            <span>{{
-              currentUser()?.username?.charAt(0)?.toUpperCase() || "U"
-            }}</span>
+            @if(currentUserProfileImage() !== 'assets/images/default-avatar.png') {
+              <img [src]="currentUserProfileImage()" [alt]="currentUser()?.username || 'Photo de profil'" class="avatar-image" />
+            } @else {
+              <span>{{ userInitials() || 'U' }}</span>
+            }
           </div>
           <button
             class="logout-btn"
@@ -113,9 +115,11 @@
         tabindex="0"
       >
         <div class="user-avatar-large">
-          <span>{{
-            currentUser()?.username?.charAt(0)?.toUpperCase() || "U"
-          }}</span>
+          @if(currentUserProfileImage() !== 'assets/images/default-avatar.png') {
+            <img [src]="currentUserProfileImage()" [alt]="currentUser()?.username || 'Photo de profil'" class="avatar-image" />
+          } @else {
+            <span>{{ userInitials() || 'U' }}</span>
+          }
         </div>
         <span class="username">{{ currentUser()?.username }}</span>
       </div>

@@ -1,5 +1,5 @@
 import { EBlockType } from '../../../enum/BlockType';
-import { Component, input, OnInit, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { Block } from '../../../classes/Block';
 
 @Component({

@@ -16,6 +16,7 @@ import { ModuleComment } from '../../classes/ModuleComment';
 import { ModuleCommentService } from '../../services/https/module-comment.service';
 import { ModuleHttpService } from '../../services/https/module-http.service';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { UserAvatarService } from '../../services/user-avatar.service';
 import { User } from '../../classes/User';
 import { Module } from '../../classes/Module';
 
@@ -45,6 +46,7 @@ export class ModuleCommentsComponent implements OnInit {
   private moduleCommentService = inject(ModuleCommentService);
   private moduleService = inject(ModuleHttpService);
   private userService = inject(UserHttpService);
+  private userAvatarService = inject(UserAvatarService);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private dialogConfig = inject(DynamicDialogConfig, { optional: true });

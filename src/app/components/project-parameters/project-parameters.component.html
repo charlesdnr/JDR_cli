@@ -44,21 +44,14 @@
     <div class="param-section">
       <h3>Collaborateurs</h3>
       <p-avatar-group>
-        @for(user of selectedUsers(); track user){ @if(getImageForUser(user)){
+        @for(user of selectedUsers(); track user){
         <p-avatar
-          [image]="getImageForUser(user)"
+          [label]="getUserInitials(user)"
           size="normal"
           shape="circle"
           [pTooltip]="user.email"
         />
-        } @else {
-        <p-avatar
-          icon="pi pi-user"
-          size="normal"
-          shape="circle"
-          [pTooltip]="user.email"
-        />
-        } }
+        }
       </p-avatar-group>
     </div>
   </div>
