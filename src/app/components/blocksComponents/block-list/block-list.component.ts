@@ -84,7 +84,6 @@ export class BlockListComponent {
   // Nouvelle méthode - Gérer directement le drop
   onDrop(event: CdkDragDrop<Block[]>): void {
     if (this.isReadOnly()) return;
-    console.log('BlockListComponent.onDrop appelé', event);
 
     const version = this.moduleService.currentModuleVersion();
     if (!version) {
@@ -359,7 +358,6 @@ export class BlockListComponent {
     if (this.isReadOnly()) return;
     const user = this.userService.currentJdrUser();
     const version = this.moduleService.currentModuleVersion();
-    console.log(version);
 
     if (!user || !version) {
       console.error(

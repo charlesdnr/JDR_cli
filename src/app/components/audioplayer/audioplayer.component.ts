@@ -158,7 +158,6 @@ export class AudioplayerComponent {
   }
 
   onVolumeChange(event: SliderChangeEvent) {
-    console.log(event)
     this.audioPlayer().nativeElement.volume = (event.value ?? 0) / 100;
   }
 

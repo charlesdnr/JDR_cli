@@ -8,7 +8,7 @@ import { Block } from '../../../classes/Block';
   templateUrl: './block-types-toolbar.component.html',
   styleUrl: './block-types-toolbar.component.scss',
 })
-export class BlockTypesToolbarComponent implements OnInit {
+export class BlockTypesToolbarComponent {
   availableBlocks = input.required<Block[]>();
   isDraggingIcon = input<boolean>(false);
   dragPosition = input<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -18,9 +18,6 @@ export class BlockTypesToolbarComponent implements OnInit {
 
   EBlockType = EBlockType;
 
-  ngOnInit(){
-    console.log(this.availableBlocks())
-  }
 
   getIconByType(type: EBlockType): string {
     switch (type) {

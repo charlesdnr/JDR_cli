@@ -91,9 +91,6 @@ export class NotificationService {
         connectHeaders: {
           Authorization: `Bearer ${token}`
         },
-        debug: (msg: string) => {
-          console.log('STOMP Debug:', msg);
-        },
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000
@@ -261,7 +258,6 @@ export class NotificationService {
       (message) => {
         try {
           const data = JSON.parse(message.body);
-          console.log(data)
           callback(data);
         } catch (error) {
           console.error("Erreur lors du traitement des données de mise à jour d'accès:", error);
@@ -282,7 +278,6 @@ export class NotificationService {
     return this.stompClient.subscribe(
       `/module/${moduleId}/updates`,
       (message) => {
-        console.log('module :', message)
         try {
           const data = JSON.parse(message.body);
           callback(data);

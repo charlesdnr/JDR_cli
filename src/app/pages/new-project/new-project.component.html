@@ -63,6 +63,130 @@
 </div>
 }
 <p-confirmDialog />
+
+<!-- ===== MODERN FLOATING ACTION BAR ===== -->
+@if($module) {
+  <div class="floating-action-bar" [@slideUpFade]>
+    <div class="action-bar-container">
+      
+      <!-- Primary Actions -->
+      <div class="primary-actions">
+        
+        <!-- Save/Create Button -->
+        <button 
+          class="action-btn primary"
+          [disabled]="isReadOnly() || loadingSave()"
+          (click)="save()"
+          [attr.aria-label]="needToCreate() ? 'Créer le module' : 'Sauvegarder le module'"
+        >
+          <div class="btn-content">
+            @if(loadingSave()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else {
+              <i class="pi pi-save"></i>
+            }
+            <span>{{ needToCreate() ? 'Créer' : 'Sauvegarder' }}</span>
+          </div>
+          <div class="btn-ripple"></div>
+        </button>
+
+        <!-- Publish/Unpublish Button -->
+        @if(!needToCreate() && canPublish()) {
+          <button 
+            class="action-btn secondary"
+            [class.is-published]="currentVersion()?.published"
+            [disabled]="needToCreate() || !canPublish() || loadingPublished()"
+            (click)="published()"
+            [attr.aria-label]="currentVersion()?.published ? 'Rendre le module privé' : 'Publier le module'"
+          >
+            <div class="btn-content">
+              @if(loadingPublished()) {
+                <i class="pi pi-spin pi-spinner"></i>
+              } @else {
+                <i class="pi" [class.pi-globe]="!currentVersion()?.published" [class.pi-eye-slash]="currentVersion()?.published"></i>
+              }
+              <span>{{ currentVersion()?.published ? 'Rendre privé' : 'Publier' }}</span>
+            </div>
+            <div class="btn-ripple"></div>
+          </button>
+        }
+
+        <!-- Share Button -->
+        @if(!needToCreate()) {
+          <button 
+            class="action-btn tertiary"
+            (click)="shareModule()"
+            [attr.aria-label]="'Partager le module'"
+          >
+            <div class="btn-content">
+              <i class="pi pi-share-alt"></i>
+              <span>Partager</span>
+            </div>
+            <div class="btn-ripple"></div>
+          </button>
+        }
+      </div>
+
+      <!-- Secondary Actions Menu -->
+      <div class="secondary-actions">
+        <div class="dropdown-container" [class.expanded]="secondaryMenuExpanded()">
+          
+          <!-- Menu Toggle -->
+          <button 
+            class="menu-toggle"
+            (click)="toggleSecondaryMenu()"
+            [attr.aria-expanded]="secondaryMenuExpanded()"
+            [attr.aria-label]="'Plus d\'actions'"
+          >
+            <i class="pi pi-ellipsis-v"></i>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div class="dropdown-menu">
+            
+            @if(!needToCreate()) {
+              <!-- Export -->
+              <button class="dropdown-item" (click)="exportModule(); closeSecondaryMenu()">
+                <i class="pi pi-download"></i>
+                <span>Exporter</span>
+              </button>
+
+              <!-- Duplicate -->
+              <button class="dropdown-item" (click)="duplicateModule(); closeSecondaryMenu()">
+                <i class="pi pi-copy"></i>
+                <span>Dupliquer</span>
+              </button>
+
+              <!-- Settings -->
+              <button class="dropdown-item" (click)="openSettings(); closeSecondaryMenu()">
+                <i class="pi pi-cog"></i>
+                <span>Paramètres</span>
+              </button>
+
+              <div class="dropdown-divider"></div>
+            }
+
+            <!-- Delete (only for owner) -->
+            @if(!isReadOnly() && currentUser()?.id === currentModule()?.creator?.id && !needToCreate()) {
+              <button class="dropdown-item danger" (click)="deleteModule(); closeSecondaryMenu()">
+                <i class="pi pi-trash"></i>
+                <span>Supprimer</span>
+              </button>
+            }
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Bar Backdrop -->
+    @if(secondaryMenuExpanded()) {
+      <div class="action-bar-backdrop" (click)="closeSecondaryMenu()" role="presentation" aria-hidden="true"></div>
+    }
+  </div>
+}
+
 @for(cursor of otherUserCursors(); track cursor.userId) {
   <div
     class="remote-cursor"

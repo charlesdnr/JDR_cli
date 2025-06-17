@@ -277,7 +277,6 @@ export class AiConfigComponent implements OnInit, OnDestroy {
       this.formgroupCompleteModule.value.gameSystemId?.toString() || '1'
     )
       .then(resp => {
-        console.log('Réponse module complet:', resp);
         this.response.set(JSON.stringify(resp));
 
         // Show success animation

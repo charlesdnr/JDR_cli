@@ -1,5 +1,82 @@
 @use "assets/sass/core";
 
+/* Create Module Modal Dialog Overrides */
+.create-module-dialog {
+  // Dialog mask (arrière-plan)
+  &.p-dialog-mask {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2.5vh !important;
+  }
+
+  // Dialog container
+  .p-dialog {
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 900px !important;
+    max-height: 95vh !important;
+    margin: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  // Dialog content
+  .p-dialog-content {
+    padding: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    height: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+  
+  // Hide header
+  .p-dialog-header {
+    display: none !important;
+  }
+
+  // Hide footer if exists
+  .p-dialog-footer {
+    display: none !important;
+  }
+}
+
+// Force modal to take full available space
+.p-dialog-mask.create-module-dialog {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2.5vh 2.5vw !important;
+
+  .p-dialog {
+    width: 100% !important;
+    height: 90vh !important;
+    max-width: 900px !important;
+    max-height: 90vh !important;
+    margin: 0 !important;
+    flex: none !important;
+  }
+
+  .p-dialog-content {
+    height: 90vh !important;
+    max-height: 90vh !important;
+  }
+}
+
+// Alternative approach - force by class name directly
+.create-module-dialog .p-dialog-content {
+  height: 90vh !important;
+  min-height: 90vh !important;
+  max-height: 90vh !important;
+}
+
 :root {
   --p-button-primary-background: var(--primary-color);
   --p-button-primary-border-color: var(--primary-color);
@@ -13,11 +90,11 @@
   --p-dialog-background: var(--background-color);
 
   --scrollbar-bg: transparent;
-  --scrollbar-thumb-bg: var(--primary-color);
-  --scrollbar-thumb-hover: #2980b9;
-  --scrollbar-width: 8px;
-  --scrollbar-border-radius: 4px;
-  --scrollbar-active-shadow: 0 0 6px rgba(52, 152, 219, 0.5);
+  --scrollbar-thumb-bg: rgba(var(--neutral-color-rgb), 0.3);
+  --scrollbar-thumb-hover: rgba(var(--neutral-color-rgb), 0.6);
+  --scrollbar-width: 6px;
+  --scrollbar-border-radius: 10px;
+  --scrollbar-active-shadow: none;
 
   // accordéon primeng
   --p-accordion-panel-border-color: var(--neutral-color);
@@ -365,26 +442,46 @@ body.resizing [contenteditable="true"] {
 ::-webkit-scrollbar-track {
   background: var(--scrollbar-bg);
   border-radius: var(--scrollbar-border-radius);
-  margin: 2px;
+  margin: 0;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb-bg);
   border-radius: var(--scrollbar-border-radius);
-  transition: background-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  opacity: 0.6;
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+  opacity: 1;
+  transform: scaleY(1.2);
 }
 
 ::-webkit-scrollbar-thumb:active {
   background: var(--scrollbar-thumb-hover);
-  box-shadow: var(--scrollbar-active-shadow);
+  opacity: 1;
+  transform: scaleY(1.4);
 }
 
 ::-webkit-scrollbar-button {
   display: none;
+}
+
+/* Scrollbar uniquement visible au hover du conteneur */
+::-webkit-scrollbar-thumb {
+  opacity: 0;
+  transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  opacity: 0.6;
+}
+
+*:hover::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
 }
 
 .biblioteque-wrapper .container_biblio,
@@ -397,28 +494,39 @@ body.resizing [contenteditable="true"] {
 @keyframes scrollbarFadeIn {
   from {
     opacity: 0;
+    transform: scaleY(0.8);
   }
-
   to {
-    opacity: 1;
+    opacity: 0.6;
+    transform: scaleY(1);
   }
 }
 
-::-webkit-scrollbar-thumb {
-  animation: scrollbarFadeIn 0.3s ease;
+/* Animation de la scrollbar lors de l'apparition */
+*:hover::-webkit-scrollbar-thumb {
+  animation: scrollbarFadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 @media (pointer: coarse) {
   :root {
-    --scrollbar-width: 12px;
+    --scrollbar-width: 8px;
+  }
+  
+  /* Sur mobile, scrollbar légèrement plus visible */
+  ::-webkit-scrollbar-thumb {
+    opacity: 0.4;
+  }
+  
+  *:hover::-webkit-scrollbar-thumb {
+    opacity: 0.8;
   }
 }
 
 .dark-theme {
   --scrollbar-bg: transparent;
-  --scrollbar-thumb-bg: #2c3e50;
-  --scrollbar-thumb-hover: #34495e;
-  --scrollbar-active-shadow: 0 0 6px rgba(52, 73, 94, 0.5);
+  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.4);
+  --scrollbar-active-shadow: none;
 }
 
 .custom-scrollbar {

@@ -15,7 +15,6 @@ export const moduleAccessGuard: CanActivateFn = (route: ActivatedRouteSnapshot):
   const moduleId = route.paramMap.get('moduleId');
   
   if (!moduleId) {
-    console.log('ModuleAccessGuard: Aucun moduleId fourni');
     return of(false);
   }
 
@@ -27,30 +26,25 @@ export const moduleAccessGuard: CanActivateFn = (route: ActivatedRouteSnapshot):
       
       // Si l'utilisateur est authentifié, accès complet
       if (firebaseUser && jdrUser) {
-        console.log('ModuleAccessGuard: Utilisateur authentifié, accès complet autorisé');
         return of(true);
       }
       
       // Si pas authentifié, vérifier si le module est publié
-      console.log('ModuleAccessGuard: Utilisateur non authentifié, vérification du statut public du module');
       return from(moduleService.getModuleById(parseInt(moduleId))).pipe(
         map(module => {
           // Vérifier si le module a une version publiée
           const hasPublishedVersion = module.versions?.some(version => version.published);
           
           if (hasPublishedVersion) {
-            console.log('ModuleAccessGuard: Module publié, accès en lecture autorisé');
             return true;
           } else {
-            console.log('ModuleAccessGuard: Module privé, redirection vers login');
             router.navigate(['/auth/login'], { 
               queryParams: { returnUrl: route.url.join('/') }
             });
             return false;
           }
         }),
-        catchError(error => {
-          console.error('ModuleAccessGuard: Erreur lors de la vérification du module', error);
+        catchError(() => {
           router.navigate(['/home']);
           return of(false);
         })

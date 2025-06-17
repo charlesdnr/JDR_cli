@@ -1,0 +1,339 @@
+<div class="create-module-modal">
+  <!-- Header -->
+  <div class="modal-header">
+    <div class="header-content">
+      <h2 class="modal-title">
+        <i class="pi pi-plus-circle"></i>
+        Créer un nouveau module
+      </h2>
+      <button 
+        type="button" 
+        class="close-btn" 
+        (click)="close()"
+        pTooltip="Fermer"
+        tooltipPosition="left"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div 
+          class="progress-fill" 
+          [style.width.%]="progressWidth()"
+          [@progressBar]="{ value: progressWidth(), params: { width: progressWidth() } }"
+        ></div>
+      </div>
+      <div class="progress-text">
+        Étape {{ currentStep() }} sur 3
+      </div>
+    </div>
+
+    <!-- Steps Navigation -->
+    <div class="steps-nav">
+      @for (step of steps; track step.id) {
+        <div 
+          class="step-item" 
+          [class.active]="currentStep() === step.id"
+          [class.completed]="step.completed"
+          [class.clickable]="step.id <= currentStep() || step.completed"
+          (click)="goToStep(step.id)"
+          (keyup.enter)="goToStep(step.id)"
+          [attr.tabindex]="(step.id <= currentStep() || step.completed) ? 0 : -1"
+          role="button"
+          [attr.aria-label]="'Aller à l\'étape ' + step.id + ': ' + step.title"
+        >
+          <div class="step-number">
+            @if (step.completed) {
+              <i class="pi pi-check"></i>
+            } @else {
+              {{ step.id }}
+            }
+          </div>
+          <div class="step-info">
+            <div class="step-title">{{ step.title }}</div>
+            <div class="step-description">{{ step.description }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="modal-content">
+    
+    <!-- Step 1: Creation Type -->
+    @if (currentStep() === 1) {
+      <div class="step-content" [@slideTransition]>
+        <div class="step-header">
+          <h3>Comment souhaitez-vous créer votre module ?</h3>
+          <p>Choisissez la méthode qui correspond le mieux à vos besoins</p>
+        </div>
+
+        <div class="creation-options">
+          @for (option of creationOptions; track option.type) {
+            <div 
+              class="creation-option" 
+              [class.selected]="creationType() === option.type"
+              [class.disabled]="option.disabled"
+              [class.primary]="option.primary"
+              (click)="selectCreationType(option.type)"
+              [attr.tabindex]="option.disabled ? -1 : 0"
+              (keyup.enter)="selectCreationType(option.type)"
+            >
+              <div class="option-icon">{{ option.icon }}</div>
+              <div class="option-content">
+                <div class="option-header">
+                  <h4>{{ option.title }}</h4>
+                  @if (option.badge) {
+                    <span 
+                      class="option-badge" 
+                      [class.badge-primary]="option.badge === 'Recommandé'"
+                      [class.badge-new]="option.badge === 'Nouveau'"
+                      [class.badge-soon]="option.badge === 'Bientôt'"
+                    >
+                      {{ option.badge }}
+                    </span>
+                  }
+                </div>
+                <p>{{ option.description }}</p>
+              </div>
+              @if (creationType() === option.type) {
+                <div class="option-selected">
+                  <i class="pi pi-check-circle"></i>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Essential Information -->
+    @if (currentStep() === 2) {
+      <div class="step-content" [@slideTransition]>
+        <div class="step-header">
+          <h3>Informations essentielles</h3>
+          <p>Configurez les paramètres de base de votre module</p>
+        </div>
+
+        <div class="form-content">
+          <!-- Module Title -->
+          <div class="form-group">
+            <label for="moduleTitle" class="form-label">
+              <i class="pi pi-bookmark"></i>
+              Titre du module *
+            </label>
+            <input
+              id="moduleTitle"
+              type="text"
+              class="form-input"
+              [(ngModel)]="moduleTitle"
+              placeholder="Ex: L'Aventure du Dragon Oublié"
+              autocomplete="off"
+              maxlength="100"
+            />
+            <div class="form-hint">
+              @if (moduleTitle().length > 0) {
+                <span class="char-count">{{ moduleTitle().length }}/100</span>
+              }
+              @if (moduleTitle().length > 0 && moduleTitle().length < 3) {
+                <span class="error-text">Le titre doit contenir au moins 3 caractères</span>
+              }
+            </div>
+          </div>
+
+          <!-- Module Type -->
+          <div class="form-group">
+            <label for="moduleType" class="form-label">
+              <i class="pi pi-tag"></i>
+              Type de module *
+            </label>
+            <p-select
+              id="moduleType"
+              [options]="moduleTypes"
+              [(ngModel)]="moduleType"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un type"
+              styleClass="form-select"
+              [fluid]="true"
+            >
+            </p-select>
+            <div class="form-hint">
+              Définit la catégorie principale de votre module
+            </div>
+          </div>
+
+          <!-- Game System -->
+          <div class="form-group">
+            <label for="gameSystem" class="form-label">
+              <i class="pi pi-cog"></i>
+              Système de jeu
+            </label>
+            <p-select
+              id="gameSystem"
+              [options]="gameSystems()"
+              [(ngModel)]="selectedGameSystem"
+              [loading]="loadingGameSystems()"
+              optionLabel="name"
+              placeholder="Sélectionner un système de jeu"
+              styleClass="form-select"
+              [fluid]="true"
+            >
+              <ng-template pTemplate="selectedItem">
+                @if (selectedGameSystem()) {
+                  <div class="selected-system">
+                    <i class="pi pi-circle-fill system-color"></i>
+                    {{ selectedGameSystem()!.name }}
+                  </div>
+                }
+              </ng-template>
+              <ng-template pTemplate="item" let-system>
+                <div class="system-option">
+                  <i class="pi pi-circle-fill system-color"></i>
+                  {{ system.name }}
+                </div>
+              </ng-template>
+            </p-select>
+            <div class="form-hint">
+              Le système de jeu peut être modifié plus tard
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 3: Organization -->
+    @if (currentStep() === 3) {
+      <div class="step-content" [@slideTransition]>
+        <div class="step-header">
+          <h3>Organisation et finalisation</h3>
+          <p>Choisissez où stocker votre module et créez-le</p>
+        </div>
+
+        <div class="form-content">
+          <!-- Folder Selection -->
+          <div class="form-group">
+            <label for="folderSelect" class="form-label">
+              <i class="pi pi-folder"></i>
+              Dossier de stockage *
+            </label>
+            <p-treeselect
+              id="folderSelect"
+              [options]="folders()"
+              [(ngModel)]="selectedFolder"
+              [loading]="loadingFolders()"
+              placeholder="Sélectionner un dossier"
+              styleClass="form-select"
+              [fluid]="true"
+            >
+            </p-treeselect>
+            <div class="form-hint">
+              Votre module sera organisé dans ce dossier
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="creation-summary">
+            <h4>Résumé de la création</h4>
+            <div class="summary-content">
+              <div class="summary-item">
+                <i class="pi pi-bookmark"></i>
+                <div>
+                  <strong>Titre:</strong>
+                  <span>{{ moduleTitle() || 'Non défini' }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <i class="pi pi-tag"></i>
+                <div>
+                  <strong>Type:</strong>
+                  <span>{{ selectedModuleTypeLabel() }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <i class="pi pi-cog"></i>
+                <div>
+                  <strong>Système:</strong>
+                  <span>{{ selectedGameSystem()?.name || 'Aucun' }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <i class="pi pi-folder"></i>
+                <div>
+                  <strong>Dossier:</strong>
+                  <span>{{ selectedFolderLabel() }}</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <i class="pi pi-file"></i>
+                <div>
+                  <strong>Méthode:</strong>
+                  <span>{{ selectedCreationTypeTitle() }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <div class="footer-actions">
+      @if (currentStep() > 1) {
+        <button 
+          type="button" 
+          class="btn-secondary" 
+          (click)="prevStep()"
+          [disabled]="isCreating()"
+        >
+          <i class="pi pi-arrow-left"></i>
+          Précédent
+        </button>
+      }
+      
+      <div class="footer-main-actions">
+        <button 
+          type="button" 
+          class="btn-cancel" 
+          (click)="close()"
+          [disabled]="isCreating()"
+        >
+          Annuler
+        </button>
+        
+        @if (currentStep() < 3) {
+          <button 
+            type="button" 
+            class="btn-primary" 
+            (click)="nextStep()"
+            [disabled]="(currentStep() === 1 && !canProceedToStep2()) || (currentStep() === 2 && !canProceedToStep3())"
+          >
+            Continuer
+            <i class="pi pi-arrow-right"></i>
+          </button>
+        } @else {
+          <button 
+            type="button" 
+            class="btn-create" 
+            (click)="createModule()"
+            [disabled]="!canCreate() || isCreating()"
+          >
+            @if (isCreating()) {
+              <i class="pi pi-spin pi-spinner"></i>
+              Création...
+            } @else {
+              <i class="pi pi-plus"></i>
+              Créer le module
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

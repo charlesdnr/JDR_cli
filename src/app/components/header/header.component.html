@@ -39,7 +39,7 @@
           [routerLink]="[button.link]"
           [queryParams]="
             button.name === 'Projets' && $folders[0]?.folderId
-              ? { folderId: folders()[0]?.folderId }
+              ? { folderId: folders()[0].folderId }
               : null
           "
           class="nav-item"
@@ -126,7 +126,7 @@
           [routerLink]="[button.link]"
           [queryParams]="
             button.name === 'Projets' && folders()[0]?.folderId
-              ? { folderId: folders()[0]?.folderId }
+              ? { folderId: folders()[0].folderId }
               : null
           "
           class="mobile-nav-item"

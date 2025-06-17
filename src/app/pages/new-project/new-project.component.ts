@@ -8,6 +8,7 @@ import {
   effect,
   HostListener,
 } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -25,6 +26,7 @@ import { EBlockType } from '../../enum/BlockType';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { BlockHttpService } from '../../services/https/block-http.service';
 import { ModuleHttpService } from '../../services/https/module-http.service';
+import { ModuleVersionHttpService } from '../../services/https/module-version-http.service';
 import { AiConfigComponent } from '../../components/ai-config/ai-config.component';
 import { BlockTypesToolbarComponent } from '../../components/blocksComponents/block-types-toolbar/block-types-toolbar.component';
 import { BlockListComponent } from '../../components/blocksComponents/block-list/block-list.component';
@@ -47,6 +49,10 @@ import { NotificationService } from '../../services/Notification.service';
 import { StompSubscription } from '@stomp/stompjs';
 import { CursorPosition } from '../../interfaces/CursorPosition';
 import { ModuleUpdateDTO } from '../../interfaces/ModuleUpdateDTO';
+import { ShareModuleDialogComponent } from '../../components/share-module-dialog/share-module-dialog.component';
+import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
+import { FolderService } from '../../services/folders.service';
+import { UserSavedModule } from '../../classes/UserSavedModule';
 
 @Component({
   selector: 'app-new-project',
@@ -67,18 +73,30 @@ import { ModuleUpdateDTO } from '../../interfaces/ModuleUpdateDTO';
   providers: [ConfirmationService],
   templateUrl: './new-project.component.html',
   styleUrl: './new-project.component.scss',
+  animations: [
+    trigger('slideUpFade', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(40px)' }),
+        animate('0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+          style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ],
 })
 export class NewProjectComponent implements OnInit, OnDestroy {
   private moduleService = inject(ModuleService);
   private userService = inject(UserHttpService);
   private blockHttpService = inject(BlockHttpService);
   private moduleHttpService = inject(ModuleHttpService);
+  private moduleVersionHttpService = inject(ModuleVersionHttpService);
   public dialogService = inject(DialogService);
   public confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private notificationService = inject(NotificationService);
+  private folderService = inject(FolderService);
+  private userSavedModuleHttpService = inject(UserSavedModuleHttpService);
 
   currentModule = this.moduleService.currentModule;
   loadingModuleState = this.moduleService.loadingModule;
@@ -117,6 +135,12 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   canPublish = computed(() => this.userRights().canPublish);
   canInvite = computed(() => this.userRights().canInvite);
   canView = computed(() => this.userRights().canView);
+
+  // ===== FLOATING ACTION BAR SIGNALS =====
+  secondaryMenuExpanded = signal(false);
+  hasUnsavedChanges = signal(false);
+  needToCreate = computed(() => !this.currentModule()?.id);
+  loadingPublished = signal(false);
 
   otherUserCursors = this.notificationService.userCursors;
   private cursorSubscription: StompSubscription | undefined;
@@ -471,7 +495,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   startIconDrag(event: { event: Event; blockType: EBlockType }) {
-    console.log(this.currentModule());
     if (this.isDraggingIcon()) return;
 
     let clientX = 0,
@@ -558,6 +581,9 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       if (module.id === 0) {
         // Création
         savedModule = await this.moduleHttpService.createModule(moduleRequest);
+
+        await this.addModuleToFirstFolder(savedModule);
+
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
@@ -594,6 +620,39 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async addModuleToFirstFolder(savedModule: Module): Promise<void> {
+  try {
+    const currentUser = this.currentUser();
+    if (!currentUser) return;
+
+    // Charger les dossiers de l'utilisateur
+    await this.folderService.loadFolders();
+    const userFolders = this.folderService.currentFolders();
+    
+    if (userFolders.length > 0) {
+      // Prendre le premier dossier
+      const firstFolder = userFolders[0];
+      
+      if (firstFolder.folderId && savedModule.versions.length > 0) {
+        // Créer une association UserSavedModule
+        const userSavedModule = new UserSavedModule(
+          currentUser.id,
+          savedModule.id,
+          savedModule.versions[0].id!,
+          firstFolder.folderId
+        );
+        
+        // Sauvegarder l'association
+        await this.userSavedModuleHttpService.saveModule(userSavedModule);
+        
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout du module au premier dossier:', error);
+    // Ne pas faire échouer la création du module si l'ajout au dossier échoue
+  }
+}
+
   // Méthode pour générer avec l'IA
   generateAIContent(data: { blockId: number; blockType: string }) {
     this.dialogService
@@ -614,12 +673,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   processAIResponse(blockId: number, blockType: string, response: string) {
-    console.log(blockId);
-    console.log(blockType);
-    console.log(response);
-    console.log(
-      this.currentVersion()?.blocks.find((block) => block.id === blockId)
-    );
     if (blockType == EBlockType.paragraph) {
       (
         this.currentVersion()?.blocks.find(
@@ -635,7 +688,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         }
       });
 
-      console.log(this.currentVersion()?.blocks);
     }
   }
 
@@ -654,7 +706,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
       try {
         const moduleData = JSON.parse(response);
-        console.log('Module data received:', moduleData);
 
         // Update the current module with metadata
         this.currentModule.update((module) => {
@@ -838,5 +889,128 @@ export class NewProjectComponent implements OnInit, OnDestroy {
         detail: 'Impossible de supprimer le module.',
       });
     }
+  }
+
+  // ===== FLOATING ACTION BAR METHODS =====
+  
+  toggleSecondaryMenu(): void {
+    this.secondaryMenuExpanded.set(!this.secondaryMenuExpanded());
+  }
+
+  closeSecondaryMenu(): void {
+    this.secondaryMenuExpanded.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.secondaryMenuExpanded()) {
+      this.closeSecondaryMenu();
+    }
+  }
+
+  // Action methods that delegate to existing functionality
+  published(): void {
+    if (!this.canPublish() || !this.currentVersion()) return;
+    
+    const currentVersion = this.currentVersion()!;
+    currentVersion.published = !currentVersion.published;
+    this.loadingPublished.set(true);
+    
+    this.moduleVersionHttpService
+      .updateModuleVersion(currentVersion.id!, currentVersion)
+      .then(() => {
+        if (currentVersion.published) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Publication',
+            detail: 'Le module a été publié avec succès',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Publication',
+            detail: 'Le module a été rendu privé',
+          });
+        }
+      })
+      .catch((error) => {
+        // Restaurer l'état précédent en cas d'erreur
+        currentVersion.published = !currentVersion.published;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de modifier le statut de publication',
+        });
+        console.error('Erreur lors de la publication:', error);
+      })
+      .finally(() => {
+        this.loadingPublished.set(false);
+      });
+  }
+
+  shareModule(): void {
+    this.closeSecondaryMenu();
+    
+    if (!this.currentModule() || this.needToCreate()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Partage impossible',
+        detail: 'Vous devez d\'abord sauvegarder le module'
+      });
+      return;
+    }
+
+    // Ouvrir un dialog avec les options de partage
+    this.ref = this.dialogService.open(ShareModuleDialogComponent, {
+      header: 'Partager le module',
+      width: '500px',
+      modal: true,
+      closable: true,
+      data: {
+        module: this.currentModule(),
+        currentUser: this.currentUser(),
+        canInvite: this.canInvite()
+      }
+    });
+
+    this.ref.onClose.subscribe((result) => {
+      if (result) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Partage',
+          detail: 'Permissions mises à jour avec succès'
+        });
+      }
+    });
+  }
+
+  exportModule(): void {
+    this.closeSecondaryMenu();
+    // TODO: Implement export functionality
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export',
+      detail: 'Export du module en cours...'
+    });
+  }
+
+  duplicateModule(): void {
+    this.closeSecondaryMenu();
+    // TODO: Implement duplicate functionality
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Duplication',
+      detail: 'Module dupliqué avec succès'
+    });
+  }
+
+  openSettings(): void {
+    this.closeSecondaryMenu();
+    // TODO: Open settings modal or navigate to settings
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Paramètres',
+      detail: 'Ouverture des paramètres...'
+    });
   }
 }

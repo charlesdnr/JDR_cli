@@ -24,8 +24,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { FileUploadModule, FileSelectEvent } from 'primeng/fileupload';
 import { FileHttpService } from '../../services/https/file-http.service';
-import { StatisticsService } from '../../services/statistics.service';
-import { UserStatistics } from '../../interfaces/UserStatisticsDTO';
 import { Subscription } from 'rxjs';
 import { FirebaseError } from '@angular/fire/app';
 
@@ -56,7 +54,6 @@ export class AccountComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(Auth);
   private fileHttpService = inject(FileHttpService);
-  private statisticsService = inject(StatisticsService);
 
   private subscriptions = new Subscription();
 
@@ -73,11 +70,6 @@ export class AccountComponent implements OnInit, OnDestroy {
   hasChanges = computed(() => {
     const current = this.editableUsername();
     const original = this.originalUsername();
-    console.log('Checking changes:', {
-      current,
-      original,
-      hasChanges: current !== original,
-    });
     return current !== original;
   });
 
@@ -178,47 +170,10 @@ export class AccountComponent implements OnInit, OnDestroy {
       this.originalUsername.set(user.username);
       this.editableUsername.set(user.username); // Initialiser les deux
     }
-
-    // Load user statistics
-    this.loadUserStatistics();
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-  }
-
-  private loadUserStatistics() {
-    const user = this.currentUser();
-    if (user?.id) {
-      this.loadingUserStats.set(true);
-
-      this.subscriptions.add(
-        this.statisticsService.getUserStatistics(user.id).subscribe({
-          next: (stats: UserStatistics) => {
-            // Update user stats with real data
-            this.userStats.update((currentStats) => ({
-              ...currentStats,
-              modulesCreated: stats.modulesCreated,
-              followers: stats.subscribersCount,
-              // Keep other stats for now (can be added to backend later)
-              totalPlays: currentStats.totalPlays,
-              totalDownloads: currentStats.totalDownloads,
-              averageRating: currentStats.averageRating,
-            }));
-          },
-          error: (error) => {
-            console.error(
-              'Erreur lors du chargement des statistiques utilisateur:',
-              error
-            );
-            // Keep default values on error
-          },
-          complete: () => {
-            this.loadingUserStats.set(false);
-          },
-        })
-      );
-    }
   }
 
   saveUser() {

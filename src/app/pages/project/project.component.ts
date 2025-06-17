@@ -610,8 +610,6 @@ export class ProjectComponent implements OnInit {
   onNodeDrop(event: TreeNodeDropEvent): void {
     const dragNode = event.dragNode;
     const dropNode = event.dropNode;
-    console.log(dropNode)
-    console.log(dragNode)
 
     if (!dragNode || !dropNode || !dragNode.data || !dropNode.data) return;
 
@@ -625,7 +623,6 @@ export class ProjectComponent implements OnInit {
 
       // Mise à jour du module avec le nouveau folderId
       const updatedModule = { ...dragNode.data, folderId: targetFolderId };
-      console.log(updatedModule);
 
       this.httpUserSavedModuleService
         .updateSavedModule(updatedModule.savedModuleId, updatedModule)
@@ -939,10 +936,6 @@ export class ProjectComponent implements OnInit {
         }
       }
     }
-  }
-
-  subsribe(moduleId: number) {
-    console.log(moduleId);
   }
 
   resetModule() {

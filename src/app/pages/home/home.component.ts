@@ -12,12 +12,12 @@ import { Router, RouterLink } from '@angular/router';
 import { ModuleHttpService } from '../../services/https/module-http.service';
 import { Module } from '../../classes/Module';
 import { SkeletonModule } from 'primeng/skeleton';
-import { StatisticsService } from '../../services/statistics.service';
-import { WebSocketService } from '../../services/websocket.service';
 import { PlatformStatistics } from '../../interfaces/PlatformStatisticsDTO';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { CreateModuleModalComponent } from '../../components/create-module-modal/create-module-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -33,8 +33,10 @@ import { ModuleCardComponent } from '../../components/module-card/module-card.co
     RouterLink, 
     SkeletonModule,
     FormsModule,
-    ModuleCardComponent
+    ModuleCardComponent,
+    DynamicDialogModule
   ],
+  providers: [DialogService],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -42,10 +44,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   userService = inject(UserHttpService);
   moduleHttpService = inject(ModuleHttpService);
   router = inject(Router);
-  statisticsService = inject(StatisticsService);
-  webSocketService = inject(WebSocketService);
+  dialogService = inject(DialogService);
   
   private subscriptions = new Subscription();
+  private dialogRef: DynamicDialogRef | undefined;
 
   currentUser = computed(() => this.userService.currentJdrUser())
 
@@ -68,14 +70,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadPopularModules();
-    this.loadPlatformStatistics();
-    this.subscribeToRealTimeStats();
-    this.webSocketService.connect();
   }
   
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
-    this.webSocketService.disconnect();
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
   }
 
   async loadPopularModules() {
@@ -95,36 +96,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
   
-  private loadPlatformStatistics() {
-    this.subscriptions.add(
-      this.statisticsService.getPlatformStatistics().subscribe({
-        next: (stats) => {
-          this.platformStats.set(stats);
-          this.statisticsService.updatePlatformStatistics(stats);
-        },
-        error: (error) => {
-          console.error('Erreur lors du chargement des statistiques:', error);
-          // Fallback to default values
-          this.platformStats.set({
-            totalModulesCreated: 1247,
-            activeUsers: 892,
-            sharedModules: 15439
-          });
-        }
-      })
-    );
-  }
-  
-  private subscribeToRealTimeStats() {
-    this.subscriptions.add(
-      this.statisticsService.platformStatistics$.subscribe(stats => {
-        if (stats) {
-          this.platformStats.set(stats);
-        }
-      })
-    );
-  }
-
   // Navigation methods
   scrollToFeatures() {
     document.getElementById('explore')?.scrollIntoView({ 
@@ -186,5 +157,45 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (userId) {
       this.router.navigate(['/user', userId]);
     }
+  }
+
+  // Method to open create module modal
+  openCreateModuleModal() {
+    this.dialogRef = this.dialogService.open(CreateModuleModalComponent, {
+      header: '',
+      width: 'calc(100vw - 5vw)',
+      height: '90vh',
+      modal: true,
+      closable: false,
+      maximizable: false,
+      resizable: false,
+      styleClass: 'create-module-dialog',
+      contentStyle: { 
+        padding: '0',
+        height: '100%',
+        width: '100%'
+      },
+      style: {
+        'max-width': '900px',
+        'height': '90vh'
+      },
+      baseZIndex: 10000
+    });
+
+    // Force modal size after opening (mais gardons le centrage)
+    setTimeout(() => {
+      const dialogElements = document.querySelectorAll('.create-module-dialog .p-dialog');
+      dialogElements.forEach((dialog: Element) => {
+        const htmlDialog = dialog as HTMLElement;
+        htmlDialog.style.height = '90vh';
+        htmlDialog.style.maxHeight = '90vh';
+        
+        const content = htmlDialog.querySelector('.p-dialog-content') as HTMLElement;
+        if (content) {
+          content.style.height = '90vh';
+          content.style.maxHeight = '90vh';
+        }
+      });
+    }, 100);
   }
 }

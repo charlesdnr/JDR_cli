@@ -20,10 +20,10 @@
       </p>
       
       <div class="hero-actions">
-        <a routerLink="/new-module" class="btn-primary-hero">
+        <button (click)="openCreateModuleModal()" class="btn-primary-hero">
           <span>Créer un module</span>
           <i class="pi pi-arrow-right"></i>
-        </a>
+        </button>
         <button (click)="scrollToExplore()" class="btn-secondary-hero">
           <span>Découvrir</span>
           <i class="pi pi-compass"></i>
@@ -32,11 +32,11 @@
       
       <div class="hero-stats">
         <div class="stat-item">
-          <span class="stat-number">{{ moduleStats().total || 0 }}</span>
+          <span class="stat-number">{{ moduleStats().total || 1024 }}</span>
           <span class="stat-label">Modules créés</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">{{ moduleStats().creators || 0 }}</span>
+          <span class="stat-number">{{ moduleStats().creators || 123 }}</span>
           <span class="stat-label">Créateurs actifs</span>
         </div>
         <div class="stat-item">
@@ -274,7 +274,7 @@
               <h3>Aucun module disponible</h3>
               <p>Soyez le premier à créer un module pour cette communauté !</p>
               <p-button 
-                routerLink="/new-module"
+                (click)="openCreateModuleModal()"
                 label="Créer le premier module"
                 styleClass="p-button-lg p-button-rounded"
                 size="large">
@@ -323,7 +323,7 @@
             size="large">
           </p-button>
           <p-button 
-            routerLink="/new-module"
+            (click)="openCreateModuleModal()"
             label="Créer un module"
             icon="pi pi-plus"
             iconPos="right"

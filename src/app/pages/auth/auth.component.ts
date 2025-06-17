@@ -145,8 +145,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       .then(async (value) => {
         await this.checkOurLogin(value);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         this.loadingGoogle.set(false);
       });
   }
@@ -158,8 +157,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       .then(async (value) => {
         await this.checkOurLogin(value);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         this.loadingGithub.set(false);
       });
   }
@@ -176,8 +174,6 @@ export class AuthComponent implements OnInit, OnDestroy {
           summary: 'Success',
           detail: 'Connecté en tant que ' + value.user.email,
         });
-      } catch (err) {
-        console.log('erreur : ', err);
       } finally {
         // Réinitialiser tous les loading
         this.loading.set(false);
@@ -190,15 +186,12 @@ export class AuthComponent implements OnInit, OnDestroy {
         const username = (this.formgroup().value as { login:string }).login;
         const resp: User = await this.httpUser.post({ email: email, username: username });
         this.httpUser.currentJdrUser.set(resp);
-        console.log(resp);
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Connecté en tant que ' + value.user.email,
         });
-      } catch (err) {
-        console.log('erreur : ', err);
       } finally {
         // Réinitialiser tous les loading
         this.loading.set(false);

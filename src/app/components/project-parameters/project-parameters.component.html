@@ -244,44 +244,8 @@
     />
   </div>
 
-  <!-- 6. Collaborateurs (si privé) -->
-  @if(!currentVersion().published){
-  <div class="container-label">
-    <label for="collaborators">{{ "Collaborateurs" | translate }}</label>
-    <app-user-avatar-choose id="collaborators" [disabled]="!canInvite()" />
-  </div>
-  }
+  <!-- Collaborators section removed - now handled by floating action bar share button -->
 
-  <!-- 7. Actions principales -->
-  <div class="actions-section">
-    <p-button
-      [label]="needToCreate() ? 'Créer le module' : 'Sauvegarder'"
-      [loading]="loadingSave()"
-      [disabled]="isReadOnly()"
-      icon="pi pi-save"
-      (onClick)="save()"
-      severity="success"
-      [fluid]="true"
-    />
-
-    <p-button
-      [disabled]="needToCreate() || !canPublish()"
-      (onClick)="published()"
-      [loading]="loadingPublished()"
-      [icon]="currentVersion().published ? 'pi pi-eye-slash' : 'pi pi-globe'"
-      [label]="currentVersion().published ? 'Rendre privé' : 'Publier'"
-      severity="help"
-      [fluid]="true"
-    />
-  </div>
-  } @if(!isReadOnly() && currentUser()?.id === currentModule().creator.id){
-  <p-button
-    [fluid]="true"
-    [disabled]="needToCreate() || isReadOnly()"
-    [label]="'Supprimer'"
-    icon="pi pi-trash"
-    (onClick)="deleteRequested.emit()"
-    severity="danger"
-  />
+  <!-- Actions section removed - now handled by floating action bar -->
   }
 </div>

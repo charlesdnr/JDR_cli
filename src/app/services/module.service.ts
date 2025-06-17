@@ -72,7 +72,6 @@ export class ModuleService {
 
     // Vérifier si le module est publié
     const isPublished = currentVersion && currentVersion.published;
-    console.log(isPublished)
 
     // Vérifier les droits d'accès spécifiques
     const userAccess = module.accesses.find(
@@ -114,7 +113,6 @@ export class ModuleService {
         module.versions = [new ModuleVersion()];
       }
       this.currentModule.set(module);
-      console.log(`Module ${id} chargé.`);
     } catch (e) {
       console.error(`Erreur lors du chargement du module ${id}:`, e);
       this.currentModule.set(null); // Assure que le module est null en cas d'erreur
@@ -159,7 +157,6 @@ export class ModuleService {
     this.loadingModule.set(false);
     this.currentModule.set(newModule);
     this.currentModuleVersion.set(newVersion);
-    console.log("Préparation d'un nouveau module.");
   }
 
   // Mettre à jour le signal
@@ -170,7 +167,6 @@ export class ModuleService {
   // Méthode pour effacer le module (utile en quittant l'éditeur par ex.)
   clearCurrentModule(): void {
     this.currentModule.set(null);
-    console.log('Module courant effacé.');
   }
 
   // Méthode spécifique pour mettre à jour les accès
@@ -200,8 +196,6 @@ export class ModuleService {
     if (module && module.id !== 0) {
       // Ne recharge que si ce n'est pas un nouveau module non sauvegardé
       await this.loadModuleById(module.id);
-    } else {
-      console.log('Impossible de rafraîchir un nouveau module non sauvegardé.');
     }
   }
 

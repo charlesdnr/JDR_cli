@@ -49,7 +49,6 @@ export class ThemeService {
     effect(() => {
       const theme = this.effectiveTheme();
       this.setTheme(theme);
-      console.log('Thème appliqué:', theme);
     });
   }
 

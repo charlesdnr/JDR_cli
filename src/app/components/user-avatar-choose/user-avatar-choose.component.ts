@@ -159,7 +159,6 @@ export class UserAvatarChooseComponent implements OnInit, OnDestroy {
           const updatedAccesses = mod.accesses.filter(acc => acc.user.id !== user.id);
           return { ...mod, accesses: updatedAccesses };
         });
-        console.log(this.currentModule())
         this.messageService.add({
           severity: 'success', summary: 'Suppression', detail:
             "L'utilisateur " + user.email + " n'a plus accés a ce module"

@@ -16,7 +16,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { TranslateModule } from '@ngx-translate/core';
 import { GameSystem } from '../../classes/GameSystem';
-import { UserAvatarChooseComponent } from '../../components/user-avatar-choose/user-avatar-choose.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { User } from '../../classes/User';
 import { TooltipModule } from 'primeng/tooltip';
@@ -55,7 +54,6 @@ import { Picture } from '../../classes/Picture';
     InputTextModule,
     TextareaModule,
     TranslateModule,
-    UserAvatarChooseComponent,
     TooltipModule,
     TreeSelectModule,
     AutoCompleteModule,
@@ -193,7 +191,6 @@ export class ProjectParametersComponent implements OnInit {
 
     // Lancer le processus d'ajout des enfants
     addChildren();
-    console.log(nodes);
     return nodes;
   });
 
@@ -244,7 +241,6 @@ export class ProjectParametersComponent implements OnInit {
   onEnterKeyForTags(event: Event): void {
     const target = event.target as HTMLInputElement;
     const value = target.value.trim();
-    console.log(value);
     if (value) {
       this.createNewTag(value);
     }
@@ -280,7 +276,6 @@ export class ProjectParametersComponent implements OnInit {
             summary: 'Tags',
             detail: "Erreur lors de l'ajout du tag : " + error.message,
           });
-          console.log(error);
         });
     }
   }
@@ -322,9 +317,6 @@ export class ProjectParametersComponent implements OnInit {
           detail: 'Tag créé et ajouté avec succés',
         });
       })
-      .catch((error: HttpErrorResponse) => {
-        console.log(error);
-      });
   }
 
   async autoCompleteRes(search: string): Promise<void> {
@@ -391,10 +383,8 @@ export class ProjectParametersComponent implements OnInit {
                   this.treeNode(),
                   folder.folderId ?? 0
                 );
-                console.log(foundNode);
                 if (foundNode) {
                   this.selectedFolder.set(foundNode);
-                  console.log(this.selectedFolder());
                 }
               });
           }

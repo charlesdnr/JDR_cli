@@ -19,12 +19,8 @@ export const privatePageGuard: CanActivateFn = (route, state): Observable<boolea
       
       // L'utilisateur doit être connecté sur Firebase ET avoir un profil JDR
       if (firebaseUser && jdrUser) {
-        console.log('PrivatePageGuard: Utilisateur authentifié, accès autorisé');
         return true;
       } else {
-        console.log('PrivatePageGuard: Utilisateur non authentifié, redirection vers /auth/login');
-        console.log('Firebase User:', firebaseUser ? 'connecté' : 'non connecté');
-        console.log('JDR User:', jdrUser ? 'présent' : 'absent');
         return router.createUrlTree(['/auth/login'], {
           queryParams: { returnUrl: state.url }
         });
