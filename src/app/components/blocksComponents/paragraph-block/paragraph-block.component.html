@@ -1,7 +1,7 @@
 @if(isReadOnly()) {
 <div class="text-block-readonly">
   <h3 class="block-title">{{ paragraphBlock().title }}</h3>
-  <div class="block-content" [innerHTML]="paragraphBlock().paragraph"></div>
+  <div class="block-content" [innerHTML]="getSanitizedContent()"></div>
   @if(paragraphBlock().style) {
   <div class="block-style">{{ paragraphBlock().style }}</div>
   }
@@ -36,7 +36,9 @@
         #paragraphEditor
         id="paragraph"
         [(ngModel)]="paragraphBlock().paragraph"
-        
+        (onTextChange)="onTextChange($event)"
+        [style]="{'height':'300px'}"
+        [formats]="editorFormats"
       ></p-editor>
     </div>
   </div>

@@ -45,6 +45,21 @@
         }
       </div>
     }
+
+    <!-- Ratings icon positioned next to comments -->
+    @if (showRatings()) {
+      <div class="module-ratings-action" 
+           (click)="openRatings($event)"
+           (keyup.enter)="openRatings($event)"
+           tabindex="0"
+           [pTooltip]="getRatingTooltip()"
+           tooltipPosition="top">
+        <i class="pi pi-star"></i>
+        @if (averageRating() > 0) {
+          <span class="rating-badge">{{ averageRating() | number:'1.1-1' }}</span>
+        }
+      </div>
+    }
     <div class="content-header">
       <h3 class="module-title">{{ module().title }}</h3>
       

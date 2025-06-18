@@ -1,317 +1,257 @@
-@if (isLoading()) {
-  <!-- Loading Skeleton -->
-  <div class="profile-skeleton">
-    <div class="hero-skeleton">
-      <div class="hero-content-skeleton">
-        <p-skeleton shape="circle" size="8rem" class="avatar-skeleton"></p-skeleton>
-        <div class="info-skeleton">
-          <p-skeleton height="2rem" width="200px" class="mb-2"></p-skeleton>
-          <p-skeleton height="1rem" width="150px" class="mb-3"></p-skeleton>
-          <div class="actions-skeleton">
-            <p-skeleton height="2.5rem" width="100px"></p-skeleton>
-            <p-skeleton height="2.5rem" width="100px"></p-skeleton>
+<div class="profile-container">
+  @if (isLoading()) {
+    <!-- État de chargement élégant -->
+    <div class="loading-skeleton">
+      <div class="hero-skeleton">
+        <div class="profile-header-skeleton">
+          <p-skeleton shape="circle" size="8rem" />
+          <div class="profile-info-skeleton">
+            <p-skeleton width="200px" height="2rem" />
+            <p-skeleton width="150px" height="1.5rem" />
+            <p-skeleton width="300px" height="1rem" />
           </div>
+        </div>
+        <div class="stats-skeleton">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="stat-skeleton">
+              <p-skeleton width="60px" height="2rem" />
+              <p-skeleton width="80px" height="1rem" />
+            </div>
+          }
         </div>
       </div>
     </div>
-    <div class="content-skeleton">
-      <p-skeleton height="200px" width="100%" class="mb-4"></p-skeleton>
-      <div class="modules-skeleton">
-        @for (item of [1,2,3,4]; track item) {
-          <p-skeleton height="250px" width="300px"></p-skeleton>
-        }
-      </div>
-    </div>
-  </div>
-} @else if (user()) {
-  <!-- Profile Content -->
-  <div class="user-profile">
-    <!-- Hero Section -->
-    <section class="hero-section">
+  } @else {
+    <!-- Hero Section avec design moderne -->
+    <div class="profile-hero">
       <div class="hero-background">
-        <div class="hero-gradient"></div>
-        <div class="hero-pattern"></div>
+        <div class="gradient-overlay"></div>
+        <div class="pattern-overlay"></div>
       </div>
       
       <div class="hero-content">
         <div class="profile-header">
-          <!-- Avatar and Basic Info -->
-          <div class="avatar-section">
-            <div class="avatar-container">
-              <p-avatar 
-                [label]="user()!.username.charAt(0).toUpperCase()" 
-                size="xlarge"
-                class="profile-avatar"
-                [style]="{'background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}"
-              ></p-avatar>
-              <div class="status-indicator online"></div>
-            </div>
-            
-            <div class="profile-info">
-              <h1 class="username">{{ user()!.username }}</h1>
-              <p class="email">{{ user()!.email }}</p>
-              
-              @if (userStats()) {
-                <div class="quick-stats">
-                  <div class="stat-item">
-                    <span class="stat-number">{{ userStats()!.totalModules }}</span>
-                    <span class="stat-label">Modules</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-number">{{ userStats()!.followers }}</span>
-                    <span class="stat-label">Followers</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-number">{{ userStats()!.following }}</span>
-                    <span class="stat-label">Following</span>
-                  </div>
+          <div class="profile-picture-container">
+            @if (profileImageUrl()) {
+              <img 
+                [src]="profileImageUrl()!" 
+                [alt]="userDisplayName()"
+                class="profile-image"
+                (load)="onImageLoad()"
+                (error)="onImageError()"
+                [class.loading]="isImageLoading()"
+              />
+              @if (isImageLoading()) {
+                <div class="image-loading">
+                  <i class="pi pi-spin pi-spinner"></i>
                 </div>
               }
-            </div>
+            } @else {
+              <div class="profile-avatar-fallback">
+                <span>{{ userInitials() }}</span>
+              </div>
+            }
+            <div class="status-indicator"></div>
           </div>
-
-          <!-- Action Buttons -->
+          
+          <div class="profile-info">
+            <h1 class="display-name">{{ userDisplayName() }}</h1>
+            <p class="username">{{ '@' + user()?.username }}</p>
+            <div class="member-info">
+              <i class="pi pi-calendar"></i>
+              <span>Membre depuis {{ memberSince() }}</span>
+            </div>
+            
+            @if (userStats()?.averageRating && userStats()!.averageRating > 0) {
+              <div class="user-rating">
+                <p-rating 
+                  [ngModel]="userStats()!.averageRating" 
+                  [readonly]="true" 
+                  [stars]="5"
+                  styleClass="rating-compact"
+                />
+                <span class="rating-value">{{ userStats()!.averageRating | number:'1.1-1' }}</span>
+                <span class="rating-label">note moyenne</span>
+              </div>
+            }
+          </div>
+          
           <div class="profile-actions">
             @if (!isOwnProfile()) {
               <p-button 
                 [label]="isFollowing() ? 'Suivi' : 'Suivre'"
                 [icon]="isFollowing() ? 'pi pi-check' : 'pi pi-plus'"
-                [severity]="isFollowing() ? 'success' : 'primary'"
+                [severity]="isFollowing() ? 'secondary' : 'primary'"
                 [outlined]="isFollowing()"
                 (onClick)="toggleFollow()"
-                class="follow-btn"
-                pTooltip="Suivre cet utilisateur"
-                tooltipStyleClass="tooltip-info"
-              ></p-button>
-              
-              <p-button 
-                icon="pi pi-comment" 
-                severity="secondary"
-                [outlined]="true"
-                pTooltip="Envoyer un message"
-                tooltipStyleClass="tooltip-info"
-              ></p-button>
+                size="large"
+                styleClass="follow-btn"
+              />
             }
-            
             <p-button 
-              icon="pi pi-share-alt" 
+              icon="pi pi-share-alt"
               severity="secondary"
               [outlined]="true"
               (onClick)="shareProfile()"
-              pTooltip="Partager le profil"
-              tooltipStyleClass="tooltip-info"
-            ></p-button>
+              pTooltip="Partager ce profil"
+              size="large"
+              styleClass="share-btn"
+            />
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Stats Cards Section -->
-    @if (userStats()) {
-      <section class="stats-section">
-        <div class="stats-container">
-          <div class="stat-card premium">
+        
+        <!-- Statistiques en cartes modernes -->
+        <div class="stats-grid">
+          <div class="stat-card modules">
+            <div class="stat-icon">
+              <i class="pi pi-book"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ formatNumber(userStats()?.totalModules || 0) }}</div>
+              <div class="stat-label">Module{{ (userStats()?.totalModules || 0) > 1 ? 's' : '' }}</div>
+              @if ((userStats()?.publishedModules || 0) > 0) {
+                <div class="stat-sub">{{ userStats()!.publishedModules }} publié{{ userStats()!.publishedModules > 1 ? 's' : '' }}</div>
+              }
+            </div>
+          </div>
+          
+          <div class="stat-card views">
             <div class="stat-icon">
               <i class="pi pi-eye"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-number">{{ userStats()!.totalViews.toLocaleString() }}</div>
-              <div class="stat-title">Vues totales</div>
+              <div class="stat-number">{{ formatNumber(userStats()?.totalViews || 0) }}</div>
+              <div class="stat-label">Vue{{ (userStats()?.totalViews || 0) > 1 ? 's' : '' }}</div>
+              <div class="stat-sub">du profil</div>
             </div>
           </div>
-
-          <div class="stat-card">
+          
+          <div class="stat-card followers">
             <div class="stat-icon">
-              <i class="pi pi-bookmark"></i>
+              <i class="pi pi-users"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-number">{{ userStats()!.publishedModules }}</div>
-              <div class="stat-title">Modules publiés</div>
-              <div class="stat-progress">
-                <p-progressBar 
-                  [value]="(userStats()!.publishedModules / userStats()!.totalModules) * 100"
-                  [showValue]="false"
-                  class="mini-progress"
-                ></p-progressBar>
+              <div class="stat-number">{{ formatNumber(userStats()?.followers || 0) }}</div>
+              <div class="stat-label">Abonné{{ (userStats()?.followers || 0) > 1 ? 's' : '' }}</div>
+              <div class="stat-sub">{{ (userStats()?.followers || 0) === 0 ? 'Aucun' : '' }} suiveur{{ (userStats()?.followers || 0) > 1 ? 's' : '' }}</div>
+            </div>
+          </div>
+          
+          @if (userStats()?.averageRating && userStats()!.averageRating > 0) {
+            <div class="stat-card rating">
+              <div class="stat-icon">
+                <i class="pi pi-star-fill"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ userStats()!.averageRating | number:'1.1-1' }}</div>
+                <div class="stat-label">Note moyenne</div>
+                <div class="stat-sub">sur ses modules</div>
               </div>
             </div>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section du contenu principal -->
+    <div class="profile-content">
+      <div class="content-header">
+        <h2 class="section-title">
+          <i class="pi pi-folder"></i>
+          Modules créés
+        </h2>
+        
+        <!-- Filtres et recherche -->
+        <div class="content-controls">
+          <div class="search-container">
+            <p-iconfield iconPosition="left">
+              <p-inputicon styleClass="pi pi-search" />
+              <input 
+                pInputText 
+                placeholder="Rechercher un module..."
+                [ngModel]="searchQuery()"
+                (ngModelChange)="onSearchChange($event)"
+                class="search-input"
+              />
+            </p-iconfield>
           </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="pi pi-star-fill"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-number">{{ userStats()!.avgRating.toFixed(1) }}</div>
-              <div class="stat-title">Note moyenne</div>
-              <div class="stars">
-                @for (star of getStarArray(userStats()!.avgRating); track $index) {
-                  <i class="pi" [class]="star ? 'pi-star-fill active' : 'pi-star'"></i>
-                }
+          
+          <p-select
+            [options]="filterOptions"
+            [ngModel]="selectedFilter()"
+            (ngModelChange)="onFilterChange($event)"
+            placeholder="Filtrer par..."
+            optionValue="value"
+            optionLabel="label"
+            styleClass="filter-select"
+          >
+            <ng-template let-option pTemplate="selectedItem">
+              <div class="filter-option">
+                <i [class]="option.icon"></i>
+                <span>{{ option.label }}</span>
               </div>
+            </ng-template>
+            <ng-template let-option pTemplate="item">
+              <div class="filter-option">
+                <i [class]="option.icon"></i>
+                <span>{{ option.label }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+      
+      <!-- Grille des modules -->
+      @if (filteredModules().length > 0) {
+        <div class="modules-grid">
+          @for (module of filteredModules(); track module.id) {
+            <div 
+              class="module-card-wrapper" 
+              (click)="openModule(module.id)"
+              (keyup.enter)="openModule(module.id)"
+              (keyup.space)="openModule(module.id)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Ouvrir le module ' + module.title"
+            >
+              <app-module-card [module]="module" />
             </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="pi pi-calendar"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-number">{{ getJoinedDuration() }}</div>
-              <div class="stat-title">Membre depuis</div>
-            </div>
+          }
+        </div>
+      } @else {
+        <!-- État vide élégant -->
+        <div class="empty-state">
+          <div class="empty-illustration">
+            @if (searchQuery() || selectedFilter() !== 'all') {
+              <i class="pi pi-search"></i>
+              <h3>Aucun module trouvé</h3>
+              <p>Aucun module ne correspond à vos critères de recherche</p>
+              <p-button 
+                label="Effacer les filtres"
+                icon="pi pi-refresh"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="searchQuery.set(''); selectedFilter.set('all')"
+              />
+            } @else {
+              <i class="pi pi-folder-open"></i>
+              <h3>{{ isOwnProfile() ? 'Vous n\'avez' : 'Cet utilisateur n\'a' }} créé aucun module</h3>
+              <p>{{ isOwnProfile() ? 'Commencez votre aventure en créant votre premier module' : 'Revenez plus tard pour découvrir ses créations' }}</p>
+              @if (isOwnProfile()) {
+                <p-button 
+                  label="Créer un module"
+                  icon="pi pi-plus"
+                  severity="primary"
+                  routerLink="/create"
+                />
+              }
+            }
           </div>
         </div>
-      </section>
-    }
+      }
+    </div>
+  }
+</div>
 
-    <!-- Main Content Tabs -->
-    <section class="content-section">
-      <p-tabs value="modules" class="profile-tabs">
-        <p-tablist>
-          <p-tab value="modules">
-            <i class="pi pi-book"></i>
-            <span>Modules</span>
-            <p-badge [value]="userModules().length" severity="secondary"></p-badge>
-          </p-tab>
-          <p-tab value="activity">
-            <i class="pi pi-chart-line"></i>
-            <span>Activité</span>
-          </p-tab>
-          <p-tab value="about">
-            <i class="pi pi-info-circle"></i>
-            <span>À propos</span>
-          </p-tab>
-        </p-tablist>
-
-        <p-tabpanels>
-          <!-- Modules Tab -->
-          <p-tabpanel value="modules">
-            <div class="modules-tab">
-              <!-- Search and Filter Controls -->
-              <div class="modules-controls">
-                <div class="search-section">
-                  <p-iconField iconPosition="left">
-                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                    <input 
-                      type="text" 
-                      pInputText
-                      placeholder="Rechercher dans les modules..."
-                      [value]="searchQuery()"
-                      (input)="onSearchChange($any($event.target).value)"
-                      class="search-input"
-                    />
-                  </p-iconField>
-                </div>
-                
-                <p-select
-                  [options]="filterOptions"
-                  [(ngModel)]="selectedFilter"
-                  (onChange)="onFilterChange($event.value)"
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Filtrer"
-                  class="filter-dropdown"
-                ></p-select>
-              </div>
-
-              <!-- Modules Grid -->
-              <div class="modules-grid">
-                @if (filteredModules().length === 0) {
-                  <div class="empty-state">
-                    <div class="empty-icon">
-                      <i class="pi pi-inbox"></i>
-                    </div>
-                    <h3>Aucun module trouvé</h3>
-                    <p>{{ searchQuery() ? 'Aucun module ne correspond à votre recherche.' : 'Cet utilisateur n\'a pas encore créé de modules.' }}</p>
-                  </div>
-                } @else {
-                  @for (module of filteredModules(); track module.id) {
-                    <app-module-card 
-                      [module]="module"
-                    />
-                  }
-                }
-              </div>
-            </div>
-          </p-tabpanel>
-
-          <!-- Activity Tab -->
-          <p-tabpanel value="activity">
-            <div class="activity-tab">
-              <div class="activity-header">
-                <h2>Activité récente</h2>
-                <p>Découvrez ce que {{ user()!.username }} a fait récemment</p>
-              </div>
-              
-              <div class="activity-timeline">
-                @for (activity of [
-                  { type: 'publish', title: 'A publié "Aventure Fantasy"', time: '2 heures', icon: 'pi-upload' },
-                  { type: 'update', title: 'A mis à jour "Campagne Sci-Fi"', time: '1 jour', icon: 'pi-pencil' },
-                  { type: 'create', title: 'A créé "Mystère Gothic"', time: '3 jours', icon: 'pi-plus-circle' },
-                  { type: 'follow', title: 'A commencé à suivre 3 nouveaux créateurs', time: '1 semaine', icon: 'pi-users' }
-                ]; track $index) {
-                  <div class="activity-item">
-                    <div class="activity-icon">
-                      <i class="pi" [class]="activity.icon"></i>
-                    </div>
-                    <div class="activity-content">
-                      <h4>{{ activity.title }}</h4>
-                      <span class="activity-time">Il y a {{ activity.time }}</span>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          </p-tabpanel>
-
-          <!-- About Tab -->
-          <p-tabpanel value="about">
-            <div class="about-tab">
-              <div class="about-grid">
-                <div class="about-card">
-                  <h3>Informations générales</h3>
-                  <div class="info-list">
-                    <div class="info-item">
-                      <i class="pi pi-calendar"></i>
-                      <span>Membre depuis {{ userStats()?.joinDate | date:'longDate' }}</span>
-                    </div>
-                    <div class="info-item">
-                      <i class="pi pi-clock"></i>
-                      <span>Dernière activité {{ userStats()?.lastActive | date:'shortDate' }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="about-card">
-                  <h3>Genres favoris</h3>
-                  <div class="genres-list">
-                    @for (genre of userStats()?.favoriteGenres || []; track genre) {
-                      <p-chip [label]="genre" styleClass="genre-chip"></p-chip>
-                    }
-                  </div>
-                </div>
-
-                <div class="about-card">
-                  <h3>Statistiques avancées</h3>
-                  <div class="advanced-stats">
-                    <div class="advanced-stat">
-                      <span class="label">Taux de completion</span>
-                      <div class="stat-bar">
-                        <p-progressBar 
-                          [value]="userStats()?.completionRate || 0"
-                          [showValue]="true"
-                          class="completion-bar"
-                        ></p-progressBar>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
-    </section>
-  </div>
-}
+<!-- Toast pour les notifications -->
+<p-toast />

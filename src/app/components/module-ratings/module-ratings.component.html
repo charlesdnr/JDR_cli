@@ -1,0 +1,272 @@
+<div class="ratings-container">
+  <!-- En-tête avec sélection de version -->
+  <div class="ratings-header">
+    <div class="header-info">
+      <h3>
+        <i class="pi pi-star"></i>
+        Évaluations du module
+      </h3>
+      @if (module()) {
+        <p class="module-title">{{ module()!.title }}</p>
+      }
+    </div>
+
+    <!-- Sélecteur de version -->
+    @if (availableVersions().length > 0) {
+      <div class="version-selector">
+        <label for="version-select">Version :</label>
+        <p-select
+          id="version-select"
+          [options]="availableVersions()"
+          [ngModel]="selectedVersionId()"
+          (ngModelChange)="onVersionChange($event)"
+          placeholder="Sélectionner une version"
+          styleClass="version-dropdown"
+          [disabled]="loading()"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Statistiques des ratings -->
+  <div class="ratings-stats">
+    <div class="stats-grid">
+      <div class="stat-card average">
+        <div class="stat-icon">
+          <i class="pi pi-star-fill"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ averageRating | number:'1.1-1' }}</div>
+          <div class="stat-label">Note moyenne</div>
+          <p-rating 
+            [ngModel]="averageRating" 
+            [readonly]="true" 
+            [stars]="5"
+            styleClass="compact-rating"
+          />
+        </div>
+      </div>
+
+      <div class="stat-card total">
+        <div class="stat-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalRatings }}</div>
+          <div class="stat-label">{{ totalRatings > 1 ? 'Évaluations' : 'Évaluation' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire pour ajouter/modifier une évaluation -->
+  @if (currentUser()) {
+    <div class="rating-form">
+      @if (!hasUserRated) {
+        <!-- Nouvelle évaluation -->
+        <div class="form-header">
+          <h4>Évaluer cette version</h4>
+          <p>Partagez votre avis sur cette version du module</p>
+        </div>
+        
+        <div class="form-content">
+          <div class="rating-input">
+            <span class="input-label">Votre note :</span>
+            <p-rating 
+              [ngModel]="newRating()" 
+              (ngModelChange)="newRating.set($event)"
+              [stars]="5"
+              styleClass="user-rating"
+            />
+            <span class="rating-text" [style.color]="getRatingColor(newRating())">
+              {{ newRating() > 0 ? getRatingText(newRating()) : 'Aucune note' }}
+            </span>
+          </div>
+
+          <div class="form-actions">
+            <p-button 
+              label="Publier l'évaluation"
+              icon="pi pi-check"
+              (onClick)="submitRating()"
+              [disabled]="!newRating() || loading()"
+              [loading]="loading()"
+              severity="success"
+            />
+          </div>
+        </div>
+      } @else {
+        <!-- Évaluation existante -->
+        <div class="user-rating-display">
+          <div class="rating-header">
+            <h4>Votre évaluation</h4>
+            <div class="rating-actions">
+              <p-button 
+                icon="pi pi-pencil"
+                pTooltip="Modifier"
+                (onClick)="startEdit(userRating!)"
+                [disabled]="loading()"
+                severity="secondary"
+                size="small"
+              />
+              <p-button 
+                icon="pi pi-trash"
+                pTooltip="Supprimer"
+                (onClick)="confirmDelete(userRating!)"
+                [disabled]="loading()"
+                severity="danger"
+                size="small"
+              />
+            </div>
+          </div>
+
+          @if (editingRating() && editingRating()?.id === userRating!.id) {
+            <!-- Mode édition -->
+            <div class="edit-form">
+              <div class="rating-input">
+                <span class="input-label">Votre note :</span>
+                <p-rating 
+                  [ngModel]="editRatingValue()" 
+                  (ngModelChange)="editRatingValue.set($event)"
+                  [stars]="5"
+                  styleClass="user-rating"
+                />
+                <span class="rating-text" [style.color]="getRatingColor(editRatingValue())">
+                  {{ editRatingValue() > 0 ? getRatingText(editRatingValue()) : 'Aucune note' }}
+                </span>
+              </div>
+
+              <div class="form-actions">
+                <p-button 
+                  label="Sauvegarder"
+                  icon="pi pi-check"
+                  (onClick)="saveEdit()"
+                  [disabled]="!editRatingValue() || loading()"
+                  [loading]="loading()"
+                  severity="success"
+                  size="small"
+                />
+                <p-button 
+                  label="Annuler"
+                  icon="pi pi-times"
+                  (onClick)="cancelEdit()"
+                  [disabled]="loading()"
+                  severity="secondary"
+                  size="small"
+                />
+              </div>
+            </div>
+          } @else {
+            <!-- Affichage normal -->
+            <div class="rating-display">
+              <div class="rating-content">
+                <p-rating 
+                  [ngModel]="userRating!.rating" 
+                  [readonly]="true" 
+                  [stars]="5"
+                  styleClass="display-rating"
+                />
+                <span class="rating-text" [style.color]="getRatingColor(userRating!.rating)">
+                  {{ getRatingText(userRating!.rating) }}
+                </span>
+              </div>
+              <div class="rating-meta">
+                <span class="date">
+                  <i class="pi pi-calendar"></i>
+                  {{ getTimeAgo(userRating!.updatedAt) }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Utilisateur non connecté -->
+    <div class="login-prompt">
+      <i class="pi pi-user"></i>
+      <p>Connectez-vous pour évaluer ce module</p>
+    </div>
+  }
+
+  <!-- État de chargement -->
+  @if (loading()) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Chargement des évaluations...</p>
+    </div>
+  }
+
+  <!-- Liste des évaluations des autres utilisateurs -->
+  @if (otherUsersRatings.length > 0) {
+    <div class="all-ratings-section">
+      <div class="section-header">
+        <h4>
+          <i class="pi pi-users"></i>
+          Évaluations des utilisateurs ({{ otherUsersRatings.length }})
+        </h4>
+      </div>
+
+      <div class="ratings-list">
+        @for (rating of otherUsersRatings; track rating.id) {
+          <div class="rating-item">
+            <div class="rating-header">
+              <div class="user-info">
+                <div class="user-avatar">
+                  @if (getCachedUserProfileImage(rating.user)) {
+                    <img 
+                      [src]="getCachedUserProfileImage(rating.user)!" 
+                      [alt]="rating.user?.username || 'Utilisateur'"
+                      class="avatar-image"
+                      (error)="onProfileImageError($event, rating.user)"
+                    />
+                  } @else {
+                    <span class="avatar-fallback">
+                      {{ getUserInitials(rating.user) }}
+                    </span>
+                  }
+                </div>
+                <div class="user-details">
+                  <span 
+                    class="username clickable" 
+                    (click)="goToUserProfile($event, rating.user)"
+                    (keyup.enter)="goToUserProfile($event, rating.user)"
+                    tabindex="0"
+                    pTooltip="Voir le profil de {{ rating.user?.username }}">
+                    {{ rating.user?.username || 'Utilisateur anonyme' }}
+                  </span>
+                  <span class="rating-date">
+                    {{ getTimeAgo(rating.updatedAt) }}
+                  </span>
+                </div>
+              </div>
+              <div class="rating-value">
+                <p-rating 
+                  [ngModel]="rating.rating" 
+                  [readonly]="true" 
+                  [stars]="5"
+                  styleClass="compact-rating"
+                />
+                <span class="rating-text" [style.color]="getRatingColor(rating.rating)">
+                  {{ getRatingText(rating.rating) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- État vide -->
+  @if (!loading() && totalRatings === 0) {
+    <div class="empty-state">
+      <i class="pi pi-star"></i>
+      <h4>Aucune évaluation</h4>
+      <p>Soyez le premier à évaluer cette version !</p>
+    </div>
+  }
+</div>
+
+<!-- Dialogs -->
+<p-confirmDialog />
+<p-toast />

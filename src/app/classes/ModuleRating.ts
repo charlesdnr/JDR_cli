@@ -1,11 +1,11 @@
 import { User } from "./User";
 
 export class ModuleRating {
-    id = 1;
+    id: number | null = null;
     moduleId = 0;
     moduleVersionId = 0;
     user: User | null = null;
-    ratings = 0;
+    rating = 0;
     createdAt: Date = new Date();
     updatedAt: Date = new Date();
     

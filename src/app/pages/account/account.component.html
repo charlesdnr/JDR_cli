@@ -177,33 +177,22 @@
           <div class="card-content">
             <div class="preference-item">
               <div class="preference-info">
-                <span class="preference-label">{{ 'Notifications par email' | translate }}</span>
-                <span class="preference-desc">{{ 'Recevoir des notifications pour les nouvelles activités' | translate }}</span>
-              </div>
-              <p-toggleButton 
-                [ngModel]="userPreferences().emailNotifications" 
-                (ngModelChange)="updatePreference('emailNotifications', $event)"
-                onIcon="pi pi-check" 
-                offIcon="pi pi-times"
-                styleClass="preference-toggle"
-              />
-            </div>
-            
-            <div class="preference-item">
-              <div class="preference-info">
                 <span class="preference-label">{{ 'Profil public' | translate }}</span>
                 <span class="preference-desc">{{ 'Permettre aux autres utilisateurs de voir votre profil' | translate }}</span>
               </div>
               <p-toggleButton 
-                [ngModel]="userPreferences().publicProfile" 
+                [ngModel]="syncedUserPreferences().publicProfile" 
                 (ngModelChange)="updatePreference('publicProfile', $event)"
                 onIcon="pi pi-check" 
                 offIcon="pi pi-times"
+                onLabel="Oui"
+                offLabel="Non"
                 styleClass="preference-toggle"
               />
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

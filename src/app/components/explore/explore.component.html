@@ -376,56 +376,105 @@
   }
 </div>
 
-<!-- Dialog de sauvegarde -->
+<!-- Dialog de sauvegarde amélioré -->
 <p-dialog 
-  header="Sauvegarder dans un dossier"
+  header=""
   [(visible)]="showSaveDialog"
   [modal]="true"
-  [style]="{ width: '450px' }"
+  [style]="{ width: '520px', maxHeight: '80vh' }"
   [closable]="true"
   [draggable]="false"
-  styleClass="save-dialog"
+  styleClass="save-dialog-enhanced"
+  [blockScroll]="true"
 >
+  <div class="save-dialog-header">
+    <div class="dialog-icon">
+      <i class="pi pi-bookmark" style="color: var(--primary-color); font-size: 2rem;"></i>
+    </div>
+    <div class="dialog-title">
+      <h3>Sauvegarder le module</h3>
+      <p>Choisissez un dossier pour organiser vos modules sauvegardés</p>
+    </div>
+  </div>
+
   <div class="save-dialog-content">
     @if(moduleToSave()) {
-      <div class="module-info">
-        <h4>{{ moduleToSave()?.title }}</h4>
-        <p>{{ moduleToSave()?.description }}</p>
+      <div class="module-preview">
+        <div class="module-image">
+          <img 
+            [src]="moduleToSave()?.picture?.src || 'assets/images/baseImageModule.png'"
+            [alt]="moduleToSave()?.title"
+            loading="lazy"
+          />
+        </div>
+        <div class="module-details">
+          <h4>{{ moduleToSave()?.title }}</h4>
+          <p class="module-description">{{ moduleToSave()?.description }}</p>
+          <div class="module-meta">
+            <span class="meta-item">
+              <i class="pi pi-user"></i>
+              {{ moduleToSave()?.creator?.username || 'Créateur inconnu' }}
+            </span>
+            @if(moduleToSave()?.tags && moduleToSave()!.tags!.length > 0) {
+              <span class="meta-item">
+                <i class="pi pi-tags"></i>
+                {{ moduleToSave()!.tags!.length }} tag{{ moduleToSave()!.tags!.length > 1 ? 's' : '' }}
+              </span>
+            }
+          </div>
+        </div>
       </div>
     }
     
-    <div class="folder-selection">
-      <label for="folder-select">Choisir un dossier :</label>
+    <div class="folder-selection-section">
+      <label for="folder-select" class="selection-label">
+        <i class="pi pi-folder"></i>
+        Destination
+      </label>
       <p-treeselect
         inputId="folder-select"
         [options]="userFolders()"
         [(ngModel)]="selectedFolder"
-        placeholder="Sélectionner un dossier"
+        placeholder="Sélectionner un dossier de destination"
         [appendTo]="'body'"
         [showClear]="true"
         [filter]="true"
         filterPlaceholder="Rechercher un dossier..."
-        class="folder-tree-select"
+        class="folder-tree-select-enhanced"
+        [disabled]="savingModule()"
       />
+      @if(!selectedFolder()) {
+        <small class="selection-hint">
+          <i class="pi pi-info-circle"></i>
+          Veuillez sélectionner un dossier pour continuer
+        </small>
+      }
     </div>
   </div>
   
   <ng-template pTemplate="footer">
-    <div class="dialog-footer">
+    <div class="dialog-footer-enhanced">
       <p-button 
         label="Annuler"
         icon="pi pi-times"
         severity="secondary"
         [outlined]="true"
         (onClick)="cancelSave()"
+        [disabled]="savingModule()"
+        size="large"
       />
       <p-button 
-        label="Sauvegarder"
-        icon="pi pi-save"
+        [label]="savingModule() ? 'Sauvegarde...' : 'Sauvegarder'"
+        [icon]="savingModule() ? 'pi pi-spin pi-spinner' : 'pi pi-bookmark'"
         severity="primary"
         (onClick)="saveToFolder()"
-        [disabled]="!selectedFolder()"
+        [disabled]="!selectedFolder() || savingModule()"
+        [loading]="savingModule()"
+        size="large"
       />
     </div>
   </ng-template>
 </p-dialog>
+
+<!-- Toast notifications -->
+<p-toast />

@@ -24,10 +24,13 @@ import { GameSystemService } from '../../services/https/GameSystemService.servic
 import { EditorModule } from 'primeng/editor';
 import { GameSystem } from '../../classes/GameSystem';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DomSanitizer } from '@angular/platform-browser';
+import { sanitizeAIGeneratedHTML } from '../../utils/cleanBlocksForSave';
 
 interface AnimatedWord {
   text: string;
   opacity: number;
+  isHTML?: boolean;
 }
 
 @Component({
@@ -56,6 +59,7 @@ export class AiConfigComponent implements OnInit, OnDestroy {
   private AIService = inject(AIGenerationService);
   private messageService = inject(MessageService);
   private gameSystemService = inject(GameSystemService);
+  private sanitizer = inject(DomSanitizer);
 
   type = input<EBlockType>(EBlockType.paragraph);
   generatingMessage = signal<string>('Génération en cours...');
@@ -241,25 +245,57 @@ export class AiConfigComponent implements OnInit, OnDestroy {
       clearTimeout(this.animationTimeout);
     }
 
-    // Séparer le texte en mots en préservant les espaces importants
-    const words = text.split(/(\S+|\s+)/g)
-      .filter(word => word.trim().length > 0 || word === ' ') // Garde les espaces simples, supprime les multiples
-      .map(word => ({
-        text: word,
-        opacity: 0
-      }));
+    // Parser le HTML et diviser en segments (texte et balises)
+    const segments = this.parseHTMLSegments(text);
+    
+    this.animatedWords.set(segments);
 
-    this.animatedWords.set(words);
-
-    // Animer chaque mot
-    words.forEach((word, index) => {
+    // Animer chaque segment
+    segments.forEach((segment, index) => {
       this.animationTimeout = setTimeout(() => {
-        const updatedWords = [...this.animatedWords()];
-        updatedWords[index] = { ...word, opacity: 1 };
-        this.animatedWords.set(updatedWords);
+        const updatedSegments = [...this.animatedWords()];
+        updatedSegments[index] = { ...segment, opacity: 1 };
+        this.animatedWords.set(updatedSegments);
       }, index * this.WORD_ANIMATION_DELAY);
     });
   }
+
+  private parseHTMLSegments(html: string): {text: string, opacity: number, isHTML: boolean}[] {
+    const segments: {text: string, opacity: number, isHTML: boolean}[] = [];
+    
+    // D'abord sanitiser tout le HTML
+    const sanitizedHTML = sanitizeAIGeneratedHTML(html);
+    
+    // Regex pour matcher les balises HTML et le texte
+    const htmlRegex = /<[^>]*>|[^<]+/g;
+    const matches = sanitizedHTML.match(htmlRegex) || [];
+    
+    matches.forEach(match => {
+      if (match.startsWith('<') && match.endsWith('>')) {
+        // C'est une balise HTML déjà sanitisée
+        segments.push({
+          text: match,
+          opacity: 0,
+          isHTML: true
+        });
+      } else {
+        // C'est du texte, on le divise en mots
+        const words = match.split(/(\S+|\s+)/g)
+          .filter(word => word.trim().length > 0 || word === ' ');
+        
+        words.forEach(word => {
+          segments.push({
+            text: word,
+            opacity: 0,
+            isHTML: false
+          });
+        });
+      }
+    });
+    
+    return segments;
+  }
+
 
   // Ajouter une méthode pour régénérer
   regenerate() {

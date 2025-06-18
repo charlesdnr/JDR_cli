@@ -111,6 +111,21 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   userPreferences = signal(this.userPreferencesData);
 
+  // Computed pour synchroniser avec le UserProfile
+  syncedUserPreferences = computed(() => {
+    const currentProfile = this.currentUserProfile();
+    const currentPrefs = this.userPreferences();
+    
+    if (currentProfile) {
+      return {
+        ...currentPrefs,
+        publicProfile: currentProfile.isPublic
+      };
+    }
+    
+    return currentPrefs;
+  });
+
   recentActivities = signal([
     {
       id: 1,
@@ -170,6 +185,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   ]);
 
 
+
   ngOnInit() {
     const user = this.currentUser();
     if (user?.username) {
@@ -181,6 +197,15 @@ export class AccountComponent implements OnInit, OnDestroy {
     const profileImage = this.profileImageUrl();
     if (profileImage) {
       this.profileImagePreview.set(profileImage);
+    }
+
+    // Initialiser les préférences avec les valeurs du profil utilisateur
+    const currentProfile = this.currentUserProfile();
+    if (currentProfile) {
+      this.userPreferences.set({
+        ...this.userPreferences(),
+        publicProfile: currentProfile.isPublic
+      });
     }
   }
 
@@ -388,13 +413,47 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
 
-  updatePreference(key: keyof typeof this.userPreferencesData, value: boolean) {
+  async updatePreference(key: keyof typeof this.userPreferencesData, value: boolean) {
     const currentPrefs = this.userPreferences();
     this.userPreferences.set({
       ...currentPrefs,
       [key]: value,
     });
+
+    // Si on change la préférence publicProfile, mettre à jour le UserProfile
+    if (key === 'publicProfile') {
+      try {
+        const currentProfile = this.currentUserProfile();
+        if (currentProfile) {
+          const updatedProfile = { ...currentProfile };
+          updatedProfile.isPublic = value;
+          
+          await this.userProfileService.updateUserProfile(updatedProfile);
+          
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: `Profil ${value ? 'public' : 'privé'} mis à jour avec succès`,
+          });
+        }
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du profil:', error);
+        
+        // Revenir à l'ancienne valeur en cas d'erreur
+        this.userPreferences.set({
+          ...currentPrefs,
+          [key]: !value,
+        });
+        
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Erreur lors de la mise à jour du profil utilisateur',
+        });
+      }
+    }
   }
+
 
   async deleteAccount() {
     const currentUser = this.auth.currentUser;

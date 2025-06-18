@@ -23,13 +23,21 @@
             <div class="writing-response">
               <div class="writing-text">
                 @for(word of animatedWords(); track $index) {
-                  @if(word.text.trim()) {
-                    <span
-                      class="animated-word"
-                      [style.opacity]="word.opacity"
-                    >
-                      {{word.text}}
-                    </span>
+                  @if(word.text.trim() || word.isHTML) {
+                    @if(word.isHTML) {
+                      <span
+                        class="animated-word"
+                        [style.opacity]="word.opacity"
+                        [innerHTML]="word.text"
+                      ></span>
+                    } @else {
+                      <span
+                        class="animated-word"
+                        [style.opacity]="word.opacity"
+                      >
+                        {{word.text}}
+                      </span>
+                    }
                   }
                 }
               </div>

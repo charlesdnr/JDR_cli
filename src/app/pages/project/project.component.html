@@ -54,8 +54,7 @@
         <p-button 
           label="Nouveau"
           icon="pi pi-plus"
-          (onClick)="resetModule()"
-          routerLink="/new-module"
+          (onClick)="openCreateModuleModal()"
         ></p-button>
       </div>
     </div>
@@ -297,8 +296,7 @@
                         label="Créer un module"
                         icon="pi pi-plus"
                         size="large"
-                        (onClick)="resetModule()"
-                        routerLink="/new-module"
+                        (onClick)="openCreateModuleModal()"
                       ></p-button>
                     </div>
                     
@@ -330,8 +328,7 @@
       icon="pi pi-plus"
       [rounded]="true"
       size="large"
-      (onClick)="resetModule()"
-      routerLink="/new-module"
+      (onClick)="openCreateModuleModal()"
       title="Créer un nouveau module"
     ></p-button>
   </div>

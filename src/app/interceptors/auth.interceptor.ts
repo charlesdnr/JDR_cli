@@ -2,7 +2,8 @@ import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angul
 import { inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { from, Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, catchError } from 'rxjs/operators';
+import { AuthenticationService } from '../services/authentication.service';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -10,51 +11,58 @@ export const authInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
 
   const auth = inject(Auth);
+  const authService = inject(AuthenticationService);
+
+  // For requests that don't need authentication, proceed immediately
   const currentUser = auth.currentUser;
 
-  // Si pas d'utilisateur, passer directement la requête (retourne un Observable)
+  // If no user is logged in, proceed with the original request
   if (!currentUser) {
     return next(req);
   }
 
+  // Wait for authentication to be ready and get token
   const requestHandlerPromise = async (): Promise<HttpRequest<unknown>> => {
     try {
-      // Utilisation de await pour obtenir le token
-      const token = await currentUser.getIdToken();
+      // Wait for auth to be ready and get token
+      const token = await authService.waitForAuthToken();
 
       if (token) {
-        // Cloner la requête si le token est obtenu
-        // Pour FormData, ne pas modifier Content-Type
+        // Clone the request with authorization header
         const headers: Record<string, string> = {
           Authorization: `Bearer ${token}`
         };
         
-        // Pour FormData/multipart, ne pas définir Content-Type
+        // For FormData/multipart, don't set Content-Type
         const isFormData = req.body instanceof FormData;
         if (!isFormData) {
-          // Seulement pour les requêtes non-FormData, on peut ajouter Content-Type si nécessaire
-          // headers['Content-Type'] = 'application/json'; // Ne le faites que si nécessaire
+          // Only for non-FormData requests, add Content-Type if necessary
+          // headers['Content-Type'] = 'application/json'; // Only if necessary
         }
         
         const clonedReq = req.clone({
           setHeaders: headers
         });
-        // Retourner la requête clonée (résolution de la Promise)
         return clonedReq;
       } else {
-        // Si pas de token (peu probable mais géré), retourner l'originale
-        console.warn('Utilisateur connecté mais impossible de récupérer le token Firebase.');
+        // If no token available, log warning and proceed with original request
+        console.warn('User logged in but unable to retrieve Firebase token.');
         return req;
       }
     } catch (error) {
-      // Gérer les erreurs potentielles lors de la récupération du token
-      console.error('Erreur lors de la récupération du token Firebase via interceptor:', error);
-      // En cas d'erreur, retourner la requête originale (résolution de la Promise)
+      // Handle potential errors when retrieving token
+      console.error('Error retrieving Firebase token via interceptor:', error);
+      // In case of error, return original request
       return req;
     }
   };
 
   return from(requestHandlerPromise()).pipe(
-    switchMap(processedRequest => next(processedRequest))
+    switchMap(processedRequest => next(processedRequest)),
+    catchError(error => {
+      console.error('Auth interceptor error:', error);
+      // In case of interceptor error, try with original request
+      return next(req);
+    })
   );
 };

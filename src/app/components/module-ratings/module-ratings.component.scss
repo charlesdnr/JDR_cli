@@ -1,0 +1,536 @@
+@use "../../../assets/sass/core/mixins" as *;
+
+.ratings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+// === HEADER ===
+.ratings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--neutral-color);
+
+  @include respond-to("mobile") {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-info {
+    flex: 1;
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--font-color);
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      i {
+        color: #ffc107;
+        font-size: 1.25rem;
+      }
+    }
+
+    .module-title {
+      font-size: 0.875rem;
+      color: var(--font-secondary-color);
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+
+  .version-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+
+    @include respond-to("mobile") {
+      min-width: unset;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--font-color);
+    }
+
+    ::ng-deep .version-dropdown {
+      .p-select {
+        border-radius: var(--radius-small);
+        border: 2px solid var(--neutral-color);
+        transition: all 0.3s ease;
+
+        &:focus-within {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// === STATISTICS ===
+.ratings-stats {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--background-color-lighter);
+      border: 1px solid var(--neutral-color);
+      border-radius: var(--radius-small);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      &.average {
+        border-left: 4px solid #ffc107;
+
+        .stat-icon {
+          background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        }
+      }
+
+      &.total {
+        border-left: 4px solid var(--primary-color);
+
+        .stat-icon {
+          background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+        }
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .stat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: var(--font-color);
+          line-height: 1;
+        }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: var(--font-secondary-color);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+
+// === RATING FORM ===
+.rating-form {
+  background: var(--background-color);
+  border: 1px solid var(--neutral-color);
+  border-radius: var(--radius-small);
+  padding: 1.5rem;
+
+  .form-header {
+    margin-bottom: 1.5rem;
+
+    h4 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--font-color);
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--font-secondary-color);
+      margin: 0;
+    }
+  }
+
+  .form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .rating-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .input-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--font-color);
+    }
+
+    .rating-text {
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-small);
+      background: var(--background-color-lighter);
+      display: inline-block;
+      width: fit-content;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+
+    @include respond-to("mobile") {
+      flex-direction: column;
+    }
+  }
+}
+
+// === USER RATING DISPLAY ===
+.user-rating-display {
+  background: var(--background-color);
+  border: 1px solid var(--neutral-color);
+  border-radius: var(--radius-small);
+  padding: 1.5rem;
+  border-left: 4px solid #10b981;
+
+  .rating-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h4 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--font-color);
+      margin: 0;
+    }
+
+    .rating-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rating-display {
+    .rating-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+
+      .rating-text {
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-small);
+        background: var(--background-color-lighter);
+      }
+    }
+
+    .rating-meta {
+      .date {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        color: var(--font-secondary-color);
+
+        i {
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+
+// === ALL RATINGS SECTION ===
+.all-ratings-section {
+  background: var(--background-color);
+  border: 1px solid var(--neutral-color);
+  border-radius: var(--radius-small);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+
+  .section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--neutral-color);
+
+    h4 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--font-color);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  .ratings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .rating-item {
+      background: var(--background-color-lighter);
+      border: 1px solid var(--neutral-color);
+      border-radius: var(--radius-small);
+      padding: 1rem;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .rating-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+
+        @include respond-to("mobile") {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex: 1;
+
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+
+            .avatar-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              border-radius: 50%;
+            }
+
+            .avatar-fallback {
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+              color: white;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 0.875rem;
+              border-radius: 50%;
+
+              &.hidden {
+                display: none;
+              }
+            }
+          }
+
+          .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .username {
+              font-weight: 600;
+              color: var(--font-color);
+              
+              &.clickable {
+                cursor: pointer;
+                transition: color 0.3s ease;
+
+                &:hover,
+                &:focus {
+                  color: var(--primary-color);
+                  text-decoration: underline;
+                }
+
+                &:focus {
+                  outline: 2px solid var(--primary-color);
+                  outline-offset: 2px;
+                  border-radius: 3px;
+                }
+              }
+            }
+
+            .rating-date {
+              font-size: 0.75rem;
+              color: var(--font-secondary-color);
+            }
+          }
+        }
+
+        .rating-value {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+
+          @include respond-to("mobile") {
+            align-items: flex-start;
+            align-self: stretch;
+          }
+
+          .rating-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-small);
+            background: var(--background-color);
+          }
+        }
+      }
+    }
+  }
+}
+
+// === STATES ===
+.login-prompt,
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--font-secondary-color);
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--font-color);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.loading-state i {
+  color: var(--primary-color);
+  opacity: 1;
+}
+
+// === RATING COMPONENT CUSTOMIZATION ===
+::ng-deep {
+  .compact-rating {
+    .p-rating-item {
+      width: 16px;
+      height: 16px;
+      
+      .p-rating-icon {
+        font-size: 14px;
+        color: #ffc107;
+      }
+    }
+  }
+
+  .user-rating {
+    .p-rating-item {
+      width: 32px;
+      height: 32px;
+      
+      .p-rating-icon {
+        font-size: 28px;
+        color: #ffc107;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+
+  .display-rating {
+    .p-rating-item {
+      width: 20px;
+      height: 20px;
+      
+      .p-rating-icon {
+        font-size: 18px;
+        color: #ffc107;
+      }
+    }
+  }
+}
+
+// === RESPONSIVE ===
+@include respond-to("mobile") {
+  .ratings-container {
+    gap: 1rem;
+  }
+
+  .ratings-stats .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-rating-display .rating-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .rating-form .rating-input .rating-text {
+    align-self: center;
+  }
+}

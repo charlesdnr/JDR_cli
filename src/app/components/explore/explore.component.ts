@@ -14,6 +14,7 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
 import { TreeSelectModule } from 'primeng/treeselect';
+import { ToastModule } from 'primeng/toast';
 import { TranslateModule } from '@ngx-translate/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
@@ -29,8 +30,9 @@ import { UserFolder } from '../../classes/UserFolder';
 import { UserSavedModule } from '../../classes/UserSavedModule';
 import { EModuleType } from '../../enum/ModuleType';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { TreeNode } from 'primeng/api';
+import { TreeNode, MessageService } from 'primeng/api';
 import { UserHttpService } from '../../services/https/user-http.service';
+import { AuthenticationService } from '../../services/authentication.service';
 
 interface PaginatedResponse<T> {
   content: T[];
@@ -62,9 +64,11 @@ interface TagWithCount extends Tag {
     TooltipModule,
     DialogModule,
     TreeSelectModule,
+    ToastModule,
     TranslateModule,
     ModuleCardComponent,
   ],
+  providers: [MessageService],
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.scss',
   animations: [
@@ -114,6 +118,8 @@ export class ExploreComponent implements OnInit {
   private userSavedModuleHttpService = inject(UserSavedModuleHttpService);
   private router = inject(Router);
   private userHttpService = inject(UserHttpService);
+  private authService = inject(AuthenticationService);
+  private messageService = inject(MessageService);
 
   // Signals pour l'état principal
   modules = signal<Module[]>([]);
@@ -192,9 +198,23 @@ export class ExploreComponent implements OnInit {
   }
 
   async ngOnInit() {
-    await this.loadInitialData();
-    this.setupSearchDebounce();
-    await this.loadModules();
+    await this.initializeWithAuth();
+  }
+  
+  private async initializeWithAuth() {
+    try {
+      // Wait for Firebase authentication to be ready before making HTTP calls
+      await this.authService.waitForAuthReady();
+      await this.loadInitialData();
+      this.setupSearchDebounce();
+      await this.loadModules();
+    } catch (error) {
+      console.error('Error waiting for authentication:', error);
+      // Even if auth fails, try to load data
+      await this.loadInitialData();
+      this.setupSearchDebounce();
+      await this.loadModules();
+    }
   }
 
   private setupSearchDebounce() {
@@ -484,12 +504,13 @@ export class ExploreComponent implements OnInit {
 
   isSaved(module: Module): boolean {
     // TODO: Vérifier si le module est sauvegardé pour l'utilisateur actuel
-    console.log('Check if saved:', module.title);
-    return false;
+    // console.log('Check if saved:', module.title);
+    return module ? false : false;
   }
 
   // Gestion des dossiers
   userFolders = signal<TreeNode[]>([]);
+  savingModule = signal(false);
 
   private async loadUserFolders() {
     try {
@@ -526,9 +547,18 @@ export class ExploreComponent implements OnInit {
     
     if (!module || !folder) return;
 
+    this.savingModule.set(true);
+
     try {
       const currentUser = this.userHttpService.currentJdrUser();
-      if (!currentUser) return;
+      if (!currentUser) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Vous devez être connecté pour sauvegarder un module'
+        });
+        return;
+      }
 
       const savedModule = new UserSavedModule(
         currentUser.id,
@@ -538,11 +568,27 @@ export class ExploreComponent implements OnInit {
       );
       
       await this.userSavedModuleHttpService.saveModule(savedModule);
+      
+      // Succès - fermer la modal et afficher un message
       this.showSaveDialog.set(false);
       this.moduleToSave.set(null);
       this.selectedFolder.set(null);
+      
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Succès',
+        detail: `Le module "${module.title}" a été sauvegardé dans le dossier "${folder.label}"`
+      });
+      
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur de sauvegarde',
+        detail: 'Impossible de sauvegarder le module. Veuillez réessayer.'
+      });
+    } finally {
+      this.savingModule.set(false);
     }
   }
 

@@ -11,6 +11,9 @@ import { ModuleSummary } from '../../classes/ModuleSummary';
 import { Module } from '../../classes/Module';
 import { ModuleCommentService } from '../../services/https/module-comment.service';
 import { ModuleCommentsComponent } from '../module-comments/module-comments.component';
+import { ModuleRatingsHttpService } from '../../services/https/module-ratings-http.service';
+import { ModuleRatingsComponent } from '../module-ratings/module-ratings.component';
+import { AggregatedRatings } from '../../classes/AggregatedRatings';
 
 @Component({
   selector: 'app-module-card',
@@ -33,17 +36,24 @@ export class ModuleCardComponent implements OnInit {
   clickable = input<boolean>(true);
   isHorizontal = input<boolean>(false);
   showComments = input<boolean>(true);
+  showRatings = input<boolean>(true);
   
   private router = inject(Router);
   private moduleCommentService = inject(ModuleCommentService);
+  private moduleRatingsHttpService = inject(ModuleRatingsHttpService);
   private dialogService = inject(DialogService);
   
   commentCount = signal<number>(0);
+  averageRating = signal<number>(0);
+  ratingCount = signal<number>(0);
   private dialogRef: DynamicDialogRef | undefined;
 
   ngOnInit() {
     if (this.showComments()) {
       this.loadCommentCount();
+    }
+    if (this.showRatings()) {
+      this.loadRatingData();
     }
   }
 
@@ -53,6 +63,16 @@ export class ModuleCardComponent implements OnInit {
       this.commentCount.set(comments.length);
     } catch {
       console.error('Error loading comment count');
+    }
+  }
+
+  private async loadRatingData() {
+    try {
+      const ratingsData: AggregatedRatings = await this.moduleRatingsHttpService.getModuleRatingsByModule(this.module().id);
+      this.averageRating.set(ratingsData.moduleAverageRating);
+      this.ratingCount.set(ratingsData.moduleNumberOfRatings);
+    } catch {
+      console.error('Error loading rating data');
     }
   }
 
@@ -88,6 +108,47 @@ export class ModuleCardComponent implements OnInit {
       // Recharger le nombre de commentaires au cas où il y en aurait de nouveaux
       this.loadCommentCount();
     });
+  }
+
+  openRatings(event: Event) {
+    event.stopPropagation(); // Empêcher la propagation vers le click du module
+    
+    this.dialogRef = this.dialogService.open(ModuleRatingsComponent, {
+      header: `Évaluations - ${this.module().title}`,
+      width: '90vw',
+      height: '80vh',
+      modal: true,
+      closable: true,
+      data: {
+        moduleId: this.module().id,
+        moduleVersionId: undefined // Pour les ratings généraux du module
+      }
+    });
+
+    this.dialogRef.onClose.subscribe(() => {
+      // Recharger les données de rating au cas où il y en aurait de nouvelles
+      this.loadRatingData();
+    });
+  }
+
+  getRatingTooltip(): string {
+    const rating = this.averageRating();
+    const count = this.ratingCount();
+    
+    if (rating === 0 || count === 0) {
+      return 'Aucune évaluation';
+    }
+    
+    const ratingText = this.getRatingText(rating);
+    return `${ratingText} (${rating.toFixed(1)}/5) - ${count} évaluation${count > 1 ? 's' : ''}`;
+  }
+
+  private getRatingText(rating: number): string {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 3.5) return 'Très bon';
+    if (rating >= 2.5) return 'Correct';
+    if (rating >= 1.5) return 'Passable';
+    return 'Décevant';
   }
 
   getImageSrc(): string {

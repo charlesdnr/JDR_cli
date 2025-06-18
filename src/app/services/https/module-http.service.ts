@@ -82,6 +82,11 @@ export class ModuleHttpService extends BaseHttpService {
     return firstValueFrom(this.httpClient.get<Module[]>(url));
   }
 
+  getMostRatedModules(page = 0, limit = 10): Promise<Module[]> {
+    const url = `${this.baseApiUrl}/most-rated?page=${page}&limit=${limit}`;
+    return firstValueFrom(this.httpClient.get<Module[]>(url));
+  }
+
   /** GET /api/modules/most-recent */
   getMostRecentModules(
     page = 0,

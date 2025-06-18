@@ -640,6 +640,23 @@
       align-items: center;
       gap: 0.25rem;
       
+      &.clickable-rating {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--radius-small);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: var(--background-color-lighter);
+          transform: scale(1.05);
+        }
+        
+        &:focus {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
+      }
+      
       i {
         color: #ffd700;
         font-size: 0.875rem;
@@ -705,6 +722,43 @@
       .author-role {
         font-size: 0.875rem;
         color: var(--font-secondary-color);
+      }
+    }
+  }
+  
+  .spotlight-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+    
+    .spotlight-secondary-actions {
+      display: flex;
+      gap: 0.5rem;
+      
+      .comment-btn {
+        --p-button-bg: transparent;
+        --p-button-border-color: var(--neutral-color);
+        --p-button-color: var(--font-secondary-color);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          --p-button-bg: var(--primary-color);
+          --p-button-border-color: var(--primary-color);
+          --p-button-color: white;
+          transform: scale(1.1);
+        }
+      }
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      
+      .spotlight-secondary-actions {
+        justify-content: center;
       }
     }
   }

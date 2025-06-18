@@ -2,6 +2,7 @@ import {
   Component,
   inject,
   OnInit,
+  OnDestroy,
   signal,
   WritableSignal,
   computed,
@@ -43,11 +44,13 @@ import {
   TreeNodeSelectEvent,
 } from 'primeng/tree';
 import { ContextMenuModule } from 'primeng/contextmenu';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Module } from '../../classes/Module';
 import { ModuleService } from '../../services/module.service';
 import { DragDropModule } from 'primeng/dragdrop';
 import { ModuleSummary } from '../../classes/ModuleSummary';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { CreateModuleModalComponent } from '../../components/create-module-modal/create-module-modal.component';
 
 interface DisplayableSavedModule extends UserSavedModule {
   moduleDetails?: ModuleSummary;
@@ -73,18 +76,18 @@ interface DisplayableSavedModule extends UserSavedModule {
     ModuleCardComponent,
     TreeModule,
     ContextMenuModule,
-    RouterLink,
     DragDropModule,
     SelectModule,
     ToggleButtonModule,
     SelectButtonModule,
     TooltipModule,
+    DynamicDialogModule,
   ],
-  providers: [TreeDragDropService],
+  providers: [TreeDragDropService, DialogService],
   templateUrl: './project.component.html',
   styleUrl: './project.component.scss',
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent implements OnInit, OnDestroy {
   private httpUserFolderService = inject(UserFolderHttpService);
   private httpUserService = inject(UserHttpService);
   private httpUserSavedModuleService = inject(UserSavedModuleHttpService);
@@ -94,6 +97,9 @@ export class ProjectComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private folderService = inject(FolderService);
+  private dialogService = inject(DialogService);
+  
+  private dialogRef: DynamicDialogRef | undefined;
 
   currentUser = computed(() => this.httpUserService.currentJdrUser());
 
@@ -1031,6 +1037,52 @@ export class ProjectComponent implements OnInit {
           queryParamsHandling: 'merge',
         });
       }
+    }
+  }
+
+  // Method to open create module modal
+  openCreateModuleModal() {
+    this.dialogRef = this.dialogService.open(CreateModuleModalComponent, {
+      header: '',
+      width: 'calc(100vw - 5vw)',
+      height: '90vh',
+      modal: true,
+      closable: false,
+      maximizable: false,
+      resizable: false,
+      styleClass: 'create-module-dialog',
+      contentStyle: { 
+        padding: '0',
+        height: '100%',
+        width: '100%'
+      },
+      style: {
+        'max-width': '900px',
+        'height': '90vh'
+      },
+      baseZIndex: 10000
+    });
+
+    // Force modal size after opening (mais gardons le centrage)
+    setTimeout(() => {
+      const dialogElements = document.querySelectorAll('.create-module-dialog .p-dialog');
+      dialogElements.forEach((dialog: Element) => {
+        const htmlDialog = dialog as HTMLElement;
+        htmlDialog.style.height = '90vh';
+        htmlDialog.style.maxHeight = '90vh';
+        
+        const content = htmlDialog.querySelector('.p-dialog-content') as HTMLElement;
+        if (content) {
+          content.style.height = '90vh';
+          content.style.maxHeight = '90vh';
+        }
+      });
+    }, 100);
+  }
+
+  ngOnDestroy() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
     }
   }
 }

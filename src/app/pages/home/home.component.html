@@ -166,15 +166,15 @@
     </div>
     
     <!-- Featured Module Spotlight -->
-    @if (mostSavedModules().length > 0 && !loadingModules()) {
+    @if (mostRatedModules().length > 0 && !loadingModules()) {
       <div class="featured-module-spotlight">
         <div class="spotlight-content">
           <div class="spotlight-image">
-            <img [src]="mostSavedModules()[0].picture.src || 'assets/images/baseImageModule.png'" 
-                 [alt]="mostSavedModules()[0].title"
+            <img [src]="mostRatedModules()[0].picture.src || 'assets/images/baseImageModule.png'" 
+                 [alt]="mostRatedModules()[0].title"
                  loading="lazy">
             <div class="spotlight-overlay">
-              <div class="spotlight-badge">⭐ Le plus populaire</div>
+              <div class="spotlight-badge">⭐ Le mieux noté</div>
               <div class="spotlight-stats">
                 <span class="stat-item">
                   <i class="pi pi-heart"></i>
@@ -191,43 +191,61 @@
           <div class="spotlight-details">
             <div class="spotlight-meta">
               <p-tag value="Aventure Premium" styleClass="spotlight-category" severity="info"></p-tag>
-              <div class="spotlight-rating">
+              <div class="spotlight-rating clickable-rating" 
+                   (click)="openFeaturedModuleRatings($event)"
+                   (keyup.enter)="openFeaturedModuleRatings($event)"
+                   tabindex="0"
+                   pTooltip="Voir les évaluations"
+                   tooltipStyleClass="tooltip-info">
                 <p-rating 
-                  [(ngModel)]="ratingValue" 
+                  [ngModel]="featuredModuleRatingValue" 
                   [readonly]="true" 
                   styleClass="rating-stars">
                 </p-rating>
-                <span class="rating-text">5.0</span>
+                <span class="rating-text">{{ featuredModuleRatingValue | number:'1.1-1' }}</span>
               </div>
             </div>
             
-            <h3 class="spotlight-title">{{ mostSavedModules()[0].title }}</h3>
-            <p class="spotlight-description">{{ mostSavedModules()[0].description }}</p>
+            <h3 class="spotlight-title">{{ mostRatedModules()[0].title }}</h3>
+            <p class="spotlight-description">{{ mostRatedModules()[0].description }}</p>
             
             <div class="spotlight-author clickable-author" 
-                 (click)="goToUserProfile($event, mostSavedModules()[0].creator.id)"
-                 (keyup.enter)="goToUserProfile($event, mostSavedModules()[0].creator.id)"
+                 (click)="goToUserProfile($event, mostRatedModules()[0].creator.id)"
+                 (keyup.enter)="goToUserProfile($event, mostRatedModules()[0].creator.id)"
                  tabindex="0"
-                 pTooltip="Voir le profil de {{ mostSavedModules()[0].creator.username }}"
+                 pTooltip="Voir le profil de {{ mostRatedModules()[0].creator.username }}"
                  tooltipStyleClass="tooltip-info">
               <div class="author-avatar-large">
-                {{ mostSavedModules()[0].creator.username.charAt(0) || 'A' }}
+                {{ mostRatedModules()[0].creator.username.charAt(0) || 'A' }}
               </div>
               <div class="author-info">
-                <span class="author-name">{{ mostSavedModules()[0].creator.username || 'Anonyme' }}</span>
+                <span class="author-name">{{ mostRatedModules()[0].creator.username || 'Anonyme' }}</span>
                 <span class="author-role">Maître de Jeu Expert</span>
               </div>
             </div>
             
-            <p-button 
-              class="btn-spotlight" 
-              (click)="navigateToModule(mostSavedModules()[0].id)"
-              label="Découvrir ce module"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              styleClass="p-button-lg p-button-rounded"
-              size="large">
-            </p-button>
+            <div class="spotlight-actions">
+              <div class="spotlight-secondary-actions">
+                <p-button 
+                  icon="pi pi-comments"
+                  (click)="openFeaturedModuleComments($event)"
+                  pTooltip="Voir les commentaires"
+                  tooltipStyleClass="tooltip-info"
+                  styleClass="p-button-rounded p-button-outlined comment-btn"
+                  size="small">
+                </p-button>
+              </div>
+              
+              <p-button 
+                class="btn-spotlight" 
+                (click)="navigateToModule(mostRatedModules()[0].id)"
+                label="Découvrir ce module"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                styleClass="p-button-lg p-button-rounded"
+                size="large">
+              </p-button>
+            </div>
           </div>
         </div>
       </div>
@@ -236,7 +254,7 @@
     <!-- Enhanced Modules Grid -->
     <div class="modules-section">
       <div class="modules-header">
-        <h3 class="modules-section-title">Autres modules populaires</h3>
+        <h3 class="modules-section-title">Autres modules bien notés</h3>
         <div class="modules-filter">
           <p-button label="Tous" styleClass="filter-btn active p-button-sm" size="small"></p-button>
           <p-button label="Aventure" styleClass="filter-btn p-button-sm p-button-outlined" size="small"></p-button>
@@ -262,8 +280,8 @@
             </div>
           </div>
         } @else {
-          @if (mostSavedModules().length > 1) {
-            @for (module of mostSavedModules().slice(1); track module.id) {
+          @if (mostRatedModules().length > 1) {
+            @for (module of mostRatedModules().slice(1); track module.id) {
               <div class="module-card-wrapper">
                 <app-module-card [module]="module" />
               </div>
