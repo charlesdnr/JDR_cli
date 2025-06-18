@@ -1,12 +1,10 @@
 @use "../../../assets/sass/core/mixins" as *;
 
 // ===== VARIABLES LOCALES =====
-:root {
-  --profile-hero-height: 40vh;
-  --profile-picture-size: 5rem;
-  --stat-card-size: 160px;
-  --content-max-width: 1200px;
-}
+$profile-hero-height: 40vh;
+$profile-picture-size: 4rem;
+$stat-card-size: 140px;
+$content-max-width: 1200px;
 
 // ===== CONTAINER PRINCIPAL =====
 .profile-container {
@@ -21,7 +19,7 @@
 // ===== LOADING SKELETON =====
 .loading-skeleton {
   .hero-skeleton {
-    min-height: var(--profile-hero-height);
+    min-height: $profile-hero-height;
     padding: 2rem;
     background: var(--background-color-lighter);
     border-bottom: 1px solid var(--neutral-color);
@@ -30,7 +28,7 @@
       display: flex;
       align-items: center;
       gap: 2rem;
-      max-width: var(--content-max-width);
+      max-width: $content-max-width;
       margin: 0 auto 3rem auto;
       
       .profile-info-skeleton {
@@ -44,7 +42,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1.5rem;
-      max-width: var(--content-max-width);
+      max-width: $content-max-width;
       margin: 0 auto;
       
       .stat-skeleton {
@@ -54,7 +52,7 @@
         gap: 0.5rem;
         padding: 1.5rem;
         background: var(--background-color);
-        border-radius: var(--radius-medium);
+        border-radius: var(--radius);
       }
     }
   }
@@ -68,7 +66,7 @@
   
   .hero-content {
     width: 100%;
-    max-width: var(--content-max-width);
+    max-width: $content-max-width;
     margin: 0 auto;
     padding: 0 2rem;
     
@@ -98,8 +96,8 @@
     
     .profile-image,
     .profile-avatar-fallback {
-      width: var(--profile-picture-size);
-      height: var(--profile-picture-size);
+      width: $profile-picture-size !important;
+      height: $profile-picture-size !important;
       border-radius: 50%;
       border: 3px solid var(--neutral-color);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -115,7 +113,7 @@
     }
     
     .profile-avatar-fallback {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -209,13 +207,135 @@
       width: 100%;
       justify-content: center;
     }
+
+    .follow-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border: 1.5px solid var(--primary-color);
+      border-radius: 1.5rem;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      min-width: 110px;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      // État suivre (défaut)
+      &:not(.following):not(.loading) {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+
+        &:hover {
+          background: var(--primary-color);
+          border-color: var(--primary-color);
+          filter: brightness(0.9);
+        }
+      }
+
+      // État suivi
+      &.following {
+        background: white;
+        border-color: #d1d5db;
+        color: #374151;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
+
+        i {
+          transition: all 0.2s ease;
+        }
+
+        .follow-text {
+          opacity: 1;
+          transition: all 0.2s ease;
+        }
+
+        .unfollow-text {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          opacity: 0;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          min-width: max-content;
+        }
+
+        &:hover {
+          border-color: #dc2626;
+          background: #dc2626;
+          color: white;
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+          transform: translateY(-2px);
+
+          i {
+            opacity: 0;
+          }
+
+          .follow-text {
+            opacity: 0;
+          }
+
+          .unfollow-text {
+            opacity: 1;
+          }
+        }
+      }
+
+      // État loading
+      &.loading {
+        background: var(--neutral-color);
+        border-color: var(--neutral-color);
+        cursor: wait;
+
+        i {
+          animation: spin 1s linear infinite;
+        }
+      }
+
+      i {
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      span {
+        white-space: nowrap;
+      }
+    }
   }
 }
 
 // ===== STATISTICS GRID =====
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--stat-card-size), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax($stat-card-size, 1fr)) !important;
   gap: 1rem;
   
   @include respond-to('mobile') {
@@ -227,7 +347,7 @@
     background: var(--background-color);
     border: 1px solid var(--neutral-color);
     border-radius: var(--radius-small);
-    padding: 1.25rem 1rem;
+    padding: 1rem 0.75rem !important;
     transition: all 0.3s ease;
     position: relative;
     
@@ -238,20 +358,20 @@
     }
     
     .stat-icon {
-      width: 40px;
-      height: 40px;
+      width: 32px !important;
+      height: 32px !important;
       border-radius: var(--radius-small);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 0.75rem;
-      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem !important;
       color: white;
     }
     
     .stat-content {
       .stat-number {
-        font-size: 1.75rem;
+        font-size: 1.5rem !important;
         font-weight: 700;
         line-height: 1;
         margin-bottom: 0.25rem;
@@ -302,7 +422,7 @@
   }
   
   .content-header {
-    max-width: var(--content-max-width);
+    max-width: $content-max-width;
     margin: 0 auto 2rem auto;
     display: flex;
     justify-content: space-between;
@@ -357,7 +477,7 @@
           
           &:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px var(--primary-color-transparent-20);
+            box-shadow: 0 0 0 3px var(--primary-color-transparent-50);
           }
         }
       }
@@ -367,7 +487,7 @@
 
 // ===== MODULES GRID =====
 .modules-grid {
-  max-width: var(--content-max-width);
+  max-width: $content-max-width;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -390,7 +510,7 @@
 
 // ===== EMPTY STATE =====
 .empty-state {
-  max-width: var(--content-max-width);
+  max-width: $content-max-width;
   margin: 0 auto;
   padding: 4rem 2rem;
   text-align: center;
@@ -445,7 +565,7 @@
       
       &:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px var(--primary-color-transparent-20);
+        box-shadow: 0 0 0 3px var(--primary-color-transparent-50);
       }
     }
   }
@@ -461,21 +581,6 @@
     }
   }
   
-  // Button customizations
-  .follow-btn {
-    min-width: 120px;
-    
-    &.p-button-outlined {
-      --p-button-text-primary-color: #10b981;
-      --p-button-outlined-border-color: #10b981;
-      
-      &:hover {
-        --p-button-outlined-bg: #10b981;
-        --p-button-outlined-border-color: #10b981;
-        --p-button-outlined-color: white;
-      }
-    }
-  }
   
   .share-btn {
     min-width: 60px;
@@ -489,11 +594,9 @@
 
 // ===== RESPONSIVE ADJUSTMENTS =====
 @include respond-to('mobile') {
-  :root {
-    --profile-hero-height: 30vh;
-    --profile-picture-size: 4rem;
-    --stat-card-size: 140px;
-  }
+  $profile-hero-height: 30vh;
+  $profile-picture-size: 3.5rem;
+  $stat-card-size: 120px;
   
   .profile-header {
     .profile-info .display-name {
@@ -503,16 +606,16 @@
   
   .stats-grid {
     .stat-card {
-      padding: 1rem 0.75rem;
+      padding: 0.875rem 0.625rem;
       
       .stat-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.875rem;
       }
       
       .stat-content .stat-number {
-        font-size: 1.5rem;
+        font-size: 1.125rem;
       }
     }
   }
@@ -527,6 +630,15 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

@@ -78,15 +78,29 @@
           
           <div class="profile-actions">
             @if (!isOwnProfile()) {
-              <p-button 
-                [label]="isFollowing() ? 'Suivi' : 'Suivre'"
-                [icon]="isFollowing() ? 'pi pi-check' : 'pi pi-plus'"
-                [severity]="isFollowing() ? 'secondary' : 'primary'"
-                [outlined]="isFollowing()"
-                (onClick)="toggleFollow()"
-                size="large"
-                styleClass="follow-btn"
-              />
+              <button 
+                class="follow-button"
+                [class.following]="isFollowing()"
+                [class.loading]="isFollowLoading()"
+                [disabled]="isFollowLoading()"
+                (click)="toggleFollow()"
+                type="button"
+              >
+                @if (isFollowLoading()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                  <span>Chargement...</span>
+                } @else if (isFollowing()) {
+                  <i class="pi pi-check"></i>
+                  <span class="follow-text">Suivi</span>
+                  <span class="unfollow-text">
+                    <i class="pi pi-times"></i>
+                    Se désabonner
+                  </span>
+                } @else {
+                  <i class="pi pi-plus"></i>
+                  <span>Suivre</span>
+                }
+              </button>
             }
             <p-button 
               icon="pi pi-share-alt"

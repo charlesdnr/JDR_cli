@@ -30,6 +30,8 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "@primeng/themes": "^19.0.10",
     "@stomp/stompjs": "^7.1.1",
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.3",
     "class-transformer": "^0.5.1",
     "lottie-web": "^5.12.2",
     "ngx-lottie": "^13.0.1",

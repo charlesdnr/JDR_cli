@@ -28,19 +28,19 @@ export class UserProfileHttpService extends BaseHttpService {
   subscribeToUserProfile(userId: number): Promise<UserSubscription> {
     // Chemin spécifique pour s'abonner aux mises à jour du profil utilisateur
     const url = `${this.baseApiUrl}/user/${userId}/subscribe`;
-    return firstValueFrom(this.httpClient.get<UserSubscription>(url));
+    return firstValueFrom(this.httpClient.post<UserSubscription>(url, {}));
   }
 
   unsubscribeFromUserProfile(userId: number): Promise<UserSubscription> {
     // Chemin spécifique pour se désabonner des mises à jour du profil utilisateur
     const url = `${this.baseApiUrl}/user/${userId}/unsubscribe`;
-    return firstValueFrom(this.httpClient.get<UserSubscription>(url));
+    return firstValueFrom(this.httpClient.delete<UserSubscription>(url));
   }
 
-  getUserSubscription(userId: number): Promise<UserSubscription> {
-    // Chemin spécifique pour obtenir l'abonnement d'un utilisateur
-    const url = `${this.baseApiUrl}/user/${userId}/subscription`;
-    return firstValueFrom(this.httpClient.get<UserSubscription>(url));
+  getUserSubscriptions(userId: number): Promise<UserSubscription[]> {
+    // Chemin spécifique pour obtenir les abonnements d'un utilisateur (ceux qu'il suit)
+    const url = `${this.baseApiUrl}/user/${userId}/subscriptions`;
+    return firstValueFrom(this.httpClient.get<UserSubscription[]>(url));
   }
 
   getUserSubscribers(userId: number): Promise<UserSubscription[]> {

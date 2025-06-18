@@ -1,6 +1,5 @@
 import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
 import { from, Observable } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
@@ -10,21 +9,25 @@ export const authInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
 
-  const auth = inject(Auth);
   const authService = inject(AuthenticationService);
 
-  // For requests that don't need authentication, proceed immediately
-  const currentUser = auth.currentUser;
-
-  // If no user is logged in, proceed with the original request
-  if (!currentUser) {
+  // Skip authentication for static assets
+  if (req.url.includes('/assets/') || req.url.startsWith('assets/')) {
     return next(req);
   }
 
-  // Wait for authentication to be ready and get token
+  // Wait for authentication to be ready and add token if available
   const requestHandlerPromise = async (): Promise<HttpRequest<unknown>> => {
     try {
-      // Wait for auth to be ready and get token
+      // Always wait for auth to be ready first
+      const currentUser = await authService.waitForAuthReady();
+      
+      // If no user is logged in after waiting, proceed with original request
+      if (!currentUser) {
+        return req;
+      }
+
+      // Get the token for authenticated user
       const token = await authService.waitForAuthToken();
 
       if (token) {

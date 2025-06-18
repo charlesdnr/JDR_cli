@@ -56,6 +56,7 @@ import { ShareModuleDialogComponent } from '../../components/share-module-dialog
 import { UserSavedModuleHttpService } from '../../services/https/user-saved-module-http.service';
 import { FolderService } from '../../services/folders.service';
 import { UserSavedModule } from '../../classes/UserSavedModule';
+import { cleanModuleForSave } from '../../utils/cleanBlocksForSave';
 
 @Component({
   selector: 'app-new-project',
@@ -598,15 +599,18 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       version.gameSystemId = this.currentGameSystem()!.id;
     }
 
+    // Nettoyer le module en supprimant les IDs temporaires des blocs
+    const cleanedModule = cleanModuleForSave(module);
+
     const moduleRequest = new ModuleRequest(
-      module.title,
-      module.description,
-      module.isTemplate,
-      module.type,
-      module.creator!,
-      module.picture,
-      module.versions,
-      module.accesses
+      cleanedModule.title,
+      cleanedModule.description,
+      cleanedModule.isTemplate,
+      cleanedModule.type,
+      cleanedModule.creator!,
+      cleanedModule.picture,
+      cleanedModule.versions,
+      cleanedModule.accesses
     );
 
     try {

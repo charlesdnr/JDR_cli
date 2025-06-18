@@ -4,6 +4,7 @@ import { Block } from '../../classes/Block';
 import { firstValueFrom, map } from 'rxjs';
 import { createBlock } from '../../utils/createBlock';
 import { IBlockData } from '../../interfaces/IBlockData';
+import { cleanBlocksForSave } from '../../utils/cleanBlocksForSave';
 
 @Injectable({
   providedIn: 'root'
@@ -33,9 +34,12 @@ export class BlockHttpService extends BaseHttpService {
    * POST /api/block
    */
   createBlock(block: Block): Promise<Block> {
+    // Nettoyer les IDs temporaires avant l'envoi
+    const cleanedBlock = cleanBlocksForSave(block);
+    
     // Utilise httpClient directement pour mapper la réponse IBlockData vers Block
     return firstValueFrom(
-      this.httpClient.post<IBlockData>(this.baseApiUrl, block)
+      this.httpClient.post<IBlockData>(this.baseApiUrl, cleanedBlock)
         .pipe(
           map(responseData => createBlock(responseData))
         )
@@ -47,9 +51,12 @@ export class BlockHttpService extends BaseHttpService {
    * PUT /api/block/{id}
    */
   updateBlock(blockId: number, block: Block): Promise<Block> {
+    // Nettoyer les IDs temporaires avant l'envoi
+    const cleanedBlock = cleanBlocksForSave(block);
+    
     // Utilise httpClient directement pour mapper la réponse IBlockData vers Block
     return firstValueFrom(
-      this.httpClient.put<IBlockData>(this.buildUrlWithId(blockId), block)
+      this.httpClient.put<IBlockData>(this.buildUrlWithId(blockId), cleanedBlock)
         .pipe(
           map(responseData => createBlock(responseData))
         )

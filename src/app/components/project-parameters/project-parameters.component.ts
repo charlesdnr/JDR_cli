@@ -244,11 +244,12 @@ export class ProjectParametersComponent implements OnInit {
     this.suggestionsTags.set([]);
     this.loadTags();
   }
-  onEnterKeyForTags(event: Event): void {
+  async onEnterKeyForTags(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
     const value = target.value.trim();
     if (value) {
-      this.createNewTag(value);
+      await this.addOrCreateTag(value);
+      target.value = ''; // Vider le champ après ajout
     }
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -265,31 +266,9 @@ export class ProjectParametersComponent implements OnInit {
     return this.gameSystems().find(g => g.id === id)?.name
   }
 
-  onSelect(value: string) {
+  async onSelect(value: string): Promise<void> {
     if (value) {
-      const tagReq: TagRequest = { name: value, moduleIds: [] };
-      tagReq.moduleIds.push(this.currentModule().id);
-      this.tagsHttpService
-        .createTag(tagReq)
-        .then((newTag) => {
-          let actualTag = this.tagsSearch().find((tag) => tag.name == value);
-          if (actualTag) actualTag = newTag;
-          this.tagsSearch().map((tag) => {
-            if (tag.name == actualTag?.name) tag = actualTag;
-          });
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Tags',
-            detail: 'Tag ajouté avec succés',
-          });
-        })
-        .catch((error: HttpErrorResponse) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Tags',
-            detail: "Erreur lors de l'ajout du tag : " + error.message,
-          });
-        });
+      await this.addOrCreateTag(value);
     }
   }
 
@@ -297,13 +276,26 @@ export class ProjectParametersComponent implements OnInit {
     if (id) {
       this.tagsHttpService
         .deleteModuleOfTags(id, this.currentModule().id)
-        .then(() =>
+        .then(() => {
+          // Mettre à jour la liste locale en supprimant le tag
+          this.tagsSearch.update((tags) => {
+            return tags.filter(tag => tag.id !== id);
+          });
+          
           this.messageService.add({
             severity: 'success',
             summary: 'Tags',
-            detail: 'Tag supprimé avec succés',
-          })
-        );
+            detail: 'Tag supprimé avec succès',
+          });
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la suppression du tag:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Tags',
+            detail: 'Erreur lors de la suppression du tag',
+          });
+        });
     }
   }
 
@@ -317,19 +309,70 @@ export class ProjectParametersComponent implements OnInit {
     }
   }
 
-  createNewTag(tagName: string): void {
+  async addOrCreateTag(tagName: string): Promise<void> {
+    try {
+      // D'abord, chercher si le tag existe déjà
+      const existingTags = await this.tagsHttpService.searchTags(tagName);
+      const exactMatch = existingTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+      
+      if (exactMatch) {
+        // Le tag existe déjà, vérifier s'il est déjà associé au module
+        const moduleId = this.currentModule().id;
+        const isAlreadyAdded = this.tagsSearch().some(tag => tag.id === exactMatch.id);
+        
+        if (isAlreadyAdded) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Tags',
+            detail: 'Ce tag est déjà ajouté au module',
+          });
+          return;
+        }
+
+        // Ajouter le tag existant au module
+        const tagReq: TagRequest = { name: exactMatch.name, moduleIds: [moduleId] };
+        const updatedTag = await this.tagsHttpService.createTag(tagReq);
+        this.addTag(updatedTag);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Tags',
+          detail: 'Tag existant ajouté avec succès',
+        });
+      } else {
+        // Le tag n'existe pas, le créer
+        await this.createNewTag(tagName);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout/création du tag:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Tags',
+        detail: 'Erreur lors de l\'ajout du tag',
+      });
+    }
+  }
+
+  createNewTag(tagName: string): Promise<void> {
     const tagReq: TagRequest = { name: tagName, moduleIds: [] };
     tagReq.moduleIds.push(this.currentModule().id);
-    this.tagsHttpService
+    return this.tagsHttpService
       .createTag(tagReq)
       .then((newTag) => {
         this.addTag(newTag);
         this.messageService.add({
           severity: 'success',
           summary: 'Tags',
-          detail: 'Tag créé et ajouté avec succés',
+          detail: 'Tag créé et ajouté avec succès',
         });
       })
+      .catch((error: HttpErrorResponse) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Tags',
+          detail: "Erreur lors de la création du tag : " + error.message,
+        });
+        throw error;
+      });
   }
 
   async autoCompleteRes(search: string): Promise<void> {

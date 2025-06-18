@@ -12,7 +12,9 @@ export class AuthenticationService {
   
   constructor() {
     // Listen to auth state changes and update the ready state
+    // Wait for the auth state to be determined (user or null)
     authState(this.auth).pipe(take(1)).subscribe(() => {
+      // Auth is ready whether user is logged in or not
       this.authReadySubject.next(true);
     });
   }

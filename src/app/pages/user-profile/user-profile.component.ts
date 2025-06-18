@@ -1,7 +1,10 @@
-import { Component, OnInit, signal, computed, inject, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { AuthenticationService } from '../../services/authentication.service';
+import confetti from 'canvas-confetti';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
@@ -81,9 +84,10 @@ interface ModuleFilter {
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.scss'
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private authService = inject(AuthenticationService);
   private userService = inject(UserHttpService);
   private moduleService = inject(ModuleHttpService);
   private userProfileService = inject(UserProfileHttpService);
@@ -100,6 +104,7 @@ export class UserProfileComponent implements OnInit {
   userSubscribers = signal<UserSubscription[]>([]);
   isLoading = signal(true);
   isFollowing = signal(false);
+  isFollowLoading = signal(false);
   
   // État de l'interface
   selectedTab = signal<number>(0);
@@ -107,6 +112,7 @@ export class UserProfileComponent implements OnInit {
   selectedFilter = signal('all');
   isImageLoading = signal(true);
   private viewIncremented = false;
+  private destroy$ = new Subject<void>();
 
   // Options de filtrage
   filterOptions: ModuleFilter[] = [
@@ -189,29 +195,34 @@ export class UserProfileComponent implements OnInit {
   });
 
   constructor() {
-    effect(() => {
-      const userId = this.route.snapshot.paramMap.get('userId');
-      if (userId) {
-        const newUserId = parseInt(userId);
-        const currentUserId = this.userId();
-        
-        if (currentUserId !== newUserId) {
-          this.viewIncremented = false;
-          this.resetState();
-        }
-        
-        this.userId.set(newUserId);
-        this.loadUserProfile();
-      }
-    });
+    // L'effect sera géré dans ngOnInit pour éviter les problèmes de timing
   }
 
   ngOnInit() {
-    const userId = this.route.snapshot.paramMap.get('userId');
-    if (userId) {
-      this.userId.set(parseInt(userId));
-      this.loadUserProfile();
-    }
+    // S'abonner aux changements de paramètres de la route
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const userId = params.get('userId');
+        if (userId) {
+          const newUserId = parseInt(userId);
+          const currentUserId = this.userId();
+          
+          // Si l'utilisateur change, réinitialiser l'état
+          if (currentUserId !== newUserId) {
+            this.viewIncremented = false;
+            this.resetState();
+          }
+          
+          this.userId.set(newUserId);
+          this.loadUserProfile();
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private resetState() {
@@ -223,6 +234,7 @@ export class UserProfileComponent implements OnInit {
     this.userSubscription.set(null);
     this.userSubscribers.set([]);
     this.isFollowing.set(false);
+    this.isFollowLoading.set(false);
     this.selectedTab.set(0);
     this.searchQuery.set('');
     this.selectedFilter.set('all');
@@ -233,17 +245,33 @@ export class UserProfileComponent implements OnInit {
     
     try {
       const userId = this.userId();
-      if (!userId) return;
+      if (!userId) {
+        this.isLoading.set(false);
+        return;
+      }
+
+      // L'intercepteur HTTP gère maintenant l'attente de l'auth automatiquement
 
       // Charger toutes les données en parallèle
-      const [user, userProfile, modules, userSubscription, userSubscribers, userViews] = await Promise.all([
+      const [user, userProfile, modules, userSubscribers, userViews] = await Promise.all([
         this.userService.getUserById(userId),
         this.userProfileService.getUserProfileByUserId(userId).catch(() => null),
         this.moduleService.getModulesSummaryByUserId(userId),
-        this.userProfileService.getUserSubscription(userId).catch(() => null),
         this.userProfileService.getUserSubscribers(userId).catch(() => []),
         this.userProfileService.getuserViews(userId).catch(() => 0)
       ]);
+
+      // Vérifier si l'utilisateur actuel suit cet utilisateur (seulement si ce n'est pas son propre profil)
+      let userSubscription: UserSubscription | null = null;
+      const loggedUser = this.currentUser();
+      if (loggedUser && loggedUser.id !== userId) {
+        try {
+          const currentUserSubscriptions = await this.userProfileService.getUserSubscriptions(loggedUser.id);
+          userSubscription = currentUserSubscriptions.find(sub => sub.subscribedTo.id === userId) || null;
+        } catch {
+          userSubscription = null;
+        }
+      }
 
       // Calculer la note moyenne réelle des modules de l'utilisateur
       const averageRating = await this.calculateUserAverageRating(modules);
@@ -259,7 +287,7 @@ export class UserProfileComponent implements OnInit {
       this.generateRealUserStats(user, modules, userSubscribers, userViews, averageRating);
 
       // Incrémenter les vues si ce n'est pas le profil de l'utilisateur connecté
-      if (!this.isOwnProfile() && !this.viewIncremented) {
+      if (loggedUser && !this.isOwnProfile() && !this.viewIncremented) {
         this.incrementProfileView(userId);
         this.viewIncremented = true;
       }
@@ -332,7 +360,9 @@ export class UserProfileComponent implements OnInit {
     const userId = this.userId();
     if (!userId) return;
 
+    this.isFollowLoading.set(true);
     try {
+      // L'intercepteur HTTP gère maintenant l'attente de l'auth automatiquement
       if (this.isFollowing()) {
         await this.userProfileService.unsubscribeFromUserProfile(userId);
         this.isFollowing.set(false);
@@ -346,6 +376,10 @@ export class UserProfileComponent implements OnInit {
         const subscription = await this.userProfileService.subscribeToUserProfile(userId);
         this.isFollowing.set(true);
         this.userSubscription.set(subscription);
+        
+        // Déclencher les confettis !
+        this.triggerConfetti();
+        
         this.messageService.add({
           severity: 'success',
           summary: 'Abonnement',
@@ -373,11 +407,14 @@ export class UserProfileComponent implements OnInit {
         summary: 'Erreur',
         detail: 'Impossible de modifier l\'abonnement'
       });
+    } finally {
+      this.isFollowLoading.set(false);
     }
   }
 
   private async incrementProfileView(userId: number) {
     try {
+      // L'intercepteur HTTP gère maintenant l'attente de l'auth automatiquement
       await this.userProfileService.incrementUserViews(userId);
       
       const currentStats = this.userStats();
@@ -444,5 +481,66 @@ export class UserProfileComponent implements OnInit {
     const empty = 5 - filled - partial;
     
     return { filled, partial, empty };
+  }
+
+  private triggerConfetti() {
+    // Trouver la position du bouton follow
+    const followButton = document.querySelector('.follow-button') as HTMLElement;
+    if (!followButton) return;
+
+    const rect = followButton.getBoundingClientRect();
+    const centerX = (rect.left + rect.width / 2) / window.innerWidth;
+    const centerY = (rect.top + rect.height / 2) / window.innerHeight;
+
+    // Vérifier que le bouton est visible dans la fenêtre avec des marges moins strictes
+    if (centerX < 0.1 || centerX > 0.9 || centerY < 0.1 || centerY > 0.9) {
+      return; // Ne pas déclencher les confettis si le bouton est trop près des bords
+    }
+
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'];
+    
+    // Explosion en cercle - particules dans toutes les directions
+    confetti({
+      particleCount: 20,
+      spread: 360,
+      origin: { x: centerX, y: centerY },
+      colors: colors,
+      scalar: 0.8,
+      gravity: 1,
+      drift: 0,
+      startVelocity: 25,
+      angle: 90
+    });
+
+    // Deuxième vague circulaire
+    setTimeout(() => {
+      confetti({
+        particleCount: 15,
+        spread: 360,
+        origin: { x: centerX, y: centerY },
+        colors: colors,
+        scalar: 0.6,
+        gravity: 1.2,
+        drift: 0,
+        startVelocity: 20,
+        angle: 90
+      });
+    }, 100);
+
+    // Étoiles en cercle
+    setTimeout(() => {
+      confetti({
+        particleCount: 8,
+        spread: 360,
+        origin: { x: centerX, y: centerY },
+        shapes: ['star'],
+        colors: ['#ffd700', '#ff69b4'],
+        scalar: 0.9,
+        gravity: 1.5,
+        drift: 0,
+        startVelocity: 18,
+        angle: 90
+      });
+    }, 200);
   }
 }

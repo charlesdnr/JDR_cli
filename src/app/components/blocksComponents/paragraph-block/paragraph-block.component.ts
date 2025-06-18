@@ -37,11 +37,6 @@ export class ParagraphBlockComponent implements AfterViewInit {
     { label: 'Conclusion', value: 'Conclusion' },
   ];
 
-  // Formats supportés par l'éditeur (correspondant aux balises AI)
-  editorFormats = [
-    'bold', 'italic', 'underline', 
-    'header', 'list', 'bullet', 'ordered'
-  ];
 
   @ViewChild('paragraphEditor') paragraphEditor!: unknown;
   

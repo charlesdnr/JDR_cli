@@ -12,10 +12,11 @@ export function cleanBlocksForSave(block: Block): Block {
   const cleanedBlock = { ...block };
   
   // Si l'ID est temporaire (contient des décimales ou est très grand), le supprimer
-  if (cleanedBlock.id !== undefined) {
+  if (cleanedBlock.id !== undefined && cleanedBlock.id !== null) {
     // Les IDs temporaires sont générés avec Date.now() + Math.random()
     // Ils sont donc très grands et peuvent avoir des décimales
-    if (!Number.isInteger(cleanedBlock.id) || cleanedBlock.id > 2147483647) {
+    // Ou si l'ID est 0 (nouveau bloc pas encore sauvegardé)
+    if (!Number.isInteger(cleanedBlock.id) || cleanedBlock.id > 2147483647 || cleanedBlock.id === 0) {
       delete cleanedBlock.id;
     }
   }
