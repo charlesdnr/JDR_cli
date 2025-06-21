@@ -318,9 +318,18 @@ export class ProjectParametersComponent implements OnInit {
       if (exactMatch) {
         // Le tag existe déjà, vérifier s'il est déjà associé au module
         const moduleId = this.currentModule().id;
-        const isAlreadyAdded = this.tagsSearch().some(tag => tag.id === exactMatch.id);
         
-        if (isAlreadyAdded) {
+        // Vérifier d'abord côté serveur si le tag est réellement associé au module
+        const serverTags = await this.tagsHttpService.getTagsByModuleId(moduleId);
+        const isAlreadyAddedOnServer = serverTags.some(tag => tag.id === exactMatch.id);
+        
+        if (isAlreadyAddedOnServer) {
+          // Synchroniser la liste locale avec le serveur si nécessaire
+          const isAlreadyAddedLocally = this.tagsSearch().some(tag => tag.id === exactMatch.id);
+          if (!isAlreadyAddedLocally) {
+            this.tagsSearch.update(tags => [...tags, exactMatch]);
+          }
+          
           this.messageService.add({
             severity: 'info',
             summary: 'Tags',

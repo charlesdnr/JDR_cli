@@ -1,37 +1,127 @@
-<div class="icone-grab">
-  @for(block of availableBlocks(); track $index) {
-  <div
-    class="icon-item"
-    (mousedown)="startIconDrag($event, block.type)"
-    tabindex="0"
-    role="button"
-    (keydown.enter)="startIconDrag($event, block.type)"
-  >
-    <i
-      [class]="getIconByType(block.type)"
-      [attr.data-type]="block.type"
-      aria-hidden="true"
-    ></i>
-    <span> {{ getBlockPreview(block.type) }} </span>
+<div class="blocks-toolbar" [@slideInLeft]>
+  <!-- Header de la toolbar -->
+  <div class="toolbar-header">
+    <h3 class="toolbar-title">
+      <i class="pi pi-th-large"></i>
+      Blocs disponibles
+    </h3>
+    @if (!readonly()) {
+      <p-badge 
+        [value]="availableBlocks().length.toString()" 
+        severity="info">
+      </p-badge>
+    }
   </div>
-  }
+
+  <!-- Section Recently Used (si il y en a) -->
+  <!-- @if (organizedBlocks().recent.length > 0 && !readonly()) {
+    <div class="blocks-section">
+      <div class="section-header">
+        <i class="pi pi-clock"></i>
+        <span>Récemment utilisés</span>
+      </div>
+      <div class="blocks-grid recent-blocks" [@staggerItems]>
+        @for(block of organizedBlocks().recent; track block.type) {
+          <div class="block-item recent"
+               (mousedown)="startIconDrag($event, block.type)"
+               (mouseenter)="onBlockHover(block.type)"
+               (mouseleave)="onBlockHover(null)"
+               (keydown)="onKeyDown($event, block.type)"
+               tabindex="0"
+               role="button"
+               [attr.aria-label]="'Ajouter un bloc ' + getBlockInfo(block.type).name"
+               pTooltip="{{ getBlockInfo(block.type).description }}"
+               tooltipPosition="right"
+               [tooltipStyleClass]="'custom-tooltip'"
+               pRipple>
+            <div class="block-icon">
+              <i [class]="getIconByType(block.type)"></i>
+            </div>
+            <div class="block-content">
+              <span class="block-name">{{ getBlockInfo(block.type).name }}</span>
+              <p-badge 
+                [value]="getBlockInfo(block.type).category" 
+                [severity]="getCategoryColor(block.type)">
+              </p-badge>
+            </div>
+            <div class="block-actions">
+              <i class="pi pi-plus-circle"></i>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } -->
+
+  <!-- Section Main Blocks -->
+  <div class="blocks-section">
+    <div class="section-header">
+      <i class="pi pi-box"></i>
+      <span>Tous les blocs</span>
+    </div>
+    <div class="blocks-grid" [@staggerItems]>
+      @for(block of organizedBlocks().all; track block.type) {
+        <div class="block-item"
+             [class.is-hovered]="hoveredBlock() === block.type"
+             [class.readonly]="readonly()"
+             (mousedown)="startIconDrag($event, block.type)"
+             (mouseenter)="onBlockHover(block.type)"
+             (mouseleave)="onBlockHover(null)"
+             (keydown)="onKeyDown($event, block.type)"
+             tabindex="0"
+             role="button"
+             [attr.aria-label]="'Ajouter un bloc ' + getBlockInfo(block.type).name"
+             pTooltip="{{ getBlockInfo(block.type).description }}"
+             tooltipPosition="right"
+             [tooltipStyleClass]="'custom-tooltip'"
+             pRipple>
+          <div class="block-icon">
+            <i [class]="getIconByType(block.type)"></i>
+            @if (isBlockRecent(block.type) && !readonly()) {
+              <div class="recent-indicator">
+                <i class="pi pi-star-fill"></i>
+              </div>
+            }
+          </div>
+          <div class="block-content">
+            <span class="block-name">{{ getBlockInfo(block.type).name }}</span>
+            <span class="block-description">{{ getBlockInfo(block.type).description }}</span>
+            <p-badge 
+              [value]="getBlockInfo(block.type).category" 
+              [severity]="getCategoryColor(block.type)">
+            </p-badge>
+          </div>
+          @if (!readonly()) {
+            <div class="block-actions">
+              <i class="pi pi-plus-circle"></i>
+            </div>
+          }
+        </div>
+      }
+    </div>
 </div>
 
-<!-- Élément de preview qui suit le curseur -->
-@if(isDraggingIcon()){
-<div
-  class="icon-drag-preview"
-  [style.left.px]="dragPosition().x"
-  [style.top.px]="dragPosition().y"
->
-  <i
-    [class]="
-      'pi ' + getIconByType(draggedIconType() || EBlockType.paragraph)
-    "
-    aria-hidden="true"
-  ></i>
-  <span>{{
-    getBlockPreview(draggedIconType() || EBlockType.paragraph)
-  }}</span>
-</div>
+<!-- Élément de preview moderne qui suit le curseur -->
+@if(isDraggingIcon() && !readonly()) {
+  <div class="drag-preview-modern"
+       [style.left.px]="dragPosition().x"
+       [style.top.px]="dragPosition().y">
+    <div class="preview-card">
+      <div class="preview-icon">
+        <i [class]="getIconByType(draggedIconType() || EBlockType.paragraph)"></i>
+      </div>
+      <div class="preview-content">
+        <span class="preview-name">
+          {{ getBlockInfo(draggedIconType() || EBlockType.paragraph).name }}
+        </span>
+        <p-badge 
+          [value]="getBlockInfo(draggedIconType() || EBlockType.paragraph).category" 
+          [severity]="getCategoryColor(draggedIconType() || EBlockType.paragraph)">
+        </p-badge>
+      </div>
+      <div class="preview-indicator">
+        <i class="pi pi-arrow-down"></i>
+      </div>
+    </div>
+  </div>
 }

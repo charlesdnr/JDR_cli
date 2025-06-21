@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { ButtonModule } from 'primeng/button';
@@ -46,6 +47,54 @@ import { AggregatedRatings } from '../../classes/AggregatedRatings';
   providers: [DialogService],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
+  animations: [
+    trigger('fadeInUp', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(30px)' }),
+        animate('600ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    trigger('fadeInLeft', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-40px)' }),
+        animate('700ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'translateX(0)' }))
+      ])
+    ]),
+    trigger('fadeInRight', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(40px)' }),
+        animate('700ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'translateX(0)' }))
+      ])
+    ]),
+    trigger('scaleIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'scale(1)' }))
+      ])
+    ]),
+    trigger('staggerFadeIn', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(20px)' }),
+          stagger('100ms', [
+            animate('400ms cubic-bezier(0.35, 0, 0.25, 1)', 
+                   style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ]),
+    trigger('slideInDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-30px)' }),
+        animate('800ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
   userService = inject(UserHttpService);

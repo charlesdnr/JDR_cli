@@ -5,8 +5,8 @@
     <div class="animated-particles"></div>
   </div>
   
-  <div class="hero-content">
-    <div class="hero-text">
+  <div class="hero-content" [@fadeInUp]>
+    <div class="hero-text" [@fadeInLeft]>
       <h1 class="hero-title">
         @if(currentUser()?.username) {
           Bienvenue <span class="gradient-text">{{ currentUser()?.username }}</span>,<br>
@@ -44,7 +44,7 @@
       </div>
     </div>
     
-    <div class="hero-visual">
+    <div class="hero-visual" [@fadeInRight]>
       <div class="floating-cards">
         <div class="floating-card card-1">
           <div class="card-icon">🏰</div>
@@ -150,7 +150,7 @@
 <section id="explore" class="explore-section">
   <div class="container">
     <!-- Enhanced Section Header -->
-    <div class="section-header">
+    <div class="section-header" [@slideInDown]>
       <div class="section-badge-container">
         <span class="section-badge">Découvrir</span>
         <div class="badge-glow"></div>
@@ -167,7 +167,7 @@
     
     <!-- Featured Module Spotlight -->
     @if (mostRatedModules().length > 0 && !loadingModules()) {
-      <div class="featured-module-spotlight">
+      <div class="featured-module-spotlight" [@scaleIn]>
         <div class="spotlight-content">
           <div class="spotlight-image">
             <img [src]="mostRatedModules()[0].picture.src || 'assets/images/baseImageModule.png'" 
@@ -263,7 +263,7 @@
         </div>
       </div>
       
-      <div class="modules-showcase">
+      <div class="modules-showcase" [@staggerFadeIn]>
         @if (loadingModules()) {
           <div class="loading-state">
             <div class="loading-grid">
@@ -282,7 +282,7 @@
         } @else {
           @if (mostRatedModules().length > 1) {
             @for (module of mostRatedModules().slice(1); track module.id) {
-              <div class="module-card-wrapper">
+              <div class="module-card-wrapper" [@fadeInUp]>
                 <app-module-card [module]="module" />
               </div>
             }
@@ -315,9 +315,9 @@
           <div class="divider-line"></div>
         </div>
         
-        <div class="recent-modules-showcase">
+        <div class="recent-modules-showcase" [@staggerFadeIn]>
           @for (module of mostRecentModules(); track module.id) {
-            <div class="module-card-wrapper">
+            <div class="module-card-wrapper" [@fadeInUp]>
               <app-module-card [module]="module" />
             </div>
           }
@@ -327,7 +327,7 @@
     
     
     <!-- Enhanced Call-to-Action -->
-    <div class="explore-cta">
+    <div class="explore-cta" [@fadeInUp]>
       <div class="cta-content">
         <h3 class="cta-title">Découvrez encore plus d'aventures</h3>
         <p class="cta-description">Explorez notre collection complète de modules créés par la communauté</p>

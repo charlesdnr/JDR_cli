@@ -53,8 +53,12 @@ export interface CreateModuleStep {
   styleUrl: './create-module-modal.component.scss',
   animations: [
     trigger('slideTransition', [
-      transition('* => *', [
-        style({ transform: 'translateX(20px)', opacity: 0 }),
+      transition('* => next', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({ transform: 'translateX(0)', opacity: 1 }))
+      ]),
+      transition('* => prev', [
+        style({ transform: 'translateX(-100%)', opacity: 0 }),
         animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({ transform: 'translateX(0)', opacity: 1 }))
       ])
     ]),
@@ -83,6 +87,7 @@ export class CreateModuleModalComponent implements OnInit {
   // Modal state
   currentStep = signal(1);
   isCreating = signal(false);
+  slideDirection = signal<'next' | 'prev'>('next');
   
   // Form data
   creationType = signal<'blank' | 'ai' | 'template' | 'import'>('blank');
@@ -270,6 +275,7 @@ export class CreateModuleModalComponent implements OnInit {
     const current = this.currentStep();
     if (current < 3) {
       this.steps[current - 1].completed = true;
+      this.slideDirection.set('next');
       this.currentStep.set(current + 1);
     }
   }
@@ -277,12 +283,14 @@ export class CreateModuleModalComponent implements OnInit {
   prevStep() {
     const current = this.currentStep();
     if (current > 1) {
+      this.slideDirection.set('prev');
       this.currentStep.set(current - 1);
     }
   }
 
   goToStep(step: number) {
     if (step <= this.currentStep() || this.steps[step - 1].completed) {
+      this.slideDirection.set(step > this.currentStep() ? 'next' : 'prev');
       this.currentStep.set(step);
     }
   }

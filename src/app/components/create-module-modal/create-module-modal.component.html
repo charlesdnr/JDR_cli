@@ -66,7 +66,7 @@
     
     <!-- Step 1: Creation Type -->
     @if (currentStep() === 1) {
-      <div class="step-content" [@slideTransition]>
+      <div class="step-content" [@slideTransition]="slideDirection()">
         <div class="step-header">
           <h3>Comment souhaitez-vous créer votre module ?</h3>
           <p>Choisissez la méthode qui correspond le mieux à vos besoins</p>
@@ -113,7 +113,7 @@
 
     <!-- Step 2: Essential Information -->
     @if (currentStep() === 2) {
-      <div class="step-content" [@slideTransition]>
+      <div class="step-content" [@slideTransition]="slideDirection()">
         <div class="step-header">
           <h3>Informations essentielles</h3>
           <p>Configurez les paramètres de base de votre module</p>
@@ -208,7 +208,7 @@
 
     <!-- Step 3: Organization -->
     @if (currentStep() === 3) {
-      <div class="step-content" [@slideTransition]>
+      <div class="step-content" [@slideTransition]="slideDirection()">
         <div class="step-header">
           <h3>Organisation et finalisation</h3>
           <p>Choisissez où stocker votre module et créez-le</p>

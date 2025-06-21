@@ -6,6 +6,42 @@
   --animation-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
+// Animation Keyframes for enhanced effects
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(var(--primary-color-rgb), 0.3); }
+  50% { box-shadow: 0 0 30px rgba(var(--primary-color-rgb), 0.6); }
+}
+
+@keyframes slideInFromLeft {
+  0% { opacity: 0; transform: translateX(-50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+  0% { opacity: 0; transform: translateX(50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 :host {
   display: block;
   width: 100%;
@@ -28,6 +64,11 @@
   @media (max-width: 768px) {
     min-height: 90vh;
     padding: 1rem;
+    
+    // Faster animations on mobile for better performance
+    .floating-card {
+      animation-duration: 4s;
+    }
   }
 }
 
@@ -168,6 +209,24 @@
       font-size: 2rem;
       font-weight: 800;
       color: white;
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
     }
     
     .stat-label {
@@ -205,9 +264,17 @@
     border-radius: 12px;
     padding: 1rem;
     color: white;
-    animation-duration: 6s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
+    animation: float 6s ease-in-out infinite;
+    transition: all 0.3s cubic-bezier(0.35, 0, 0.25, 1);
+    
+    &.card-1 { animation-delay: 0s; }
+    &.card-2 { animation-delay: 2s; }
+    &.card-3 { animation-delay: 4s; }
+    
+    &:hover {
+      animation-play-state: paused;
+      transform: translateY(-25px) scale(1.05);
+    }
     
     .card-icon {
       font-size: 2rem;
@@ -384,6 +451,16 @@
     radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.08) 0%, transparent 60%);
   position: relative;
   overflow: hidden;
+  
+  // Enhanced module card wrapper with stagger delay
+  .module-card-wrapper {
+    &:nth-child(1) { animation-delay: 0ms; }
+    &:nth-child(2) { animation-delay: 100ms; }
+    &:nth-child(3) { animation-delay: 200ms; }
+    &:nth-child(4) { animation-delay: 300ms; }
+    &:nth-child(5) { animation-delay: 400ms; }
+    &:nth-child(6) { animation-delay: 500ms; }
+  }
   
   &::before {
     content: '';
@@ -1864,5 +1941,43 @@
   
   &:active {
     transform: translateX(1px) scale(0.98);
+  }
+}
+
+// Enhanced accessibility and performance settings
+@media (max-width: 768px) {
+  .module-card-wrapper {
+    &:nth-child(n) { animation-delay: 0ms; } // Remove stagger on mobile for better performance
+  }
+}
+
+// Reduced motion support for accessibility
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .floating-card {
+    animation: none;
+  }
+  
+  .stat-number::before {
+    animation: none;
+  }
+}
+
+// Enhanced loading skeleton with better shimmer
+.module-skeleton {
+  .skeleton-image, .skeleton-line {
+    background: linear-gradient(
+      90deg,
+      var(--background-color-lighter) 25%,
+      rgba(var(--primary-color-rgb), 0.1) 50%,
+      var(--background-color-lighter) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 }

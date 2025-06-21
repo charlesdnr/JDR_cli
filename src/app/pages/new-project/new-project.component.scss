@@ -312,6 +312,7 @@
         flex-direction: column;
         
         .panel-content {
+              
           // Approche plus simple : on laisse le contenu se développer naturellement
           flex: 1;
           overflow-y: auto;
@@ -1151,6 +1152,8 @@
 // ===== CUSTOM SCROLLBARS =====
 .panel-content,
 .blocks-workspace {
+  overflow: auto;
+  padding-right: 2px;
   scrollbar-width: thin;
   scrollbar-color: var(--neutral-color) transparent;
   
