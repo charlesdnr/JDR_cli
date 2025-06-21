@@ -61,6 +61,9 @@ export class ModuleBlockComponent implements OnInit {
   loadingSelectedModule = signal(false);
   currentModuleId = signal<number | null>(null);
   currentUserId = signal<number | null>(null);
+  
+  // Signal pour la valeur sélectionnée du select
+  selectedModuleId = signal<number | undefined>(undefined);
 
   // Computed pour les options du select
   moduleOptions = computed<ModuleOption[]>(() => {
@@ -102,10 +105,13 @@ export class ModuleBlockComponent implements OnInit {
 
   // Computed pour vérifier si un module est sélectionné
   hasSelectedModule = computed(
-    () => !!this.moduleBlock().moduleId && !!this.selectedModule()
+    () => !!this.selectedModuleId() && !!this.selectedModule()
   );
 
   async ngOnInit() {
+    // Initialiser le signal avec la valeur actuelle du bloc
+    this.selectedModuleId.set(this.moduleBlock().moduleId);
+    
     // D'abord, obtenir l'ID du module courant et l'utilisateur courant
     await Promise.all([
       this.loadCurrentModuleId(),
@@ -117,6 +123,9 @@ export class ModuleBlockComponent implements OnInit {
     // Si le bloc a déjà un moduleId, charger ce module
     if (this.moduleBlock().moduleId) {
       await this.loadSelectedModuleDetails();
+    } else {
+      // S'assurer que le signal est bien à undefined si pas de module
+      this.selectedModuleId.set(undefined);
     }
   }
 
@@ -193,10 +202,13 @@ export class ModuleBlockComponent implements OnInit {
         this.moduleBlock().moduleId!
       );
       this.selectedModule.set(module);
+      // S'assurer que le signal est synchronisé
+      this.selectedModuleId.set(this.moduleBlock().moduleId);
     } catch (error) {
       console.error('Erreur lors du chargement du module sélectionné:', error);
       // En cas d'erreur, réinitialiser l'ID du module
       this.moduleBlock().moduleId = undefined;
+      this.selectedModuleId.set(undefined);
     } finally {
       this.loadingSelectedModule.set(false);
     }
@@ -211,6 +223,8 @@ export class ModuleBlockComponent implements OnInit {
       return;
     }
 
+    // Mettre à jour les signaux
+    this.selectedModuleId.set(moduleId || undefined);
     this.moduleBlock().moduleId = moduleId || undefined;
 
     if (moduleId) {

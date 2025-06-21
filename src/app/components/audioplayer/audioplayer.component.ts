@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, output, signal, viewChild, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +26,7 @@ export class AudioplayerComponent {
 
   // Inputs/Outputs pour la communication avec le parent
   isReadOnly = input<boolean>(false);
+  audioFileId = input<string | undefined>(undefined); // ID du fichier audio à charger depuis le serveur
   audioUploaded = output<string>(); // Émet l'ID du fichier uploadé
   audioRemoved = output<void>(); // Émet quand l'audio est supprimé
 
@@ -40,6 +41,29 @@ export class AudioplayerComponent {
 
   // ViewChild with signal
   audioPlayer = viewChild.required<ElementRef<HTMLAudioElement>>('audioPlayer');
+
+  constructor() {
+    // Effect pour charger un fichier audio depuis le serveur quand audioFileId change
+    effect(() => {
+      const fileId = this.audioFileId();
+      if (fileId && fileId.trim() !== '') {
+        // Utiliser directement l'UUID comme URL (comme le fait le picture-block)
+        const audioFile: AudioFile = {
+          name: 'Audio enregistré',
+          url: fileId // Utiliser l'UUID directement
+        };
+
+        this.audioFiles.set([audioFile]);
+        this.currentAudio.set(audioFile);
+        this.resetPlayer();
+      } else {
+        // Si pas d'ID, vider la liste audio
+        this.audioFiles.set([]);
+        this.currentAudio.set(null);
+        this.resetPlayer();
+      }
+    });
+  }
 
   onFileSelect(event: FileSelectEvent) {
     if (this.isReadOnly()) return;

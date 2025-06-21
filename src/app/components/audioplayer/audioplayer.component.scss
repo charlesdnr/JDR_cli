@@ -1,74 +1,452 @@
 .audio-player-container {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.upload-section {
-  margin-bottom: 20px;
-}
-
-.player-section {
-  margin-bottom: 20px;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.progress-section {
-  margin-bottom: 20px;
-}
-
-.time-display {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-  color: var(--font-color);
-}
-
-.volume-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.playlist-section {
-  margin-top: 20px;
-}
-
-.active-audio {
-  background-color: #f0f0f0;
-}
-
-::ng-deep .p-slider {
-  width: 100% !important;
-}
-
-p-slider{
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-::ng-deep p-card .p-card-body {
+// ===== LECTEUR AUDIO MODERNE =====
+.modern-audio-player {
   padding: var(--padding);
+  animation: fadeIn var(--transition-duration) ease-out;
+
+  // Header avec titre de la piste
+  .player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--padding);
+    padding-bottom: var(--padding-small);
+    border-bottom: 1px solid var(--neutral-color);
+
+    .track-info {
+      display: flex;
+      align-items: center;
+      gap: var(--padding);
+      flex: 1;
+
+      .track-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-color-transparent-50);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: var(--font-size-lg);
+      }
+
+      .track-details {
+        flex: 1;
+        min-width: 0;
+
+        .track-title {
+          margin: 0 0 calc(var(--padding-small) / 2) 0;
+          font-size: var(--font-size-base);
+          font-weight: 600;
+          color: var(--font-color);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .track-duration {
+          font-size: var(--font-size-xs);
+          color: var(--font-secondary-color);
+          font-weight: 500;
+        }
+      }
+    }
+
+    .player-actions {
+      display: flex;
+      gap: var(--padding-small);
+    }
+  }
+
+  // Barre de progression
+  .progress-container {
+    margin-bottom: var(--padding);
+
+    .progress-bar-wrapper {
+      margin-bottom: calc(var(--padding-small) / 2);
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-xs);
+      color: var(--font-secondary-color);
+      font-weight: 500;
+
+      .current-time {
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  // Contrôles de lecture
+  .playback-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--padding);
+    margin-bottom: var(--padding);
+
+    ::ng-deep .play-button {
+      width: 64px !important;
+      height: 64px !important;
+      background: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 4px 12px rgba(0, 149, 255, 0.3) !important;
+      transition: all var(--transition-duration) ease !important;
+
+      &:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 16px rgba(0, 149, 255, 0.4) !important;
+      }
+
+      &:active {
+        transform: scale(0.95) !important;
+      }
+
+      .p-button-icon {
+        font-size: var(--font-size-lg) !important;
+      }
+    }
+  }
+
+  // Contrôle du volume
+  .volume-control {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-small);
+    padding: var(--padding-small);
+    background: var(--container-color);
+    border-radius: calc(var(--radius-small) / 2);
+
+    .volume-icon {
+      color: var(--font-secondary-color);
+      font-size: var(--font-size-sm);
+      min-width: 16px;
+    }
+
+    .volume-slider-wrapper {
+      flex: 1;
+    }
+  }
 }
 
-.uploading-state {
+// ===== ZONE D'UPLOAD MODERNE =====
+.upload-zone {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  color: var(--primary-color);
-  
-  i {
-    color: var(--primary-color);
+  justify-content: center;
+  min-height: 160px;
+  padding: var(--padding);
+  border: 2px dashed var(--neutral-color);
+  border-radius: var(--radius-small);
+  background: var(--background-color-lighter);
+  transition: all var(--transition-duration) ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, var(--primary-color-transparent-50) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
   }
-  
-  p {
-    margin: 0;
-    font-weight: 500;
+
+  &:hover:not(.readonly) {
+    border-color: var(--primary-color);
+    background: var(--primary-color-transparent-50);
+    transform: translateY(-2px);
+  }
+
+  &.readonly {
+    border: none;
+    background: transparent;
+    min-height: 120px;
+  }
+
+  // Contenu d'upload
+  .upload-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    .upload-icon {
+      font-size: calc(var(--icons-size) * 3);
+      color: var(--primary-color);
+      margin-bottom: var(--padding);
+      animation: float 2s ease-in-out infinite;
+    }
+
+    h4 {
+      margin: 0 0 var(--padding-small) 0;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--font-color);
+    }
+
+    p {
+      margin: 0 0 var(--padding-small) 0;
+      color: var(--font-secondary-color);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+    }
+
+    .upload-info {
+      font-size: var(--font-size-xs);
+      color: var(--font-secondary-color);
+      margin-bottom: var(--padding);
+      opacity: 0.8;
+    }
+  }
+
+  // État de téléchargement
+  .uploading-state {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    .upload-spinner {
+      font-size: calc(var(--icons-size) * 2);
+      color: var(--primary-color);
+      margin-bottom: var(--padding);
+    }
+
+    h4 {
+      margin: 0 0 var(--padding-small) 0;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    p {
+      margin: 0;
+      color: var(--font-secondary-color);
+      font-size: var(--font-size-sm);
+    }
+  }
+
+  // Mode lecture seule - aucun audio
+  .no-audio-readonly {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    .audio-icon {
+      font-size: calc(var(--icons-size) * 2.5);
+      color: var(--neutral-color);
+      margin-bottom: var(--padding);
+      opacity: 0.6;
+    }
+
+    h4 {
+      margin: 0 0 var(--padding-small) 0;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--font-color);
+    }
+
+    p {
+      margin: 0;
+      color: var(--font-secondary-color);
+      font-size: var(--font-size-sm);
+      font-style: italic;
+    }
+  }
+}
+
+// ===== STYLES GLOBAUX DES SLIDERS =====
+::ng-deep {
+  // Slider de progression
+  .progress-slider {
+    .p-slider {
+      background: var(--neutral-color) !important;
+      border: none !important;
+      height: 6px !important;
+      border-radius: 3px !important;
+    }
+
+    .p-slider .p-slider-range {
+      background: var(--primary-color) !important;
+      border-radius: 3px !important;
+    }
+
+    .p-slider .p-slider-handle {
+      background: var(--primary-color) !important;
+      border: 2px solid white !important;
+      width: 18px !important;
+      height: 18px !important;
+      margin-top: -6px !important;
+      margin-left: -9px !important;
+      border-radius: 50% !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+      transition: all var(--transition-duration) ease !important;
+
+      &:hover {
+        transform: scale(1.2) !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+    }
+  }
+
+  // Slider de volume
+  .volume-slider {
+    .p-slider {
+      background: var(--neutral-color) !important;
+      border: none !important;
+      height: 4px !important;
+      border-radius: 2px !important;
+    }
+
+    .p-slider .p-slider-range {
+      background: var(--primary-color) !important;
+      border-radius: 2px !important;
+    }
+
+    .p-slider .p-slider-handle {
+      background: var(--primary-color) !important;
+      border: 2px solid white !important;
+      width: 14px !important;
+      height: 14px !important;
+      margin-top: -5px !important;
+      margin-left: -7px !important;
+      border-radius: 50% !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+      transition: all var(--transition-duration) ease !important;
+
+      &:hover {
+        transform: scale(1.15) !important;
+      }
+    }
+  }
+
+  // Bouton d'upload
+  .upload-button {
+    .p-button {
+      background: var(--primary-color) !important;
+      border-color: var(--primary-color) !important;
+      padding: var(--padding-small) var(--padding) !important;
+      border-radius: calc(var(--radius-small) / 2) !important;
+      font-weight: 600 !important;
+      font-size: var(--font-size-sm) !important;
+      transition: all var(--transition-duration) ease !important;
+      box-shadow: 0 2px 8px rgba(0, 149, 255, 0.3) !important;
+
+      &:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 149, 255, 0.4) !important;
+      }
+
+      &:active {
+        transform: translateY(0) !important;
+      }
+    }
+  }
+
+  // Boutons du lecteur
+  .p-button {
+    transition: all var(--transition-duration) ease !important;
+
+    &:hover {
+      transform: scale(1.05) !important;
+    }
+
+    &:active {
+      transform: scale(0.95) !important;
+    }
+  }
+}
+
+// ===== ANIMATIONS =====
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.3; 
+  }
+  50% { 
+    opacity: 0.1; 
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-10px); 
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+  .modern-audio-player {
+    padding: var(--padding-mobile);
+
+    .player-header {
+      margin-bottom: var(--padding-mobile);
+
+      .track-info {
+        gap: var(--padding-small);
+
+        .track-icon {
+          width: 40px;
+          height: 40px;
+          font-size: var(--font-size-base);
+        }
+
+        .track-details .track-title {
+          font-size: var(--font-size-sm);
+        }
+      }
+    }
+
+    .playback-controls {
+      gap: var(--padding-small);
+
+      ::ng-deep .play-button {
+        width: 56px !important;
+        height: 56px !important;
+      }
+    }
+
+    .volume-control {
+      padding: var(--padding-small);
+    }
+  }
+
+  .upload-zone {
+    padding: var(--padding);
+    min-height: 160px;
+
+    .upload-content {
+      .upload-icon {
+        font-size: calc(var(--icons-size) * 2);
+      }
+
+      h4 {
+        font-size: var(--font-size-base);
+      }
+    }
   }
 }

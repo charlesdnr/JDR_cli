@@ -1,6 +1,14 @@
 @if(isReadOnly()) {
 <div class="picture-block-readonly">
-  <h3 class="block-title">{{ pictureBlock().title }}</h3>
+  <!-- Header cohérent avec icône -->
+  @if(pictureBlock().title) {
+    <div class="readonly-header">
+      <h3 class="block-title">
+        <i class="pi pi-image"></i>
+        {{ pictureBlock().title }}
+      </h3>
+    </div>
+  }
 
   @if(pictureBlock().label) {
   <p class="image-label">{{ pictureBlock().label }}</p>

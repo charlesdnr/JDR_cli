@@ -37,34 +37,6 @@
           <span class="separator">•</span>
           <span class="last-modified">{{ getTimeAgo($module.updatedAt) }}</span>
         </p>
-        @if(currentVersion()) {
-          <div class="version-selector">
-            <p-select 
-              [options]="$module.versions" 
-              [ngModel]="currentVersion()" 
-              (ngModelChange)="updateCurrentVersion($event)"
-              optionLabel="version"
-              placeholder="Version"
-              styleClass="version-dropdown"
-              [disabled]="$module.versions.length <= 1"
-            >
-              <ng-template pTemplate="selectedItem">
-                <div class="selected-version">
-                  <i class="pi pi-code-branch"></i>
-                  <span>{{ currentVersion()?.version || 'v1.0' }}</span>
-                </div>
-              </ng-template>
-              <ng-template pTemplate="item" let-version>
-                <div class="version-option">
-                  <span>{{ version.version }}</span>
-                  @if(version.published) {
-                    <i class="pi pi-check-circle published-icon"></i>
-                  }
-                </div>
-              </ng-template>
-            </p-select>
-          </div>
-        }
       </div>
     </div>
 
@@ -72,12 +44,21 @@
     <nav class="sidebar-navigation">
       <p-tabs value="0" styleClass="modern-tabs">
         <p-tablist>
-          <p-tab value="0" class="nav-tab">
-            <div class="tab-content">
-              <i class="pi pi-cog tab-icon"></i>
-              <span class="tab-label">Paramètres</span>
-            </div>
-          </p-tab>
+          @if(!isReadOnly()) {
+            <p-tab value="0" class="nav-tab">
+              <div class="tab-content">
+                <i class="pi pi-cog tab-icon"></i>
+                <span class="tab-label">Paramètres</span>
+              </div>
+            </p-tab>
+          } @else {
+            <p-tab value="0" class="nav-tab">
+              <div class="tab-content">
+                <i class="pi pi-info-circle tab-icon"></i>
+                <span class="tab-label">Informations</span>
+              </div>
+            </p-tab>
+          }
           @if(!isReadOnly()) {
             <p-tab value="1" class="nav-tab">
               <div class="tab-content">

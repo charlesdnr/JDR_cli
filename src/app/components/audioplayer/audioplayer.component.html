@@ -1,91 +1,144 @@
 <div class="audio-player-container">
-  <!-- Upload Section -->
-  <div class="upload-section">
-    @if(uploadingAudio()) {
-      <div class="uploading-state">
-        <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
-        <p>Téléchargement en cours...</p>
-      </div>
-    } @else {
-      <p-fileUpload
-        mode="basic"
-        chooseLabel="Importer un audio"
-        accept="audio/*"
-        (onSelect)="onFileSelect($event)"
-        [showUploadButton]="false"
-        [disabled]="isReadOnly()"
-        maxFileSize="10000000"
-      >
-      </p-fileUpload>
-    }
-  </div>
-
-  <!-- Audio Player Section -->
   @if (currentAudio()) {
-  <div class="player-section">
-    <p-card [header]="currentAudio()!.name">
+    <!-- Lecteur Audio Moderne -->
+    <div class="modern-audio-player">
       <audio
         #audioPlayer
         [src]="currentAudio()!.url"
         (loadedmetadata)="onMetadataLoaded()"
         (timeupdate)="onTimeUpdate()"
         (ended)="onAudioEnded()"
+        preload="metadata"
       ></audio>
 
-      <div class="controls">
-        <p-button
-          (click)="togglePlay()"
-          [icon]="isPlaying() ? 'pi pi-pause' : 'pi pi-play'"
-          [label]="isPlaying() ? 'Pause' : 'Lecture'"
-        >
-        </p-button>
-
-        <p-button
-          (click)="stopAudio()"
-          icon="pi pi-stop"
-          label="Stop"
-          severity="secondary"
-        >
-        </p-button>
-        <p-button
-          (onClick)="removeAudio(0)"
-          pTooltip="Supprimer"
-          tooltipPosition="top"
-          tooltipStyleClass="tooltip-delete"
-          [rounded]="true"
-          [text]="true"
-          [disabled]="isReadOnly()"
-          severity="danger"
-          icon="pi pi-times"
-        />
+      <!-- Header avec titre et actions -->
+      <div class="player-header">
+        <div class="track-info">
+          <div class="track-icon">
+            <i class="pi pi-volume-up"></i>
+          </div>
+          <div class="track-details">
+            <h4 class="track-title">{{ currentAudio()!.name }}</h4>
+            <span class="track-duration">{{ formatTime(duration()) }}</span>
+          </div>
+        </div>
+        
+        @if(!isReadOnly()) {
+          <div class="player-actions">
+            <p-button
+              (onClick)="removeAudio(0)"
+              pTooltip="Supprimer l'audio"
+              tooltipPosition="top"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              icon="pi pi-trash"
+              size="small"
+            />
+          </div>
+        }
       </div>
 
-      <div class="progress-section">
-        <p-slider
-          [(ngModel)]="currentTime"
-          [min]="0"
-          [max]="duration()"
-          (onChange)="onSeek($event)"
-          styleClass="slider"
-        >
-        </p-slider>
+      <!-- Barre de progression principale -->
+      <div class="progress-container">
+        <div class="progress-bar-wrapper">
+          <p-slider
+            [(ngModel)]="currentTime"
+            [min]="0"
+            [max]="duration()"
+            (onChange)="onSeek($event)"
+            styleClass="progress-slider"
+          />
+        </div>
         <div class="time-display">
-          <span>{{ formatTime(currentTime()) }}</span>
-          <span>{{ formatTime(duration()) }}</span>
+          <span class="current-time">{{ formatTime(currentTime()) }}</span>
+          <span class="total-time">{{ formatTime(duration()) }}</span>
         </div>
       </div>
 
-      <div class="volume-section">
-        <i class="pi pi-volume-up"></i>
-        <p-slider
-          [(ngModel)]="volume"
-          [min]="0"
-          [max]="100"
-          (onChange)="onVolumeChange($event)"
-        >
-        </p-slider>
+      <!-- Contrôles de lecture -->
+      <div class="playback-controls">
+        <p-button
+          (click)="stopAudio()"
+          icon="pi pi-step-backward"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          size="small"
+        />
+        
+        <p-button
+          (click)="togglePlay()"
+          [icon]="isPlaying() ? 'pi pi-pause' : 'pi pi-play'"
+          [rounded]="true"
+          styleClass="play-button"
+          size="large"
+        />
+        
+        <p-button
+          icon="pi pi-step-forward"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          size="small"
+          [disabled]="true"
+        />
       </div>
-    </p-card>
-  </div>
+
+      <!-- Contrôle du volume -->
+      <div class="volume-control">
+        <i class="pi pi-volume-down volume-icon"></i>
+        <div class="volume-slider-wrapper">
+          <p-slider
+            [(ngModel)]="volume"
+            [min]="0"
+            [max]="100"
+            (onChange)="onVolumeChange($event)"
+            styleClass="volume-slider"
+          />
+        </div>
+        <i class="pi pi-volume-up volume-icon"></i>
+      </div>
+    </div>
+  } @else {
+    <!-- Zone d'upload moderne -->
+    <div class="upload-zone" [class.readonly]="isReadOnly()">
+      @if(uploadingAudio()) {
+        <div class="uploading-state">
+          <div class="upload-spinner">
+            <i class="pi pi-spin pi-spinner"></i>
+          </div>
+          <h4>Téléchargement en cours...</h4>
+          <p>Veuillez patienter pendant l'upload de votre fichier audio</p>
+        </div>
+      } @else if(isReadOnly()) {
+        <div class="no-audio-readonly">
+          <div class="audio-icon">
+            <i class="pi pi-volume-off"></i>
+          </div>
+          <h4>Aucun audio</h4>
+          <p>Aucun fichier audio n'a été ajouté à ce bloc</p>
+        </div>
+      } @else {
+        <div class="upload-content">
+          <div class="upload-icon">
+            <i class="pi pi-cloud-upload"></i>
+          </div>
+          <h4>Importer un fichier audio</h4>
+          <p>Glissez-déposez votre fichier audio ou cliquez pour sélectionner</p>
+          <p class="upload-info">Formats supportés: MP3, WAV, OGG • Taille max: 10MB</p>
+          
+          <p-fileUpload
+            mode="basic"
+            chooseLabel="Choisir un fichier"
+            accept="audio/*"
+            (onSelect)="onFileSelect($event)"
+            [showUploadButton]="false"
+            maxFileSize="10000000"
+            styleClass="upload-button"
+          />
+        </div>
+      }
+    </div>
   }
 </div>

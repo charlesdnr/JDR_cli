@@ -232,8 +232,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Navigation method for user profiles
   goToUserProfile(event: Event, userId?: number) {
     event.stopPropagation(); // Empêcher la propagation vers le click du module
-    if (userId) {
-      this.router.navigate(['/user', userId]);
+    if (userId && userId > 0 && Number.isInteger(userId)) {
+      this.router.navigate(['/user', userId]).catch(error => {
+        console.error('Navigation error:', error);
+      });
     }
   }
 

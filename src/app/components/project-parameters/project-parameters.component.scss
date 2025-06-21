@@ -71,6 +71,34 @@
       display: flex;
       gap: 0.25rem;
       flex-wrap: wrap;
+      
+      .user-avatar-container {
+        position: relative;
+        display: inline-block;
+      }
+      
+      .micro-avatar-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--background-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all var(--transition-duration) ease;
+        cursor: pointer;
+        
+        &:hover {
+          transform: scale(1.05);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          border-color: var(--primary-color);
+        }
+      }
+      
+      .fallback-avatar {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     }
   }
 }

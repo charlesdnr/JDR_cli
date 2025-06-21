@@ -1,6 +1,14 @@
 @if(isReadOnly()) {
     <div class="module-block-readonly">
-      <h3 class="block-title">{{ moduleBlock().title }}</h3>
+      <!-- Header cohérent avec icône -->
+      @if(moduleBlock().title) {
+        <div class="readonly-header">
+          <h3 class="block-title">
+            <i class="pi pi-th-large"></i>
+            {{ moduleBlock().title }}
+          </h3>
+        </div>
+      }
       
       @if(loadingSelectedModule()) {
         <div class="loading-state">
@@ -73,7 +81,7 @@
             <p-select
               id="moduleSelect"
               [options]="moduleOptions()"
-              [ngModel]="moduleBlock().moduleId"
+              [ngModel]="selectedModuleId()"
               (ngModelChange)="onModuleSelect($event)"
               optionLabel="label"
               optionValue="value"

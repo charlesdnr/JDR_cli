@@ -80,12 +80,12 @@ import { ModuleService } from '../../services/module.service';
       <div class="collaborators-section">
         <div class="section-title">
           <i class="pi pi-users"></i>
-          <span>Collaborateurs ({{ selectedUsers().length }})</span>
+          <span>Collaborateurs ({{ displayedUsers().length }})</span>
         </div>
         
-        @if(selectedUsers().length > 0) {
+        @if(displayedUsers().length > 0) {
         <div class="collaborators-list">
-          @for(user of selectedUsers(); track user){
+          @for(user of displayedUsers(); track user){
           <div class="collaborator-item">
             <div class="collaborator-info">
               <p-avatar
@@ -371,16 +371,29 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
   
   searchResults = signal<User[]>([]);
   selectedUsers = signal<User[]>([]);
+  
+  // Signal réactif pour les accès au module
+  moduleAccesses = signal<ModuleAccess[]>([]);
+  
+  // Computed basé sur le signal réactif
+  displayedUsers = computed(() => {
+    return this.moduleAccesses()
+      .filter(access => access.user && access.user.id && access.user.id > 0)
+      .map(access => access.user);
+  });
   filterText = '';
   loadingListUser = false;
   
   private destroy$ = new Subject<void>();
 
-  accessRightsForUsers = computed(() => {
-    const result = new Map<number, string[]>();
-
-    if (this.moduleData.module) {
-      this.moduleData.module.accesses.forEach(access => {
+  private _accessRightsCache: Map<number, string[]> | null = null;
+  
+  private getAccessRightsMap(): Map<number, string[]> {
+    // Simple cache - reset when needed
+    if (!this._accessRightsCache) {
+      const result = new Map<number, string[]>();
+      
+      this.moduleAccesses().forEach(access => {
         const rights: string[] = [];
         if (access.canEdit) rights.push(AccessRight.EDIT);
         if (access.canInvite) rights.push(AccessRight.INVITE);
@@ -389,10 +402,12 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
 
         result.set(access.id!, rights);
       });
+      
+      this._accessRightsCache = result;
     }
-
-    return result;
-  });
+    
+    return this._accessRightsCache;
+  }
 
   optionsAccessRight = [
     { value: AccessRight.EDIT, label: 'Modifier' },
@@ -403,10 +418,13 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.moduleData.module) {
-      const usersWithAccess = this.moduleData.module.accesses.map(
-        (access) => access.user
-      );
-      this.selectedUsers.set(usersWithAccess);
+      // Initialiser le signal des accès
+      this.moduleAccesses.set(this.moduleData.module.accesses || []);
+      
+      const usersWithAccess = this.moduleData.module.accesses
+        .filter(access => access.user && access.user.id && access.user.id > 0)
+        .map((access) => access.user);
+      this.selectedUsers.set(usersWithAccess || []);
     }
   }
 
@@ -424,9 +442,9 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
       this.userService.searchUserByEmail(query.trim())
         .subscribe({
           next: (results) => {
-            const filteredResults = results.filter(user =>
-              !this.selectedUsers().some(selected => selected.id === user.id)
-            );
+            const filteredResults = results
+              .filter(user => user && user.id && user.id > 0 && Number.isInteger(user.id))
+              .filter(user => !this.displayedUsers().some(selected => selected.id === user.id));
             this.searchResults.set(filteredResults);
             this.loadingListUser = false;
           },
@@ -442,7 +460,17 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
   }
 
   onUserSelect(user: User): void {
-    if (!this.selectedUsers().some(selected => selected.id === user.id)) {
+    if (!user || !user.id || user.id <= 0 || !Number.isInteger(user.id)) {
+      console.error('Invalid user selected:', user);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Utilisateur invalide sélectionné'
+      });
+      return;
+    }
+    
+    if (!this.displayedUsers().some(selected => selected.id === user.id)) {
       this.createOrUpdateAccessRight(user, AccessRight.VIEW);
     }
     this.filterText = '';
@@ -452,10 +480,12 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
     const moduleAcc = this.getModuleAccessByUser(user);
     if (moduleAcc && moduleAcc.id && user !== this.currentUser()) {
       this.httpAccessRightService.deleteModuleAccess(moduleAcc.id).then(() => {
-        this.selectedUsers.set(this.selectedUsers().filter(selected => selected.id !== user.id));
-        
         // Update the module data
         this.moduleData.module.accesses = this.moduleData.module.accesses.filter(acc => acc.user.id !== user.id);
+        this._accessRightsCache = null; // Reset cache
+        
+        // Update the reactive signal
+        this.moduleAccesses.set([...this.moduleData.module.accesses]);
         
         // Update the global module state if it's the same module
         if (this.currentModule()?.id === this.moduleData.module.id) {
@@ -501,13 +531,13 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
   }
 
   getModuleAccessByUser(user: User): ModuleAccess | undefined {
-    return this.moduleData.module?.accesses.find(
+    return this.moduleAccesses().find(
       (moduleAccess: ModuleAccess) => moduleAccess.user.id === user.id
     );
   }
 
   getAccessRightsForUser(moduleAccess: ModuleAccess): string[] {
-    return this.accessRightsForUsers().get(moduleAccess.id!) || [];
+    return this.getAccessRightsMap().get(moduleAccess.id!) || [];
   }
 
   createOrUpdateAccessRightArray(user: User, accessRight: AccessRight[]) {
@@ -528,13 +558,23 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
   }
 
   createOrUpdateAccessRight(user: User, accessRight?: AccessRight) {
+    if (!user || !user.id || user.id <= 0 || !Number.isInteger(user.id)) {
+      console.error('Invalid user for access right:', user);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Utilisateur invalide pour les droits d\'accès'
+      });
+      return;
+    }
+    
     const currentMod = this.moduleData.module;
     if (!currentMod || !currentMod.id) {
       console.error('Aucun module courant ou ID de module trouvé');
       return;
     }
 
-    const moduleAccess = currentMod.accesses.find(
+    const moduleAccess = this.moduleAccesses().find(
       (moduleAccess: ModuleAccess) => moduleAccess.user.id === user.id
     );
 
@@ -547,6 +587,10 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
           const index = this.moduleData.module.accesses.findIndex(a => a.id === updatedAccess.id);
           if (index !== -1) {
             this.moduleData.module.accesses[index] = updatedAccess;
+            this._accessRightsCache = null; // Reset cache
+            
+            // Update the reactive signal
+            this.moduleAccesses.set([...this.moduleData.module.accesses]);
           }
           
           // Update global module state if it's the same module
@@ -577,9 +621,18 @@ export class ShareModuleDialogComponent implements OnInit, OnDestroy {
         .then((newAccess) => {
           // Update module data
           this.moduleData.module.accesses.push(newAccess);
+          this._accessRightsCache = null; // Reset cache
+          
+          // Update the reactive signal
+          this.moduleAccesses.set([...this.moduleData.module.accesses]);
           
           // Update selected users
-          this.selectedUsers.set([...this.selectedUsers(), user]);
+          this.selectedUsers.update(users => {
+            if (!users.some(u => u.id === user.id)) {
+              users.push(user);
+            }
+            return users;
+          });
           
           // Update global module state if it's the same module
           if (this.currentModule()?.id === this.moduleData.module.id) {

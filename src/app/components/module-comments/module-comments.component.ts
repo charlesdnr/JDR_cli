@@ -328,8 +328,10 @@ export class ModuleCommentsComponent implements OnInit {
 
   goToUserProfile(event: Event, user: User | null) {
     event.stopPropagation();
-    if (user?.id) {
-      this.router.navigate(['/user', user.id]);
+    if (user?.id && user.id > 0 && Number.isInteger(user.id)) {
+      this.router.navigate(['/user', user.id]).catch(error => {
+        console.error('Navigation error:', error);
+      });
     }
   }
 }

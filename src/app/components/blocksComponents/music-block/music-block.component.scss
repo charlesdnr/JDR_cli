@@ -1,74 +1,150 @@
 .music-block {
-  padding: 15px;
-  min-height: 120px !important;
-  height: calc(100% - 50px);
+  padding: var(--padding);
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-}
+  gap: var(--gap);
+  animation: slideInUp calc(var(--animation-duration) / 2) ease-out;
 
-.music-content {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+  .block-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
 
-.music-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    .container-label {
+      display: flex;
+      flex-direction: column;
+      gap: var(--padding-small);
 
-  h4 {
-    margin: 0;
+      label {
+        font-weight: 600;
+        color: var(--font-color);
+        font-size: var(--font-size-sm);
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: var(--padding-small);
+        
+        &::before {
+          content: '\f001';
+          font-family: 'primeicons';
+          font-size: var(--font-size-xs);
+          color: var(--primary-color);
+          padding: calc(var(--padding-small) / 2);
+          background: var(--primary-color-transparent-50);
+          border-radius: 50%;
+        }
+      }
+
+      input[pInputText] {
+        padding: var(--padding-small) var(--padding);
+        border-radius: calc(var(--radius-small) / 2);
+        border: 1px solid var(--neutral-color);
+        background: var(--input-color);
+        transition: all var(--transition-duration) ease;
+        font-size: var(--font-size-base);
+
+        &:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 2px var(--primary-color-transparent-50);
+          outline: none;
+        }
+
+        &::placeholder {
+          color: var(--placeholder-color);
+          opacity: 0.7;
+        }
+      }
+    }
   }
 
-  audio {
-    width: 100%;
+  .audio-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 }
 
-.music-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #888;
-  gap: 10px;
-
-  i {
-    font-size: 2rem;
-  }
-}
 .music-block-readonly {
-  padding: 1.5rem;
-  background-color: var(--background-color-lighter);
-  border-radius: 0 0 8px 8px;
-  border: 1px solid var(--neutral-color-transparent);
+  padding: var(--padding);
+  animation: fadeIn var(--transition-duration) ease-out;
   
-  .block-title {
-    font-size: 1.25rem;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-weight: 600;
+  .readonly-header {
+    margin-bottom: var(--padding);
+    
+    .block-title {
+      font-size: var(--font-size-xl);
+      color: var(--primary-color);
+      margin: 0;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: var(--padding-small);
+      
+      i {
+        font-size: var(--font-size-lg);
+        padding: var(--padding-small);
+        background: var(--primary-color-transparent-50);
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   }
   
   .music-label {
     font-weight: 500;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-  }
-  
-  audio {
-    width: 100%;
-    margin-top: 1rem;
-    border-radius: 8px;
-  }
-  
-  .music-description {
-    padding: 1rem;
-    background-color: var(--background-color-lighter);
-    border-radius: 8px;
+    margin-bottom: var(--padding);
+    font-size: var(--font-size-base);
+    color: var(--font-secondary-color);
     font-style: italic;
+  }
+}
+
+// Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .music-block {
+    padding: var(--padding-mobile);
+    gap: var(--gap-mobile);
+
+    .block-info {
+      padding: var(--padding-mobile);
+      gap: var(--gap-mobile);
+    }
+  }
+  
+  .music-block-readonly {
+    padding: var(--padding);
+    
+    .block-title {
+      font-size: var(--font-size-lg);
+      flex-direction: column;
+      text-align: center;
+      gap: var(--padding-small);
+    }
   }
 }

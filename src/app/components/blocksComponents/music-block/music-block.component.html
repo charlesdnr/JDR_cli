@@ -1,10 +1,20 @@
 @if(isReadOnly()) {
 <div class="music-block-readonly">
-  <h3 class="block-title">{{ musicBlock().title }}</h3>
-  @if(musicBlock().label) {
-  <p class="music-label">{{ musicBlock().label }}</p>
+  <!-- Header cohérent avec icône -->
+  @if(musicBlock().title) {
+    <div class="readonly-header">
+      <h3 class="block-title">
+        <i class="pi pi-volume-up"></i>
+        {{ musicBlock().title }}
+      </h3>
+    </div>
   }
-  <app-audioplayer [isReadOnly]="true" />
+  
+  @if(musicBlock().label) {
+    <p class="music-label">{{ musicBlock().label }}</p>
+  }
+  
+  <app-audioplayer [isReadOnly]="true" [audioFileId]="musicBlock().src || undefined" />
 </div>
 } @else {
 <div class="music-block">
@@ -27,6 +37,7 @@
   <div class="audio-section">
     <app-audioplayer 
       [isReadOnly]="isReadOnly()"
+      [audioFileId]="musicBlock().src || undefined"
       (audioUploaded)="onAudioUploaded($event)"
       (audioRemoved)="onAudioRemoved()"
     />

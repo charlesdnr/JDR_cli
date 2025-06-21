@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -51,6 +52,7 @@ import { Picture } from '../../classes/Picture';
 @Component({
   selector: 'app-project-parameters',
   imports: [
+    CommonModule,
     FormsModule,
     ButtonModule,
     SelectModule,
@@ -213,13 +215,16 @@ export class ProjectParametersComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (this.currentModule()) {
-      const usersWithAccess = this.currentModule()!.accesses.map(
-        (access) => access.user
-      );
+      const usersWithAccess = this.currentModule()!.accesses
+        .filter(access => access.user && access.user.id && access.user.id > 0)
+        .map((access) => access.user);
       this.selectedUsers.set(usersWithAccess);
     }
     this.getTagsForModule();
     this.loadTags();
+    
+    // Précharger les images des collaborateurs
+    this.preloadUserImages();
     
     // Attendre que les dossiers soient chargés par le FolderService (s'ils ne le sont pas déjà)
     if (this.folders().length === 0) {
@@ -261,6 +266,48 @@ export class ProjectParametersComponent implements OnInit {
 
   getUserInitials(user: User): string {
     return this.userAvatarService.getUserInitials(user);
+  }
+
+  // Map pour stocker les URLs des images de profil chargées
+  private userProfileImages = new Map<number, string>();
+
+  async getUserProfileImage(user: User): Promise<string> {
+    if (this.userProfileImages.has(user.id)) {
+      return this.userProfileImages.get(user.id)!;
+    }
+    
+    const imageUrl = await this.userAvatarService.getUserProfileImage(user);
+    this.userProfileImages.set(user.id, imageUrl);
+    return imageUrl;
+  }
+
+  getUserProfileImageSync(user: User): string | null {
+    return this.userProfileImages.get(user.id) || null;
+  }
+
+  // Méthode pour précharger les images des collaborateurs
+  preloadUserImages() {
+    this.selectedUsers().forEach(user => {
+      if (!this.userProfileImages.has(user.id)) {
+        this.getUserProfileImage(user).then(() => {
+          // L'image est maintenant en cache, forcer la détection de changement si nécessaire
+        });
+      }
+    });
+  }
+
+  // Méthode pour gérer l'erreur de chargement d'image
+  onImageError(event: Event, user: User) {
+    const target = event.target as HTMLImageElement;
+    const container = target.parentElement;
+    if (container) {
+      const img = container.querySelector('.micro-avatar-image') as HTMLImageElement;
+      const avatar = container.querySelector('.fallback-avatar') as HTMLElement;
+      if (img && avatar) {
+        img.style.display = 'none';
+        avatar.style.display = 'flex';
+      }
+    }
   }
   getGameSystemName(id: number){
     return this.gameSystems().find(g => g.id === id)?.name

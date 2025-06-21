@@ -442,23 +442,16 @@
 
 // Cards modernes
 :host ::ng-deep .modern-card {
-  border: 1px solid var(--neutral-color);
   border-radius: 12px;
-  box-shadow: var(--paragraph-shadow);
   transition: var(--paragraph-transition);
-  background: var(--container-color);
+  background: transparent;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   
-  &:hover {
-    box-shadow: var(--paragraph-shadow-hover);
-    transform: translateY(-1px);
-  }
-  
   .p-card-body {
-    padding: 1.5rem;
+    padding: var(--padding);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;

@@ -15,7 +15,7 @@
         </div>
         
         <div class="info-row">
-          <span class="info-icon"><i class="pi pi-gamepad-2"></i></span>
+          <span class="info-icon"><i class="pi pi-desktop"></i></span>
           <span class="info-text">{{ getGameSystemName(currentVersion().gameSystemId ?? 0) }}</span>
         </div>
         
@@ -35,13 +35,23 @@
             <span class="info-icon"><i class="pi pi-users"></i></span>
             <div class="collaborators-compact">
               @for (user of selectedUsers(); track user) {
-                <p-avatar
-                  [label]="getUserInitials(user)"
-                  size="normal"
-                  shape="circle"
-                  [pTooltip]="user.email"
-                  styleClass="micro-avatar"
-                />
+                <div class="user-avatar-container">
+                  <img 
+                    [src]="getUserProfileImageSync(user) || 'assets/images/default-avatar.png'" 
+                    [alt]="user.username || 'Photo de profil'"
+                    class="micro-avatar-image"
+                    [pTooltip]="user.email"
+                    (error)="onImageError($event, user)"
+                  />
+                  <p-avatar
+                    [label]="getUserInitials(user)"
+                    size="normal"
+                    shape="circle"
+                    [pTooltip]="user.email"
+                    styleClass="micro-avatar fallback-avatar"
+                    [ngStyle]="{'display': 'none'}"
+                  />
+                </div>
               }
             </div>
           </div>
