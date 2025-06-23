@@ -185,7 +185,53 @@
   display: flex;
   flex-direction: column;
   text-align: left;
+  position: relative;
+  
+  .error-message {
+    color: var(--red-500);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .input.error,
+  ::ng-deep .input.error .p-inputtext,
+  ::ng-deep .input.error .p-password-input {
+    border-color: var(--red-500) !important;
+    box-shadow: 0 0 0 0.2rem rgba(var(--red-500-rgb), 0.2) !important;
+  }
 }
+.error-banner {
+  background-color: var(--red-50);
+  border: 1px solid var(--red-200);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--red-700);
+  font-size: 0.875rem;
+  animation: slideDown 0.3s ease-out;
+  
+  i {
+    color: var(--red-500);
+    font-size: 1rem;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 ::ng-deep {
   .p-button {
     width: 100% !important;
@@ -198,5 +244,12 @@
   .button.p-button {
     width: 100% !important;
     min-width: 250px !important;
+  }
+  
+  // Styles pour les champs en erreur dans PrimeNG
+  .p-inputtext.p-component.p-invalid,
+  .p-password.p-component.p-invalid .p-password-input {
+    border-color: var(--red-500) !important;
+    box-shadow: 0 0 0 0.2rem rgba(var(--red-500-rgb), 0.2) !important;
   }
 }

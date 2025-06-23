@@ -152,7 +152,7 @@ export class ExploreComponent implements OnInit {
   private searchSubject = new Subject<string>();
 
   // Arrays pour l'affichage
-  skeletonArray = Array.from({ length: 12 }, (_, i) => i);
+  skeletonArray = Array.from({ length: 4 }, (_, i) => i);
 
   // Options pour les filtres
   moduleTypes = [
@@ -204,17 +204,17 @@ export class ExploreComponent implements OnInit {
   private async initializeWithAuth() {
     try {
       // Wait for Firebase authentication to be ready before making HTTP calls
+      // This ensures auth interceptor works properly
       await this.authService.waitForAuthReady();
-      await this.loadInitialData();
-      this.setupSearchDebounce();
-      await this.loadModules();
     } catch (error) {
-      console.error('Error waiting for authentication:', error);
-      // Even if auth fails, try to load data
-      await this.loadInitialData();
-      this.setupSearchDebounce();
-      await this.loadModules();
+      console.error('Error waiting for authentication, continuing without auth:', error);
     }
+    
+    // Always try to load data regardless of auth status
+    // The explore page should work for both authenticated and unauthenticated users
+    await this.loadInitialData();
+    this.setupSearchDebounce();
+    await this.loadModules();
   }
 
   private setupSearchDebounce() {
@@ -230,10 +230,18 @@ export class ExploreComponent implements OnInit {
   private async loadInitialData() {
     this.loading.set(true);
     try {
-      const [tags, gameSystems] = await Promise.all([
-        this.tagHttpService.getAllTags(),
-        this.gameSystemHttpService.getAllGameSystems()
-      ]);
+      // Load tags and game systems independently to prevent one failure from breaking everything
+      const tagsPromise = this.tagHttpService.getAllTags().catch(error => {
+        console.error('Erreur lors du chargement des tags:', error);
+        return []; // Return empty array on error
+      });
+      
+      const gameSystemsPromise = this.gameSystemHttpService.getAllGameSystems().catch(error => {
+        console.error('Erreur lors du chargement des systèmes de jeu:', error);
+        return []; // Return empty array on error
+      });
+
+      const [tags, gameSystems] = await Promise.all([tagsPromise, gameSystemsPromise]);
 
       // Simuler un moduleCount pour les tags (à remplacer par vraies données API)
       const tagsWithCount = tags.map((tag: Tag) => ({
@@ -245,6 +253,9 @@ export class ExploreComponent implements OnInit {
       this.gameSystems.set(gameSystems);
     } catch (error) {
       console.error('Erreur lors du chargement des données initiales:', error);
+      // Set empty arrays to prevent UI errors
+      this.availableTags.set([]);
+      this.gameSystems.set([]);
     } finally {
       this.loading.set(false);
     }
@@ -302,8 +313,14 @@ export class ExploreComponent implements OnInit {
 
     try {
       return await this.moduleHttpService.searchModules(params);
-    } catch (error) {
-      console.error('Erreur API, fallback vers simulation:', error);
+    } catch (error: unknown) {
+      console.error('Erreur API lors de la recherche de modules:', error);
+      const errorObj = error as { status?: number; message?: string };
+      console.log('Status:', errorObj?.status, 'Message:', errorObj?.message || error);
+      
+      // For any API error (400, 403, 500, etc.), fallback to mock data
+      // This ensures the explore page works even when backend is not properly configured
+      console.log('Utilisation des données de simulation pour la recherche...');
       return this.mockPaginatedSearch(params);
     }
   }
@@ -327,10 +344,17 @@ export class ExploreComponent implements OnInit {
   }
 
   private async loadPublicModules(): Promise<Module[]> {
-    const allModules = await this.moduleHttpService.getAllModules();
-    return allModules.filter((module) =>
-      module.versions.some((version) => version.published)
-    );
+    try {
+      const allModules = await this.moduleHttpService.getAllModules();
+      return allModules.filter((module) =>
+        module.versions.some((version) => version.published)
+      );
+    } catch (error) {
+      console.error('Erreur lors du chargement des modules publics:', error);
+      // Return empty array if unable to load modules from API
+      // This prevents the explore page from breaking completely
+      return [];
+    }
   }
 
   private applyClientSideFilters(modules: Module[]): Module[] {

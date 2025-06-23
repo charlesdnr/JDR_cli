@@ -11,6 +11,7 @@
         <label for="login">{{ "Nom d'utilisateur" | translate }}</label>
         <input
           class="input"
+          [class.error]="loginControl()?.invalid && loginControl()?.touched"
           id="login"
           required="true"
           type="text"
@@ -19,18 +20,32 @@
           formControlName="login"
           autocomplete="false"
         />
+        @if(loginControl()?.invalid && loginControl()?.touched) {
+          <small class="error-message">{{ "Le nom d'utilisateur est requis" | translate }}</small>
+        }
       </div>
       }
       <div class="container-label-button">
         <label for="email">{{ "Adresse Mail" | translate }}</label>
         <input
-          type="text"
-          placehold
+          type="email"
+          class="input"
+          [class.error]="emailControl()?.invalid && emailControl()?.touched"
           id="email"
           placeholder="example@gmail.com"
           pInputText
           formControlName="email"
         />
+        @if(emailControl()?.invalid && emailControl()?.touched) {
+          <small class="error-message">
+            @if(emailControl()?.hasError('required')) {
+              {{ "L'adresse email est requise" | translate }}
+            }
+            @if(emailControl()?.hasError('email')) {
+              {{ "Format d'email invalide" | translate }}
+            }
+          </small>
+        }
       </div>
 
       <div class="container-label-button">
@@ -41,9 +56,13 @@
           required="true"
           [toggleMask]="true"
           class="input"
+          [class.error]="passwordControl()?.invalid && passwordControl()?.touched"
           formControlName="password"
           [feedback]="false"
         />
+        @if(passwordControl()?.invalid && passwordControl()?.touched) {
+          <small class="error-message">{{ "Le mot de passe est requis" | translate }}</small>
+        }
       </div>
 
       @if(!isLogin()){
@@ -56,18 +75,32 @@
           required="true"
           [toggleMask]="true"
           class="input"
+          [class.error]="(confirmControl()?.invalid && confirmControl()?.touched) || (formgroup().hasError('passwordMismatch') && confirmControl()?.touched)"
           formControlName="confirm"
           [feedback]="false"
         />
+        @if(confirmControl()?.invalid && confirmControl()?.touched) {
+          <small class="error-message">{{ "La confirmation du mot de passe est requise" | translate }}</small>
+        }
+        @if(formgroup().hasError('passwordMismatch') && confirmControl()?.touched) {
+          <small class="error-message">{{ "Les mots de passe ne correspondent pas" | translate }}</small>
+        }
       </div>
       }
       <p-button
         class="input button"
         [label]="labelButton() | translate"
-        [disabled]="!formgroup().valid"
+        [disabled]="!formgroup().valid || loading()"
         type="submit"
         [loading]="loading()"
       />
+      
+      @if(errorMessage()) {
+        <div class="error-banner">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
     </form>
     <div class="separator"></div>
     <div class="providers">

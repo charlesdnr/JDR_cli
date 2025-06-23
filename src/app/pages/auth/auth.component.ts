@@ -25,7 +25,6 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../validators/equalPattern';
 import { MessageService } from 'primeng/api';
-import { HttpErrorResponse } from '@angular/common/http';
 import { UserHttpService } from '../../services/https/user-http.service';
 import { UserCredential } from '@angular/fire/auth';
 
@@ -57,14 +56,14 @@ export class AuthComponent implements OnInit, OnDestroy {
   formgroup = computed(() => {
     if (this.isLogin()) {
       return new FormGroup({
-        email: new FormControl(''),
-        password: new FormControl(''),
+        email: new FormControl('', [Validators.required, Validators.email]),
+        password: new FormControl('', Validators.required),
       });
     }
     return new FormGroup(
       {
         login: new FormControl('', Validators.required),
-        password: new FormControl('', Validators.required),
+        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
         confirm: new FormControl('', Validators.required),
         email: new FormControl('', [Validators.email, Validators.required]),
       },
@@ -85,6 +84,25 @@ export class AuthComponent implements OnInit, OnDestroy {
   loading = signal(false);
   loadingGoogle = signal(false);
   loadingGithub = signal(false);
+  errorMessage = signal<string>('');
+
+  // Computed pour éviter les erreurs de type dans le template
+  loginControl = computed(() => {
+    const form = this.formgroup();
+    return form.controls['login' as keyof typeof form.controls] || null;
+  });
+  emailControl = computed(() => {
+    const form = this.formgroup();
+    return form.controls['email' as keyof typeof form.controls] || null;
+  });
+  passwordControl = computed(() => {
+    const form = this.formgroup();
+    return form.controls['password' as keyof typeof form.controls] || null;
+  });
+  confirmControl = computed(() => {
+    const form = this.formgroup();
+    return form.controls['confirm' as keyof typeof form.controls] || null;
+  });
 
   private routeSubscription!: Subscription;
 
@@ -99,6 +117,8 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   formSubmit() {
+    this.errorMessage.set('');
+    
     if (this.formgroup().valid) {
       const user: User = new User(
         this.formgroup().value.email!,
@@ -115,9 +135,12 @@ export class AuthComponent implements OnInit, OnDestroy {
           })
           .catch((err) => {
             console.error(err);
+            this.handleAuthError(err);
             this.loading.set(false);
           });
       }
+    } else {
+      this.markAllFieldsAsTouched();
     }
   }
 
@@ -128,36 +151,36 @@ export class AuthComponent implements OnInit, OnDestroy {
       .then(async (value) => {
         await this.checkOurLogin(value);
       })
-      .catch((err: HttpErrorResponse) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: `Error : ${err.message}`,
-        });
+      .catch((err: unknown) => {
+        this.handleAuthError(err);
         this.loading.set(false);
       });
   }
 
   loginGoogle() {
     this.loadingGoogle.set(true);
+    this.errorMessage.set('');
     this.httpAuth
       .loginGoogle()
       .then(async (value) => {
         await this.checkOurLogin(value);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        this.handleAuthError(err);
         this.loadingGoogle.set(false);
       });
   }
 
   loginGithub() {
     this.loadingGithub.set(true);
+    this.errorMessage.set('');
     this.httpAuth
       .loginGithub()
       .then(async (value) => {
         await this.checkOurLogin(value);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        this.handleAuthError(err);
         this.loadingGithub.set(false);
       });
   }
@@ -171,14 +194,13 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
+          summary: 'Succès',
           detail: 'Connecté en tant que ' + value.user.email,
         });
+      } catch (error) {
+        this.handleAuthError(error);
       } finally {
-        // Réinitialiser tous les loading
-        this.loading.set(false);
-        this.loadingGoogle.set(false);
-        this.loadingGithub.set(false);
+        this.resetLoadingStates();
       }
     } else if (!this.isLogin()) {
       try {
@@ -189,15 +211,73 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/home');
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Connecté en tant que ' + value.user.email,
+          summary: 'Succès',
+          detail: 'Compte créé et connecté en tant que ' + value.user.email,
         });
+      } catch (error) {
+        this.handleAuthError(error);
       } finally {
-        // Réinitialiser tous les loading
-        this.loading.set(false);
-        this.loadingGoogle.set(false);
-        this.loadingGithub.set(false);
+        this.resetLoadingStates();
       }
     }
+  }
+
+  private resetLoadingStates() {
+    this.loading.set(false);
+    this.loadingGoogle.set(false);
+    this.loadingGithub.set(false);
+  }
+
+  private handleAuthError(error: unknown) {
+    let errorMessage = 'Une erreur inattendue s\'est produite';
+    
+    if (error && typeof error === 'object' && 'code' in error) {
+      const firebaseError = error as { code: string; message?: string };
+      switch (firebaseError.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          errorMessage = 'Email ou mot de passe incorrect';
+          break;
+        case 'auth/email-already-in-use':
+          errorMessage = 'Cette adresse email est déjà utilisée';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Format d\'email invalide';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'Problème de connexion réseau';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard';
+          break;
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'Connexion annulée';
+          break;
+        default:
+          errorMessage = firebaseError.message || errorMessage;
+      }
+    } else if (error && typeof error === 'object' && 'message' in error) {
+      const errorWithMessage = error as { message: string };
+      errorMessage = errorWithMessage.message;
+    }
+
+    this.errorMessage.set(errorMessage);
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail: errorMessage,
+    });
+  }
+
+  private markAllFieldsAsTouched() {
+    const form = this.formgroup();
+    Object.keys(form.controls).forEach(key => {
+      const control = form.controls[key as keyof typeof form.controls];
+      control?.markAsTouched();
+    });
   }
 }

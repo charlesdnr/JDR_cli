@@ -367,11 +367,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         await this.userProfileService.unsubscribeFromUserProfile(userId);
         this.isFollowing.set(false);
         this.userSubscription.set(null);
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Désabonnement',
-          detail: 'Vous ne suivez plus cet utilisateur'
-        });
       } else {
         const subscription = await this.userProfileService.subscribeToUserProfile(userId);
         this.isFollowing.set(true);
@@ -379,12 +374,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         
         // Déclencher les confettis !
         this.triggerConfetti();
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Abonnement',
-          detail: 'Vous suivez maintenant cet utilisateur'
-        });
       }
       
       // Recharger les abonnés pour mettre à jour le compteur

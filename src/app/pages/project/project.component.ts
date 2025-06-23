@@ -392,16 +392,34 @@ export class ProjectComponent implements OnInit, OnDestroy {
             // Enrichir avec les détails des modules
             const enrichedModules: DisplayableSavedModule[] = [];
             for (const savedModule of savedModules) {
-              const moduleDetails = this.modulesSummary().find(
+              // D'abord chercher dans le cache des modules créés par l'utilisateur
+              let moduleDetails = this.modulesSummary().find(
                 summary => summary.id === savedModule.moduleId
               );
               
-              if (moduleDetails) {
-                enrichedModules.push({
-                  ...savedModule,
-                  moduleDetails: moduleDetails,
-                });
+              // Si pas trouvé dans le cache, récupérer les détails individuellement
+              if (!moduleDetails) {
+                try {
+                  const moduleData = await this.moduleHttpService.getModuleById(savedModule.moduleId);
+                  // Convertir Module en ModuleSummary pour l'interface
+                  moduleDetails = new ModuleSummary(
+                    moduleData.id,
+                    moduleData.title,
+                    moduleData.description,
+                    moduleData.creator,
+                    moduleData.versions,
+                    moduleData.picture
+                  );
+                } catch (error) {
+                  console.warn(`Impossible de récupérer les détails du module ${savedModule.moduleId}:`, error);
+                  continue; // Ignorer ce module et continuer avec les autres
+                }
               }
+              
+              enrichedModules.push({
+                ...savedModule,
+                moduleDetails: moduleDetails,
+              });
             }
             
             // Mettre en cache
@@ -481,20 +499,38 @@ export class ProjectComponent implements OnInit, OnDestroy {
       const savedModules =
         await this.httpUserSavedModuleService.getSavedModulesByFolder(folderId);
 
-      // Enrichir chaque savedModule avec les détails du module depuis le cache summary
+      // Enrichir chaque savedModule avec les détails du module
       const enrichedModules: DisplayableSavedModule[] = [];
 
       for (const savedModule of savedModules) {
-        const moduleDetails = this.modulesSummary().find(
+        // D'abord chercher dans le cache des modules créés par l'utilisateur
+        let moduleDetails = this.modulesSummary().find(
           summary => summary.id === savedModule.moduleId
         );
         
-        if (moduleDetails) {
-          enrichedModules.push({
-            ...savedModule,
-            moduleDetails: moduleDetails,
-          });
+        // Si pas trouvé dans le cache, récupérer les détails individuellement
+        if (!moduleDetails) {
+          try {
+            const moduleData = await this.moduleHttpService.getModuleById(savedModule.moduleId);
+            // Convertir Module en ModuleSummary pour l'interface
+            moduleDetails = new ModuleSummary(
+              moduleData.id,
+              moduleData.title,
+              moduleData.description,
+              moduleData.creator,
+              moduleData.versions,
+              moduleData.picture
+            );
+          } catch (error) {
+            console.warn(`Impossible de récupérer les détails du module ${savedModule.moduleId}:`, error);
+            continue; // Ignorer ce module et continuer avec les autres
+          }
         }
+        
+        enrichedModules.push({
+          ...savedModule,
+          moduleDetails: moduleDetails,
+        });
       }
 
       // Mettre en cache et afficher
@@ -578,20 +614,38 @@ export class ProjectComponent implements OnInit, OnDestroy {
       // Filtrer pour ne garder que ceux sans dossier
       const modulesWithoutFolder = allSavedModules.filter(module => !module.folderId);
       
-      // Enrichir chaque savedModule avec les détails du module depuis le cache summary
+      // Enrichir chaque savedModule avec les détails du module
       const enrichedModules: DisplayableSavedModule[] = [];
 
       for (const savedModule of modulesWithoutFolder) {
-        const moduleDetails = this.modulesSummary().find(
+        // D'abord chercher dans le cache des modules créés par l'utilisateur
+        let moduleDetails = this.modulesSummary().find(
           summary => summary.id === savedModule.moduleId
         );
         
-        if (moduleDetails) {
-          enrichedModules.push({
-            ...savedModule,
-            moduleDetails: moduleDetails,
-          });
+        // Si pas trouvé dans le cache, récupérer les détails individuellement
+        if (!moduleDetails) {
+          try {
+            const moduleData = await this.moduleHttpService.getModuleById(savedModule.moduleId);
+            // Convertir Module en ModuleSummary pour l'interface
+            moduleDetails = new ModuleSummary(
+              moduleData.id,
+              moduleData.title,
+              moduleData.description,
+              moduleData.creator,
+              moduleData.versions,
+              moduleData.picture
+            );
+          } catch (error) {
+            console.warn(`Impossible de récupérer les détails du module ${savedModule.moduleId}:`, error);
+            continue; // Ignorer ce module et continuer avec les autres
+          }
         }
+        
+        enrichedModules.push({
+          ...savedModule,
+          moduleDetails: moduleDetails,
+        });
       }
       
       this.moduleWithoutFolder.set(enrichedModules);

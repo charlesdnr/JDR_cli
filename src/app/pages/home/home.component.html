@@ -266,8 +266,16 @@
       <div class="modules-showcase" [@staggerFadeIn]>
         @if (loadingModules()) {
           <div class="loading-state">
-            <div class="loading-grid">
-              @for (i of [1,2,3,4,5,6]; track i) {
+            <p-carousel 
+              [value]="[1,2,3,4,5,6]" 
+              [numVisible]="carouselNumVisible"
+              [numScroll]="carouselNumScroll"
+              [responsiveOptions]="carouselResponsiveOptions"
+              styleClass="custom-carousel loading-carousel"
+              [showIndicators]="false"
+              [showNavigators]="true"
+              [circular]="false">
+              <ng-template let-item pTemplate="item">
                 <div class="module-skeleton">
                   <div class="skeleton-image"></div>
                   <div class="skeleton-content">
@@ -276,16 +284,27 @@
                     <div class="skeleton-line"></div>
                   </div>
                 </div>
-              }
-            </div>
+              </ng-template>
+            </p-carousel>
           </div>
         } @else {
           @if (mostRatedModules().length > 1) {
-            @for (module of mostRatedModules().slice(1); track module.id) {
-              <div class="module-card-wrapper" [@fadeInUp]>
-                <app-module-card [module]="module" />
-              </div>
-            }
+            <p-carousel 
+              [value]="mostRatedModules().slice(1)" 
+              [numVisible]="carouselNumVisible"
+              [numScroll]="carouselNumScroll"
+              [responsiveOptions]="carouselResponsiveOptions"
+              styleClass="custom-carousel modules-carousel"
+              [showIndicators]="mostRatedModules().length > 4"
+              [showNavigators]="true"
+              [circular]="false"
+              [autoplayInterval]="6000">
+              <ng-template let-module pTemplate="item">
+                <div class="module-card-wrapper" [@fadeInUp]>
+                  <app-module-card [module]="module" />
+                </div>
+              </ng-template>
+            </p-carousel>
           } @else {
             <div class="empty-state">
               <div class="empty-icon">🎲</div>
@@ -316,11 +335,22 @@
         </div>
         
         <div class="recent-modules-showcase" [@staggerFadeIn]>
-          @for (module of mostRecentModules(); track module.id) {
-            <div class="module-card-wrapper" [@fadeInUp]>
-              <app-module-card [module]="module" />
-            </div>
-          }
+          <p-carousel 
+            [value]="mostRecentModules()" 
+            [numVisible]="carouselNumVisible"
+            [numScroll]="carouselNumScroll"
+            [responsiveOptions]="carouselResponsiveOptions"
+            styleClass="custom-carousel recent-modules-carousel"
+            [showIndicators]="mostRecentModules().length > 4"
+            [showNavigators]="true"
+            [circular]="false"
+            [autoplayInterval]="8000">
+            <ng-template let-module pTemplate="item">
+              <div class="module-card-wrapper" [@fadeInUp]>
+                <app-module-card [module]="module" />
+              </div>
+            </ng-template>
+          </p-carousel>
         </div>
       </div>
     }

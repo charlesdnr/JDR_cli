@@ -9,6 +9,7 @@ import { ChipModule } from 'primeng/chip';
 import { RatingModule } from 'primeng/rating';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { CarouselModule } from 'primeng/carousel';
 import { TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink } from '@angular/router';
 import { ModuleHttpService } from '../../services/https/module-http.service';
@@ -36,6 +37,7 @@ import { AggregatedRatings } from '../../classes/AggregatedRatings';
     RatingModule, 
     TagModule,
     TooltipModule,
+    CarouselModule,
     TranslateModule, 
     RouterLink, 
     SkeletonModule,
@@ -113,6 +115,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   mostRecentModules = signal<Module[]>([]);
   loadingModules = signal(false);
   featuredModuleRating = signal<AggregatedRatings | null>(null);
+  
+  // Configuration des carrousels - 3 cartes par défaut
+  carouselResponsiveOptions = [
+    {
+      breakpoint: '1024px',
+      numVisible: 2,
+      numScroll: 1
+    },
+    {
+      breakpoint: '768px',
+      numVisible: 1,
+      numScroll: 1
+    }
+  ];
+  
+  // Nombre de cartes visibles par défaut (desktop)
+  carouselNumVisible = 3;
+  carouselNumScroll = 1;
   
   // Stats for the hero section - now using real data
   platformStats = signal<PlatformStatistics | null>(null);
