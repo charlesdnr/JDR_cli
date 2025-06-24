@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'projects', component: ProjectComponent, canActivate: [authGuard] },
   { path: 'new-module', component: NewProjectComponent, canActivate: [authGuard] },
   { path: 'module/:moduleId', component: NewProjectComponent, canActivate: [moduleAccessGuard] },
-  { path: 'user/:userId', component: UserProfileComponent },
+  { path: 'user/:userId', component: UserProfileComponent, canActivate: [authGuard] },
   { path: 'password-reset', component: PasswordResetComponent },
   { path: 'module', redirectTo: 'projects', pathMatch: 'full' },
 ];

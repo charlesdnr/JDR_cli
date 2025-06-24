@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, HostListener } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
 import { AuthHttpService } from '../../services/https/auth-http.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
@@ -31,7 +32,8 @@ export interface buttonHeader {
     RouterLink,
     TranslateModule,
     TooltipModule,
-    NotificationBellComponent
+    NotificationBellComponent,
+    FormsModule
   ],
   providers: [FolderService],
   templateUrl: './header.component.html',
@@ -48,6 +50,9 @@ export class HeaderComponent {
 
   isMobileMenuOpen = signal(false);
   folders = this.folderSerice.currentFolders.asReadonly();
+  
+  // Recherche
+  searchQuery = signal('');
 
   mapButton = computed(() => {
     return [
@@ -70,6 +75,35 @@ export class HeaderComponent {
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(value => !value);
+  }
+
+  // Méthodes de recherche
+  onSearchSubmit() {
+    const query = this.searchQuery().trim();
+    if (query) {
+      this.router.navigate(['/explore'], { 
+        queryParams: { search: query } 
+      });
+    }
+  }
+
+  onSearchKeyup(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.onSearchSubmit();
+    }
+  }
+
+  // Raccourci clavier Cmd+K / Ctrl+K
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      event.preventDefault();
+      const searchInput = document.querySelector('.search-input') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
   }
 
   logout(event: Event) {

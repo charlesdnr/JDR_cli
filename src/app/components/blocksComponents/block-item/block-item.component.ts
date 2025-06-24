@@ -8,6 +8,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { InputTextModule } from 'primeng/inputtext';
 import { TranslateModule } from '@ngx-translate/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-block-item',
@@ -19,7 +20,16 @@ import { TranslateModule } from '@ngx-translate/core';
     TranslateModule
   ],
   templateUrl: './block-item.component.html',
-  styleUrl: './block-item.component.scss'
+  styleUrl: './block-item.component.scss',
+  animations: [
+    trigger('headerSlideIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-20px)' }),
+        animate('400ms cubic-bezier(0.35, 0, 0.25, 1)', 
+               style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class BlockItemComponent {
   block = input.required<Block | null>();
@@ -60,6 +70,23 @@ export class BlockItemComponent {
         return 'Image';
       default:
         return undefined;
+    }
+  }
+
+  getBlockTypeLabel(type: string): string {
+    switch (type) {
+      case EBlockType.paragraph:
+        return 'TEXT';
+      case EBlockType.music:
+        return 'AUDIO';
+      case EBlockType.module:
+        return 'MODULE';
+      case EBlockType.stat:
+        return 'STATS';
+      case EBlockType.picture:
+        return 'IMAGE';
+      default:
+        return 'BLOCK';
     }
   }
 

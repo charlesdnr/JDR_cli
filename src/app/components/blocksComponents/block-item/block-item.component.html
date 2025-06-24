@@ -1,44 +1,68 @@
 <div class="block-container" cdkDrag [cdkDragData]="block()">
   @if(!isReadOnly()){
-    <div class="block-header">
-      @if(!isReadOnly()) {
-      <div class="block-controls-left">
-        <i class="pi pi-bars" cdkDragHandle aria-hidden="true"></i>
+    <div class="modern-block-header" [@headerSlideIn]>
+      <!-- Left Section: Drag Handle -->
+      <div class="header-left" cdkDragHandle>
+        <div class="drag-handle-modern">
+          <div class="drag-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
       </div>
-      }
-      <div class="texte">
-        <i
-          [class]="getIconByType(block()?.type ?? 'stat')"
-          aria-hidden="true"
-        ></i>
-        <span>{{ getBlockPreview(block()?.type ?? "stat") }}</span>
+      
+      <!-- Center Section: Block Identity -->
+      <div class="header-center">
+        <div class="block-identity">
+          <div class="block-icon-container">
+            <div class="icon-glow"></div>
+            <i [class]="getIconByType(block()?.type ?? 'stat')" class="block-icon"></i>
+          </div>
+          <div class="block-info">
+            <span class="block-name">{{ getBlockPreview(block()?.type ?? "stat") }}</span>
+            <div class="block-meta">
+              <span class="block-type-badge" [attr.data-type]="block()?.type">
+                {{ getBlockTypeLabel(block()?.type ?? 'stat') }}
+              </span>
+              @if(block()?.id) {
+                <span class="block-id">#{{ block()?.id }}</span>
+              }
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="block-controls">
-        @if(block()?.id && !isReadOnly()) {
-          @if(block()!.type === enum().paragraph) {
-            <p-button
-              icon="pi pi-sparkles"
-              pTooltip="Générer avec l'IA"
-              tooltipPosition="top"
-              tooltipStyleClass="tooltip-ai"
-              (click)="onGenerateAI(block()?.id!, block()!.type)"
-              [rounded]="true"
-              [text]="true"
-              severity="help"
-            />
+      
+      <!-- Right Section: Actions -->
+      <div class="header-right">
+        <div class="block-actions">
+          @if(block()?.id && !isReadOnly()) {
+            @if(block()!.type === enum().paragraph) {
+              <button class="action-btn ai-btn" 
+                      (click)="onGenerateAI(block()?.id!, block()!.type)"
+                      pTooltip="Générer avec l'IA" 
+                      tooltipPosition="top">
+                <div class="btn-bg"></div>
+                <i class="pi pi-sparkles"></i>
+                <span class="btn-label">AI</span>
+              </button>
+            }
+            <button class="action-btn delete-btn" 
+                    (click)="onRemoveBlock(block()!.id!)"
+                    pTooltip="Supprimer le bloc" 
+                    tooltipPosition="top">
+              <div class="btn-bg"></div>
+              <i class="pi pi-trash"></i>
+            </button>
           }
-          <p-button
-            icon="pi pi-times"
-            (click)="onRemoveBlock(block()!.id!)"
-            pTooltip="Supprimer"
-            tooltipPosition="top"
-            tooltipStyleClass="tooltip-delete"
-            [rounded]="true"
-            [text]="true"
-            severity="danger"
-          />
-        }
+        </div>
       </div>
+      
+      <!-- Header Background Effect -->
+      <div class="header-bg-effect"></div>
     </div>
   }
   <ng-content></ng-content>

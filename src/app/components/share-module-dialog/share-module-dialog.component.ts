@@ -63,6 +63,7 @@ import { ModuleService } from '../../services/module.service';
           (onSelect)="onUserSelect($event.value)"
           [showClear]="true"
           [disabled]="!moduleData.canInvite"
+          appendTo="body"
         >
           <ng-template let-user pTemplate="item">
             <div class="search-result-item">
@@ -116,6 +117,7 @@ import { ModuleService } from '../../services/module.service';
                 [disabled]="user.id === moduleData.module.creator.id || !moduleData.canInvite"
                 placeholder="Droits d'accès"
                 styleClass="permissions-select"
+                appendTo="body"
               />
               }
               @if(user.id !== moduleData.module.creator.id && moduleData.canInvite){

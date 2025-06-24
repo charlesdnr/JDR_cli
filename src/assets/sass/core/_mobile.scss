@@ -1,0 +1,346 @@
+/*
+Fichier contenant toutes les mixins et utilitaires pour l'expérience mobile optimale
+*/
+
+@use "variables" as var;
+@use "mixins" as mix;
+
+/// Mixin pour les interactions tactiles améliorées
+@mixin touch-friendly {
+  // Augmente la zone tactile des éléments interactifs
+  min-height: 44px;
+  min-width: 44px;
+  
+  // Améliore la réactivité tactile
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  
+  // Évite le zoom sur les inputs sur iOS
+  &:focus {
+    font-size: 16px;
+  }
+}
+
+/// Mixin pour éviter le zoom sur les inputs iOS
+@mixin prevent-zoom-ios {
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    font-size: 16px !important;
+  }
+}
+
+/// Mixin pour les gestes de navigation mobile
+@mixin mobile-nav-gestures {
+  // Support des gestes de balayage
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+  
+  // Scroll fluide sur mobile
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/// Mixin pour les animations optimisées mobile
+@mixin mobile-performance-animation {
+  // Force l'accélération matérielle
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  
+  // Transitions plus douces
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.3s ease;
+}
+
+/// Mixin pour l'affichage mobile horizontal/vertical
+@mixin orientation-responsive {
+  @media screen and (orientation: portrait) {
+    @content;
+  }
+}
+
+@mixin landscape-responsive {
+  @media screen and (orientation: landscape) and (max-height: 500px) {
+    @content;
+  }
+}
+
+/// Mixin pour les cartes responsives mobiles
+@mixin mobile-card {
+  background: var(--container-color);
+  border-radius: var(--radius-mobile);
+  padding: var(--padding-mobile);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  @include mix.respond-to('mobile') {
+    margin: 0 var(--container-padding-mobile);
+    border-radius: var(--radius-small);
+  }
+}
+
+/// Mixin pour les listes mobiles optimisées
+@mixin mobile-list {
+  @include mix.respond-to('mobile') {
+    .list-item {
+      padding: 12px 16px;
+      min-height: 56px;
+      border-bottom: 1px solid var(--surface-border);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:active {
+        background-color: var(--surface-hover);
+      }
+    }
+  }
+}
+
+/// Mixin pour les formulaires mobiles
+@mixin mobile-form {
+  @include mix.respond-to('mobile') {
+    .form-field {
+      margin-bottom: var(--gap-mobile);
+    }
+    
+    .form-group {
+      padding: 0 var(--padding-mobile);
+    }
+    
+    input, textarea, select {
+      @include prevent-zoom-ios();
+      @include touch-friendly();
+      
+      padding: 12px 16px;
+      border-radius: var(--radius-mobile);
+      font-size: 16px;
+    }
+    
+    button {
+      @include touch-friendly();
+      border-radius: var(--radius-mobile);
+      font-weight: 500;
+    }
+  }
+}
+
+/// Mixin pour la navigation en bas d'écran mobile
+@mixin mobile-bottom-nav {
+  @include mix.respond-to('mobile') {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    
+    height: 60px;
+    background: var(--container-color);
+    border-top: 1px solid var(--surface-border);
+    
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
+    padding-bottom: env(safe-area-inset-bottom);
+    
+    .nav-item {
+      @include touch-friendly();
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 8px;
+      
+      .icon {
+        font-size: 20px;
+        margin-bottom: 2px;
+      }
+      
+      .label {
+        font-size: 10px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/// Mixin pour les headers mobiles avec safe-area
+@mixin mobile-header {
+  @include mix.respond-to('mobile') {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    
+    height: var(--header-height-mobile);
+    background: var(--container-color);
+    border-bottom: 1px solid var(--surface-border);
+    
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: var(--padding-mobile);
+    padding-right: var(--padding-mobile);
+    
+    .header-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--font-color);
+    }
+    
+    .header-action {
+      @include touch-friendly();
+    }
+  }
+}
+
+/// Mixin pour les modales en plein écran sur mobile
+@mixin mobile-fullscreen-modal {
+  @include mix.respond-to('mobile') {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    
+    .modal-content {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+/// Mixin pour les drawers/sidebars mobiles
+@mixin mobile-drawer {
+  @include mix.respond-to('mobile') {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    z-index: 1001;
+    
+    background: var(--container-color);
+    transition: left 0.3s ease;
+    
+    &.open {
+      left: 0;
+    }
+    
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+  }
+}
+
+/// Mixin pour optimiser les images sur mobile
+@mixin mobile-image-optimization {
+  @include mix.respond-to('mobile') {
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      
+      // Lazy loading pour les performances
+      loading: lazy;
+      
+      // Optimisation du rendu
+      image-rendering: -webkit-optimize-contrast;
+    }
+  }
+}
+
+/// Mixin pour les grilles mobiles
+@mixin mobile-grid($columns: 1, $gap: var(--gap-mobile)) {
+  display: grid;
+  gap: $gap;
+  
+  @include mix.respond-to('desktop') {
+    grid-template-columns: repeat($columns, 1fr);
+  }
+  
+  @include mix.respond-to('tablet') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include mix.respond-to('mobile') {
+    grid-template-columns: 1fr;
+    gap: var(--gap-mobile);
+  }
+}
+
+/// Mixin pour les espacements sécurisés (safe-area)
+@mixin safe-area-padding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/// Mixin pour les conteneurs avec scroll mobile optimisé
+@mixin mobile-scroll-container {
+  @include mix.respond-to('mobile') {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    
+    scrollbar-width: none;
+  }
+}
+
+/// Classes utilitaires mobiles
+@include mix.respond-to('mobile') {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-padding {
+    padding: var(--padding-mobile) !important;
+  }
+  
+  .mobile-margin {
+    margin: var(--margin-mobile) !important;
+  }
+}
+
+// Classes utilitaires non-mobiles
+@include mix.respond-to('desktop') {
+  .mobile-only {
+    display: none !important;
+  }
+  
+  .desktop-hidden {
+    display: none !important;
+  }
+}

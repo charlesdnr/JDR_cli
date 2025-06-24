@@ -41,7 +41,7 @@
                     [alt]="user.username || 'Photo de profil'"
                     class="micro-avatar-image"
                     [pTooltip]="user.email"
-                    (error)="onImageError($event, user)"
+                    (error)="onImageError($event)"
                   />
                   <p-avatar
                     [label]="getUserInitials(user)"

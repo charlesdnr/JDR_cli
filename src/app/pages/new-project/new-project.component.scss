@@ -1176,12 +1176,94 @@
   }
 }
 
+// ===== DRAG PREVIEW GLOBAL =====
+.drag-preview-global {
+  position: fixed;
+  z-index: 10000; // Plus élevé que tous les autres éléments
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  
+  .preview-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--background-color-lighter);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    animation: dragPulse 0.6s ease-in-out infinite alternate;
+    
+    .preview-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--primary-color);
+      border-radius: var(--border-radius-small);
+      
+      i {
+        font-size: 1rem;
+        color: white;
+      }
+    }
+    
+    .preview-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      
+      .preview-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--font-color);
+        white-space: nowrap;
+      }
+    }
+    
+    .preview-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 0.5rem;
+      
+      i {
+        font-size: 0.875rem;
+        color: var(--primary-color);
+        animation: bounce 1s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes dragPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  60% { transform: translateY(-2px); }
+}
+
 // ===== ACCESSIBILITY =====
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  .drag-preview-global .preview-card {
+    animation: none !important;
+    
+    .preview-indicator i {
+      animation: none !important;
+    }
   }
 }
 

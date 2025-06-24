@@ -152,6 +152,7 @@
               Type de module *
             </label>
             <p-select
+              appendTo="body"
               id="moduleType"
               [options]="moduleTypes"
               [(ngModel)]="moduleType"
@@ -182,6 +183,7 @@
               placeholder="Sélectionner un système de jeu"
               styleClass="form-select"
               [fluid]="true"
+              appendTo="body"
             >
               <ng-template pTemplate="selectedItem">
                 @if (selectedGameSystem()) {
@@ -229,6 +231,7 @@
               placeholder="Sélectionner un dossier"
               styleClass="form-select"
               [fluid]="true"
+              appendTo="body"
             >
             </p-treeselect>
             <div class="form-hint">

@@ -297,7 +297,7 @@ export class ProjectParametersComponent implements OnInit {
   }
 
   // Méthode pour gérer l'erreur de chargement d'image
-  onImageError(event: Event, user: User) {
+  onImageError(event: Event) {
     const target = event.target as HTMLImageElement;
     const container = target.parentElement;
     if (container) {

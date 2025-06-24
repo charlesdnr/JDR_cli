@@ -137,6 +137,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Stats for the hero section - now using real data
   platformStats = signal<PlatformStatistics | null>(null);
   
+  
   // Computed stats for display
   moduleStats = computed(() => {
     const stats = this.platformStats();
@@ -373,4 +374,5 @@ export class HomeComponent implements OnInit, OnDestroy {
       closable: true
     });
   }
+
 }

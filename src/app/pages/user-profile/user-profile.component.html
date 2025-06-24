@@ -21,6 +21,25 @@
         </div>
       </div>
     </div>
+  } @else if (isProfilePrivate()) {
+    <!-- Profil privé - Accès refusé -->
+    <div class="private-profile-message">
+      <div class="private-content">
+        <div class="private-icon">
+          <i class="pi pi-lock" style="font-size: 4rem; color: var(--primary-color);"></i>
+        </div>
+        <h2>Profil privé</h2>
+        <p>Ce profil utilisateur est privé. Seul le propriétaire peut le consulter.</p>
+        <div class="private-actions">
+          <p-button 
+            label="Retour à l'exploration" 
+            icon="pi pi-arrow-left"
+            routerLink="/explore"
+            styleClass="p-button-primary"
+          ></p-button>
+        </div>
+      </div>
+    </div>
   } @else {
     <!-- Hero Section avec design moderne -->
     <div class="profile-hero">
@@ -191,7 +210,7 @@
           </div>
           
           <p-select
-            [options]="filterOptions"
+            [options]="visibleFilterOptions()"
             [ngModel]="selectedFilter()"
             (ngModelChange)="onFilterChange($event)"
             placeholder="Filtrer par..."

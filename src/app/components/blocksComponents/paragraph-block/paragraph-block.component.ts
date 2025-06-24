@@ -12,7 +12,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ParagraphBlock } from '../../../classes/ParagraphBlock';
 import { TranslateModule } from '@ngx-translate/core';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
+import { SelectChangeEvent, SelectModule } from 'primeng/select';
 import { EditorModule } from 'primeng/editor';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -269,7 +269,7 @@ export class ParagraphBlockComponent implements AfterViewInit {
     navigator.clipboard.writeText(textContent);
   }
   
-  onStyleChange(event: any): void {
+  onStyleChange(event: SelectChangeEvent): void {
     // Mettre à jour le signal local ET le paragraphBlock
     if (event.value) {
       this.selectedStyle.set(event.value);

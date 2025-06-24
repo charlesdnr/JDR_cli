@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthenticationService } from '../../services/authentication.service';
 import confetti from 'canvas-confetti';
@@ -58,6 +58,7 @@ interface ModuleFilter {
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     CardModule,
     ButtonModule,
     ChipModule,
@@ -105,6 +106,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   isFollowing = signal(false);
   isFollowLoading = signal(false);
+  isProfilePrivate = signal(false);
   
   // État de l'interface
   selectedTab = signal<number>(0);
@@ -122,12 +124,38 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     { label: 'Récents', value: 'recent', icon: 'pi pi-clock' }
   ];
 
+  // Options de filtrage visibles selon les droits
+  visibleFilterOptions = computed(() => {
+    const options = [...this.filterOptions];
+    
+    // Masquer l'option "Brouillons" si ce n'est pas le profil de l'utilisateur connecté
+    if (!this.isOwnProfile()) {
+      return options.filter(option => option.value !== 'draft');
+    }
+    
+    return options;
+  });
+
   // Propriétés calculées
   currentUser = computed(() => this.userService.currentJdrUser());
   
   isOwnProfile = computed(() => 
     this.currentUser()?.id === this.user()?.id
   );
+
+  canViewProfile = computed(() => {
+    const userProfile = this.userProfile();
+    const isOwner = this.isOwnProfile();
+    
+    // Le propriétaire peut toujours voir son propre profil
+    if (isOwner) return true;
+    
+    // Si pas de profil chargé, on ne peut pas déterminer la visibilité
+    if (!userProfile) return false;
+    
+    // Sinon, seuls les profils publics sont accessibles
+    return userProfile.isPublic;
+  });
 
   userDisplayName = computed(() => {
     const user = this.user();
@@ -170,9 +198,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         );
         break;
       case 'draft':
-        modules = modules.filter(module => 
-          !module.versions.some(v => v.published)
-        );
+        // Seul le propriétaire peut voir ses brouillons
+        if (this.isOwnProfile()) {
+          modules = modules.filter(module => 
+            !module.versions.some(v => v.published)
+          );
+        } else {
+          // Les visiteurs ne voient aucun brouillon
+          modules = [];
+        }
         break;
       case 'recent':
         modules = [...modules].sort((a, b) => 
@@ -278,6 +312,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
       this.user.set(user);
       this.userProfile.set(userProfile);
+      
+      // Vérifier si le profil peut être affiché
+      if (!this.canViewProfile()) {
+        this.isProfilePrivate.set(true);
+        this.isLoading.set(false);
+        return;
+      }
+      
+      this.isProfilePrivate.set(false);
       this.userModules.set(modules);
       this.userSubscription.set(userSubscription);
       this.userSubscribers.set(userSubscribers);

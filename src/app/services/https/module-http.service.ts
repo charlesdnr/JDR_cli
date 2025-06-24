@@ -203,4 +203,9 @@ export class ModuleHttpService extends BaseHttpService {
       published: true,
     });
   }
+
+  public duplicateModule(moduleId: number): Promise<Module> {
+    const url = `${this.baseApiUrl}/${moduleId}/duplicate`;
+    return firstValueFrom(this.httpClient.post<Module>(url, {}));
+  }
 }

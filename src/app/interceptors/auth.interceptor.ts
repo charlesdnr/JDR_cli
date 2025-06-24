@@ -1,6 +1,6 @@
 import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { from, Observable } from 'rxjs';
+import { from, Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
 
@@ -63,9 +63,7 @@ export const authInterceptor: HttpInterceptorFn = (
   return from(requestHandlerPromise()).pipe(
     switchMap(processedRequest => next(processedRequest)),
     catchError(error => {
-      console.error('Auth interceptor error:', error);
-      // In case of interceptor error, try with original request
-      return next(req);
+      return throwError(() => error);
     })
   );
 };

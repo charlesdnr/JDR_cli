@@ -75,7 +75,7 @@ import { cleanModuleForSave } from '../../utils/cleanBlocksForSave';
     ButtonModule,
     SelectModule,
     TooltipModule,
-    FormsModule,
+    FormsModule
   ],
   providers: [ConfirmationService],
   templateUrl: './new-project.component.html',
@@ -571,6 +571,23 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     }
   }
 
+  getIconByType(type: EBlockType): string {
+    switch (type) {
+      case EBlockType.paragraph:
+        return 'pi pi-align-left';
+      case EBlockType.music:
+        return 'pi pi-volume-up';
+      case EBlockType.module:
+        return 'pi pi-book';
+      case EBlockType.stat:
+        return 'pi pi-chart-bar';
+      case EBlockType.picture:
+        return 'pi pi-image';
+      default:
+        return 'pi pi-question-circle';
+    }
+  }
+
   onGameSystemChange(system: GameSystem) {
     this.currentGameSystem.set(system);
     this.currentVersion.update((version: ModuleVersion | undefined) => {
@@ -1021,15 +1038,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     });
   }
 
-  exportModule(): void {
-    this.closeSecondaryMenu();
-    // TODO: Implement export functionality
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Export',
-      detail: 'Export du module en cours...'
-    });
-  }
 
   duplicateModule(): void {
     this.closeSecondaryMenu();

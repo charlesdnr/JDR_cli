@@ -22,11 +22,11 @@ html[data-theme="light"] {
 
    --font-color: hsl(250, 24%, 15%);
    --font-color-invert: white;
+   --font-secondary-color: hsl(0, 0%, 60%);
    --font-disabled-color: hsla(0, 0%, 0%, 0.60);
    --placeholder-color: hsl(0, 0%, 50%);
 
    --font-familly: #{$font-familly};
-   --font-secondary-color: #{$font-secondary-color};
 
    --padding: #{$padding};
    --padding-mobile: #{$padding-mobile};

@@ -454,9 +454,40 @@ export class ProjectComponent implements OnInit, OnDestroy {
       const user = this.currentUser();
       if (!user) return;
       
-      // Charger tous les modules summary de l'utilisateur
-      const summaries = await this.moduleHttpService.getModulesSummaryByUserId(user.id);
-      this.modulesSummary.set(summaries);
+      // Charger tous les modules summary de l'utilisateur (ses créations)
+      const userCreatedSummaries = await this.moduleHttpService.getModulesSummaryByUserId(user.id);
+      
+      // Récupérer tous les modules sauvegardés pour obtenir leurs IDs
+      const allSavedModules = await this.httpUserSavedModuleService.getAllUserSavedModules(user.id);
+      
+      // Extraire les IDs des modules sauvegardés qui ne sont pas créés par l'utilisateur
+      const savedModuleIds = allSavedModules
+        .map(saved => saved.moduleId)
+        .filter(moduleId => !userCreatedSummaries.some(summary => summary.id === moduleId));
+      
+      // Récupérer les détails des modules sauvegardés d'autres utilisateurs en parallèle
+      const otherModulesPromises = savedModuleIds.map(moduleId => 
+        this.moduleHttpService.getModuleById(moduleId).catch(error => {
+          console.error(`Erreur lors du chargement du module ${moduleId}:`, error);
+          return null;
+        })
+      );
+      
+      const otherModules = await Promise.all(otherModulesPromises);
+      const otherModulesSummaries: ModuleSummary[] = otherModules
+        .filter(module => module !== null)
+        .map(module => new ModuleSummary(
+          module!.id,
+          module!.title,
+          module!.description,
+          module!.creator,
+          module!.versions,
+          module!.picture
+        ));
+      
+      // Combiner tous les modules summary
+      const allSummaries = [...userCreatedSummaries, ...otherModulesSummaries];
+      this.modulesSummary.set(allSummaries);
       this.isModulesSummaryLoaded.set(true);
     } catch (error) {
       console.error('Erreur lors du chargement des modules summary:', error);

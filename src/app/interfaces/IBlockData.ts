@@ -1,3 +1,4 @@
+import { Picture } from "../classes/Picture";
 import { User } from "../classes/User";
 
 export interface IBlockData {
@@ -19,7 +20,10 @@ export interface IBlockData {
   statRules?: string;
   statValues?: string;
 
-  // Propriétés spécifiques à MusicBlock
+  // Propriétés spécifiques à MusicBlock et PictureBlock
   label?: string;
   src?: string;
+
+  // Propriétés spécifiques à PictureBlock
+  picture?: Picture;
 }

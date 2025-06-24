@@ -79,15 +79,19 @@ export class ModuleBlockComponent implements OnInit {
       (module) => module.id !== currentModule
     );
     
-    const publicOptions: ModuleOption[] = filteredPublicModules.map((module) => ({
-      label: module.title,
-      value: module.id,
-      description:
-        module.description.length > 100
-          ? module.description.substring(0, 100) + '...'
-          : module.description,
-      isPrivate: false,
-    }));
+    const currentUserId = this.currentUserId();
+    const publicOptions: ModuleOption[] = filteredPublicModules.map((module) => {
+      const isOwnModule = module.creator?.id === currentUserId;
+      return {
+        label: isOwnModule ? `📖 ${module.title}` : module.title,
+        value: module.id,
+        description:
+          (module.description.length > 100
+            ? module.description.substring(0, 100) + '...'
+            : module.description) + (isOwnModule ? ' (Vos modules)' : ''),
+        isPrivate: false,
+      };
+    });
     
     const privateOptions: ModuleOption[] = filteredPrivateModules.map((module) => ({
       label: `🔒 ${module.title}`,
@@ -99,8 +103,16 @@ export class ModuleBlockComponent implements OnInit {
       isPrivate: true,
     }));
     
-    // Combiner les options avec les modules privés en premier
-    return [...privateOptions, ...publicOptions];
+    // Séparer les modules publics de l'utilisateur des autres
+    const ownPublicOptions = publicOptions.filter(option => 
+      option.label.startsWith('📖')
+    );
+    const otherPublicOptions = publicOptions.filter(option => 
+      !option.label.startsWith('📖')
+    );
+    
+    // Combiner les options: modules privés, puis modules publics de l'utilisateur, puis autres modules publics
+    return [...privateOptions, ...ownPublicOptions, ...otherPublicOptions];
   });
 
   // Computed pour vérifier si un module est sélectionné
@@ -177,11 +189,8 @@ export class ModuleBlockComponent implements OnInit {
         );
         this.privateModules.set(userPrivateModules);
         
-        // Ne garder que les modules publics qui ne sont pas de l'utilisateur courant
-        const publicModulesNotOwned = publicModules.filter((module) =>
-          module.creator?.id !== currentUserId
-        );
-        this.availableModules.set(publicModulesNotOwned);
+        // Inclure tous les modules publics (y compris ceux de l'utilisateur)
+        this.availableModules.set(publicModules);
       } else {
         this.availableModules.set(publicModules);
         this.privateModules.set([]);
@@ -238,7 +247,15 @@ export class ModuleBlockComponent implements OnInit {
         this.selectedModule.set(selected);
         // Mettre à jour le titre du bloc avec le titre du module sélectionné
         const isPrivate = this.privateModules().some((m) => m.id === moduleId);
-        const prefix = isPrivate ? '🔒 Module intégré' : 'Module intégré';
+        const isOwnPublic = selected.creator?.id === this.currentUserId() && !isPrivate;
+        
+        let prefix = 'Module intégré';
+        if (isPrivate) {
+          prefix = '🔒 Module intégré';
+        } else if (isOwnPublic) {
+          prefix = '📖 Module intégré';
+        }
+        
         this.moduleBlock().title = `${prefix}: ${selected.title}`;
       }
     } else {

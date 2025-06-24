@@ -84,7 +84,7 @@
             >
               @switch(type.value) {
                 @case('Scenario') { <i class="pi pi-book"></i> }
-                @case('Lore') { <i class="pi pi-feather"></i> }
+                @case('Lore') { <i class="pi pi-bookmark"></i> }
                 @case('GameItem') { <i class="pi pi-shield"></i> }
                 @case('Bundle') { <i class="pi pi-box"></i> }
                 @default { <i class="pi pi-file"></i> }
@@ -226,6 +226,7 @@
     </div>
     
     <div class="view-controls">
+      
       <p-selectbutton 
         [options]="viewOptions"
         [ngModel]="isGridView() ? 'grid' : 'list'"
@@ -474,3 +475,4 @@
 
 <!-- Toast notifications -->
 <p-toast />
+

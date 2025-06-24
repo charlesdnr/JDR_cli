@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { AvatarModule } from 'primeng/avatar';
-import { Textarea } from 'primeng/inputtextarea';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
@@ -19,6 +18,7 @@ import { UserHttpService } from '../../services/https/user-http.service';
 import { UserAvatarService } from '../../services/user-avatar.service';
 import { User } from '../../classes/User';
 import { Module } from '../../classes/Module';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-module-comments',
@@ -29,7 +29,7 @@ import { Module } from '../../classes/Module';
     ButtonModule,
     CardModule,
     AvatarModule,
-    Textarea,
+    TextareaModule,
     ConfirmDialogModule,
     ToastModule,
     TooltipModule,

@@ -1,4 +1,5 @@
 @use "../../../assets/sass/core/mixins" as *;
+@use "../../../assets/sass/core/mobile" as mobile;
 
 .modern-header {
   position: fixed;
@@ -6,7 +7,14 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 70px;
+  height: var(--header-height);
+  
+  @include mobile.safe-area-padding();
+  @include mobile.mobile-header();
+  
+  @include respond-to('mobile') {
+    height: var(--header-height-mobile);
+  }
   
   .header-backdrop {
     position: absolute;
@@ -26,17 +34,10 @@
     display: flex;
     align-items: center;
     height: 100%;
-    max-width: 1400px;
+    max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 2rem;
-    
-    @include respond-to('tablet') {
-      padding: 0 1.5rem;
-    }
-    
-    @include respond-to('mobile') {
-      padding: 0 1rem;
-    }
+    @include spacing-responsive(padding-left, var(--container-padding));
+    @include spacing-responsive(padding-right, var(--container-padding));
   }
 }
 
@@ -44,32 +45,41 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--gap-mobile);
   cursor: pointer;
   transition: all 0.2s ease;
+  @include mobile.touch-friendly();
   
   &:hover {
     transform: scale(1.05);
   }
   
   .logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: var(--icons-size-mobile);
+    height: var(--icons-size-mobile);
+    border-radius: var(--radius-small);
     object-fit: contain;
+    
+    @include respond-to('mobile') {
+      width: 36px;
+      height: 36px;
+    }
+    
+    @include respond-to('desktop') {
+      width: 40px;
+      height: 40px;
+    }
   }
   
   .brand-name {
-    font-size: 1.5rem;
+    @include font-responsive(var(--font-size-xl));
     font-weight: 700;
     background: linear-gradient(135deg, var(--primary-color), #667eea);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     
-    @include respond-to('mobile') {
-      display: none;
-    }
+    @include hide-mobile();
   }
 }
 
@@ -77,16 +87,17 @@
 .search-container {
   flex: 1;
   max-width: 600px;
-  margin: 0 2rem;
+  @include spacing-responsive(margin-left, var(--margin));
+  @include spacing-responsive(margin-right, var(--margin));
   
   @include respond-to('tablet') {
-    margin: 0 1.5rem;
     max-width: 400px;
   }
   
   @include respond-to('mobile') {
-    margin: 0 1rem;
     max-width: none;
+    margin-left: var(--margin-mobile);
+    margin-right: var(--margin-mobile);
   }
   
   .search-input-wrapper {
@@ -115,9 +126,11 @@
       background: transparent;
       border: none;
       outline: none;
-      padding: 0.875rem 0;
-      font-size: 0.95rem;
+      @include spacing-responsive(padding-top, 0.875rem);
+      @include spacing-responsive(padding-bottom, 0.875rem);
+      @include font-responsive(0.95rem);
       color: var(--font-color);
+      @include mobile.prevent-zoom-ios();
       
       &::placeholder {
         color: var(--font-secondary-color);
@@ -129,16 +142,14 @@
       align-items: center;
       background: var(--background-color-lighter);
       border: 1px solid var(--neutral-color);
-      border-radius: 6px;
+      border-radius: var(--radius-small);
       padding: 0.25rem 0.5rem;
       margin-left: 0.75rem;
       
-      @include respond-to('mobile') {
-        display: none;
-      }
+      @include hide-mobile();
       
       span {
-        font-size: 0.75rem;
+        font-size: var(--font-size-xs);
         font-weight: 500;
         color: var(--font-secondary-color);
       }
@@ -151,9 +162,7 @@
   display: flex;
   align-items: center;
   
-  @include respond-to('mobile') {
-    display: none;
-  }
+  @include hide-mobile();
   
   .nav-items {
     display: flex;
@@ -281,12 +290,13 @@
   display: none;
   flex-direction: column;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: var(--inputs-size-mobile);
+  height: var(--inputs-size-mobile);
   background: transparent;
   border: none;
   cursor: pointer;
   gap: 4px;
+  @include mobile.touch-friendly();
   
   @include respond-to('mobile') {
     display: flex;
@@ -316,36 +326,38 @@
 
 .mobile-menu {
   position: fixed;
-  top: 70px;
+  top: var(--header-height-mobile);
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--background-color);
+  background: var(--container-color);
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 999;
-  overflow-y: auto;
+  @include mobile.mobile-scroll-container();
+  @include mobile.safe-area-padding();
   
   &.active {
     transform: translateX(0);
   }
   
   .mobile-menu-content {
-    padding: 2rem 1rem;
+    @include spacing-responsive(padding, var(--container-padding-mobile));
   }
   
   .mobile-user-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: var(--gap);
+    @include spacing-responsive(padding, var(--padding));
     background: var(--background-color-lighter);
-    border-radius: 12px;
-    margin-bottom: 2rem;
+    border-radius: var(--radius-mobile);
+    @include spacing-responsive(margin-bottom, var(--margin));
     cursor: pointer;
-    transition: all 0.2s ease;
+    @include mobile.touch-friendly();
+    @include mobile.mobile-performance-animation();
     
-    &:hover {
+    &:hover, &:active {
       background: var(--primary-color-transparent-50);
       transform: translateY(-1px);
     }
@@ -385,14 +397,15 @@
     .mobile-nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
+      gap: var(--gap);
+      @include spacing-responsive(padding, var(--padding));
+      border-radius: var(--radius-mobile);
       text-decoration: none;
       color: var(--font-color);
-      transition: all 0.2s ease;
+      @include mobile.touch-friendly();
+      @include mobile.mobile-performance-animation();
       
-      &:hover {
+      &:hover, &:active {
         background: var(--primary-color-transparent-50);
         color: var(--primary-color);
       }
@@ -446,16 +459,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  @include spacing-responsive(padding, var(--padding-mobile));
+  border-radius: var(--radius-mobile);
   font-weight: 600;
-  font-size: 0.9rem;
+  @include font-responsive(var(--font-size-sm));
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  @include mobile.touch-friendly();
+  @include mobile.mobile-performance-animation();
   border: none;
   
-  &:hover {
+  &:hover, &:active {
     transform: translateY(-1px);
   }
 }

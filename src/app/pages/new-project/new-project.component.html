@@ -306,11 +306,6 @@
           <div class="dropdown-menu">
             
             @if(!needToCreate()) {
-              <!-- Export -->
-              <button class="dropdown-item" (click)="exportModule(); closeSecondaryMenu()">
-                <i class="pi pi-download"></i>
-                <span>Exporter</span>
-              </button>
 
               <!-- Duplicate -->
               <button class="dropdown-item" (click)="duplicateModule(); closeSecondaryMenu()">
@@ -345,6 +340,27 @@
     @if(secondaryMenuExpanded()) {
       <div class="action-bar-backdrop" (click)="closeSecondaryMenu()" role="presentation" aria-hidden="true"></div>
     }
+  </div>
+}
+
+<!-- Drag Preview Global -->
+@if(isDraggingIcon() && draggedIconType) {
+  <div class="drag-preview-global"
+       [style.left.px]="dragPosition.x"
+       [style.top.px]="dragPosition.y">
+    <div class="preview-card">
+      <div class="preview-icon">
+        <i [class]="getIconByType(draggedIconType)"></i>
+      </div>
+      <div class="preview-content">
+        <span class="preview-name">
+          {{ getBlockPreview(draggedIconType) }}
+        </span>
+      </div>
+      <div class="preview-indicator">
+        <i class="pi pi-arrow-down"></i>
+      </div>
+    </div>
   </div>
 }
 

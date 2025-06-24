@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -117,6 +117,7 @@ export class ExploreComponent implements OnInit {
   private foldersService = inject(FolderService);
   private userSavedModuleHttpService = inject(UserSavedModuleHttpService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private userHttpService = inject(UserHttpService);
   private authService = inject(AuthenticationService);
   private messageService = inject(MessageService);
@@ -198,6 +199,13 @@ export class ExploreComponent implements OnInit {
   }
 
   async ngOnInit() {
+    // Lire les paramètres de recherche depuis l'URL
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm.set(params['search']);
+      }
+    });
+    
     await this.initializeWithAuth();
   }
   
@@ -643,4 +651,5 @@ export class ExploreComponent implements OnInit {
     this.clearFilters();
     this.showFilters.set(false);
   }
+
 }

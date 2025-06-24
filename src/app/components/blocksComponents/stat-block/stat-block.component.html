@@ -1,50 +1,65 @@
 @if(isReadOnly()) {
 <div class="stat-block-readonly">
-  <h3 class="block-title">{{ statBlock().title }}</h3>
+  <!-- Header cohérent avec icône -->
+  @if(statBlock().title) {
+    <div class="readonly-header">
+      <h3 class="block-title">
+        <i class="pi pi-chart-bar"></i>
+        {{ statBlock().title }}
+      </h3>
+    </div>
+  }
+  
   @if(statBlock().statRules) {
-  <div class="stat-rules">
-    <h4>Règles</h4>
-    <p>{{ statBlock().statRules }}</p>
-  </div>
-  } @if(statBlock().statValues) {
-  <div class="stat-values">
-    <h4>Valeurs</h4>
-    <p>{{ statBlock().statValues }}</p>
-  </div>
+    <div class="stat-rules">
+      <h4>Règles</h4>
+      <p>{{ statBlock().statRules }}</p>
+    </div>
+  }
+  
+  @if(statBlock().statValues) {
+    <div class="stat-values">
+      <h4>Valeurs</h4>
+      <p>{{ statBlock().statValues }}</p>
+    </div>
   }
 </div>
 } @else {
 <div class="stat-block">
-  <div class="container-label">
-    <label for="title">{{ "Titre" | translate }}</label>
-    <input
-      pInputText
-      type="text"
-      id="title"
-      [(ngModel)]="statBlock().title"
-      placeholder="Statistique du dragon"
-    />
-  </div>
-  <div class="container-label">
-    <label for="rules">{{ "Règles" | translate }}</label>
-    <input
-      pInputText
-      type="text"
-      id="rules"
-      [(ngModel)]="statBlock().statRules"
-      placeholder="Force"
-    />
-  </div>
-  <div class="container-label">
-    <label for="value">{{ "Valeur" | translate }}</label>
-    <p-inputNumber
-      [showButtons]="true"
-      mode="decimal"
-      type="number"
-      id="value"
-      placeholder="50"
-      [(ngModel)]="statBlock().statValues"
-    />
+  <!-- Informations du bloc (cohérent avec les autres blocs) -->
+  <div class="block-info">
+    <div class="container-label">
+      <label for="statTitle">{{ "Titre" | translate }}</label>
+      <input
+        id="statTitle"
+        type="text"
+        pInputText
+        [(ngModel)]="statBlock().title"
+        placeholder="Titre de la statistique..."
+      />
+    </div>
+
+    <div class="container-label">
+      <label for="statRules">{{ "Règles" | translate }}</label>
+      <textarea
+        id="statRules"
+        pTextarea
+        [(ngModel)]="statBlock().statRules"
+        placeholder="Règles et description de la statistique..."
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="container-label">
+      <label for="statValues">{{ "Valeurs" | translate }}</label>
+      <input
+        id="statValues"
+        type="text"
+        pInputText
+        [(ngModel)]="statBlock().statValues"
+        placeholder="Valeurs de la statistique..."
+      />
+    </div>
   </div>
 </div>
 }

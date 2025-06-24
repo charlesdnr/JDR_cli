@@ -2,6 +2,7 @@ import { Block } from "../classes/Block";
 import { IntegratedModuleBlock } from "../classes/IntegratedModuleBlock";
 import { MusicBlock } from "../classes/MusicBlock";
 import { ParagraphBlock } from "../classes/ParagraphBlock";
+import { PictureBlock } from "../classes/PictureBlock";
 import { StatBlock } from "../classes/StatBlock";
 import { IBlockData } from "../interfaces/IBlockData";
 
@@ -45,6 +46,16 @@ export function createBlock(data: IBlockData): Block {
               data.creator,
               data.label,
               data.src,
+              data.id
+          );
+      case 'picture':
+          return new PictureBlock(
+              data.moduleVersionId,
+              data.title,
+              data.blockOrder,
+              data.creator,
+              data.picture,
+              data.label,
               data.id
           );
       default:

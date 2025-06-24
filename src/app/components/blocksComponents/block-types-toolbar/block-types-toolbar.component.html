@@ -101,27 +101,3 @@
     </div>
 </div>
 
-<!-- Élément de preview moderne qui suit le curseur -->
-@if(isDraggingIcon() && !readonly()) {
-  <div class="drag-preview-modern"
-       [style.left.px]="dragPosition().x"
-       [style.top.px]="dragPosition().y">
-    <div class="preview-card">
-      <div class="preview-icon">
-        <i [class]="getIconByType(draggedIconType() || EBlockType.paragraph)"></i>
-      </div>
-      <div class="preview-content">
-        <span class="preview-name">
-          {{ getBlockInfo(draggedIconType() || EBlockType.paragraph).name }}
-        </span>
-        <p-badge 
-          [value]="getBlockInfo(draggedIconType() || EBlockType.paragraph).category" 
-          [severity]="getCategoryColor(draggedIconType() || EBlockType.paragraph)">
-        </p-badge>
-      </div>
-      <div class="preview-indicator">
-        <i class="pi pi-arrow-down"></i>
-      </div>
-    </div>
-  </div>
-}

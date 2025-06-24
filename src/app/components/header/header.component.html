@@ -19,6 +19,8 @@
           type="text"
           [placeholder]="'Rechercher des modules, créateurs...' | translate"
           class="search-input"
+          [(ngModel)]="searchQuery"
+          (keyup)="onSearchKeyup($event)"
         />
         <div class="search-shortcut">
           <span>⌘K</span>
@@ -38,8 +40,8 @@
         <a
           [routerLink]="[button.link]"
           [queryParams]="
-            button.name === 'Projets' && $folders[0]?.folderId
-              ? { folderId: folders()[0].folderId }
+            button.name === 'Projets' && $folders.length > 0 && $folders[0]?.folderId
+              ? { folderId: $folders[0].folderId }
               : null
           "
           class="nav-item"
@@ -129,7 +131,7 @@
         <a
           [routerLink]="[button.link]"
           [queryParams]="
-            button.name === 'Projets' && folders()[0]?.folderId
+            button.name === 'Projets' && folders().length > 0 && folders()[0]?.folderId
               ? { folderId: folders()[0].folderId }
               : null
           "

@@ -23,11 +23,11 @@ html[data-theme="dark"] {
 
    --font-color: white;
    --font-color-invert: hsl(250, 24%, 15%);
+   --font-secondary-color: hsl(0, 0%, 70%);
    --font-disabled-color: hsla(0, 0%, 100%, 0.4);
    --placeholder-color: hsl(0, 0%, 70%);
 
    --font-familly: #{$font-familly};
-   --font-secondary-color: #{$font-secondary-color};
 
    --padding: #{$padding};
    --padding-mobile: #{$padding-mobile};

@@ -663,6 +663,23 @@
   }
 
   .view-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    ::ng-deep .import-btn {
+      .p-button {
+        border-radius: 8px;
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+        
+        &:hover {
+          background: var(--success-color);
+          border-color: var(--success-color);
+        }
+      }
+    }
+
     ::ng-deep .view-toggle {
       .p-selectbutton {
         display: flex;

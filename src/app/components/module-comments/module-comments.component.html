@@ -42,7 +42,7 @@
       </p-avatar>
       <div class="input-container">
         <textarea
-          pInputTextarea
+          pTextarea
           [(ngModel)]="newComment"
           placeholder="Partagez votre avis sur ce module... (Ctrl+Entrée pour publier)"
           [autoResize]="true"
@@ -156,7 +156,7 @@
         <!-- Edit Mode -->
         <div class="comment-edit" *ngIf="editingComment()?.id === comment.id">
           <textarea
-            pInputTextarea
+            pTextarea
             [(ngModel)]="editText"
             [autoResize]="true"
             rows="3"
