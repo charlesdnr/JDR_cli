@@ -285,13 +285,18 @@ p-tabMenu.x {
   }
 }
 
+.p-carousel-content-container {
+  height: 500px !important;
+}
+
 /* === CAROUSEL CUSTOMIZATION === */
 .p-carousel {
   width: 100% !important;
   margin: 0 auto !important;
   
   .p-carousel-content {
-    position: relative !important;
+    position: absolute !important;
+    left: -4px;
     width: 100% !important;
     overflow: visible !important;
 

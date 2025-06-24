@@ -216,8 +216,22 @@
                  tabindex="0"
                  pTooltip="Voir le profil de {{ mostRatedModules()[0].creator.username }}"
                  tooltipStyleClass="tooltip-info">
-              <div class="author-avatar-large">
-                {{ mostRatedModules()[0].creator.username.charAt(0) || 'A' }}
+              <div class="user-avatar-container">
+                @if(getUserProfileImageSync(mostRatedModules()[0].creator) && getUserProfileImageSync(mostRatedModules()[0].creator) !== 'assets/images/default-avatar.png') {
+                  <img 
+                    [src]="getUserProfileImageSync(mostRatedModules()[0].creator)!" 
+                    [alt]="mostRatedModules()[0].creator.username || 'Photo de profil'"
+                    class="profile-image author-avatar-large"
+                    (error)="onImageError($event)"
+                  />
+                }
+                <p-avatar 
+                  [label]="getUserInitials(mostRatedModules()[0].creator)"
+                  size="large"
+                  shape="circle"
+                  styleClass="author-avatar-large"
+                  [style.display]="getUserProfileImageSync(mostRatedModules()[0].creator) && getUserProfileImageSync(mostRatedModules()[0].creator) !== 'assets/images/default-avatar.png' ? 'none' : 'flex'">
+                </p-avatar>
               </div>
               <div class="author-info">
                 <span class="author-name">{{ mostRatedModules()[0].creator.username || 'Anonyme' }}</span>

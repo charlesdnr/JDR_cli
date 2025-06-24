@@ -14,6 +14,8 @@ import { ModuleCommentsComponent } from '../module-comments/module-comments.comp
 import { ModuleRatingsHttpService } from '../../services/https/module-ratings-http.service';
 import { ModuleRatingsComponent } from '../module-ratings/module-ratings.component';
 import { AggregatedRatings } from '../../classes/AggregatedRatings';
+import { UserAvatarService } from '../../services/user-avatar.service';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-module-card',
@@ -24,7 +26,8 @@ import { AggregatedRatings } from '../../classes/AggregatedRatings';
     ChipModule,
     TooltipModule,
     BadgeModule,
-    DynamicDialogModule
+    DynamicDialogModule,
+    AvatarModule
   ],
   providers: [DialogService],
   templateUrl: './module-card.component.html',
@@ -42,11 +45,15 @@ export class ModuleCardComponent implements OnInit {
   private moduleCommentService = inject(ModuleCommentService);
   private moduleRatingsHttpService = inject(ModuleRatingsHttpService);
   private dialogService = inject(DialogService);
+  private userAvatarService = inject(UserAvatarService);
   
   commentCount = signal<number>(0);
   averageRating = signal<number>(0);
   ratingCount = signal<number>(0);
   private dialogRef: DynamicDialogRef | undefined;
+  
+  // Map pour stocker les URLs des images de profil chargées
+  private userProfileImages = new Map<number, string>();
 
   ngOnInit() {
     if (this.showComments()) {
@@ -54,6 +61,11 @@ export class ModuleCardComponent implements OnInit {
     }
     if (this.showRatings()) {
       this.loadRatingData();
+    }
+    
+    // Précharger l'image de profil du créateur
+    if (this.module().creator && this.module().creator.id) {
+      this.getUserProfileImage(this.module().creator);
     }
   }
 
@@ -189,5 +201,38 @@ export class ModuleCardComponent implements OnInit {
     if (diffInDays < 7) return `Il y a ${diffInDays} jours`;
     if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaines`;
     return `Il y a ${Math.floor(diffInDays / 30)} mois`;
+  }
+
+  // User avatar methods
+  getUserInitials(user: any): string {
+    return this.userAvatarService.getUserInitials(user);
+  }
+
+  async getUserProfileImage(user: any): Promise<string> {
+    if (this.userProfileImages.has(user.id)) {
+      return this.userProfileImages.get(user.id)!;
+    }
+    
+    const imageUrl = await this.userAvatarService.getUserProfileImage(user);
+    this.userProfileImages.set(user.id, imageUrl);
+    return imageUrl;
+  }
+
+  getUserProfileImageSync(user: any): string | null {
+    return this.userProfileImages.get(user.id) || null;
+  }
+
+  // Méthode pour gérer l'erreur de chargement d'image
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    const container = target.parentElement;
+    if (container) {
+      const img = container.querySelector('.profile-image') as HTMLImageElement;
+      const avatar = container.querySelector('p-avatar') as HTMLElement;
+      if (img && avatar) {
+        img.style.display = 'none';
+        avatar.style.display = 'flex';
+      }
+    }
   }
 }

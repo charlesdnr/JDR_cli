@@ -403,7 +403,7 @@
   border-top: 1px solid var(--neutral-color-transparent, rgba(128, 128, 128, 0.08));
   position: relative;
   @include spacing-responsive(padding-top, 1rem);
-  @include flex-responsive(column, nowrap, 0.5rem);
+  @include flex-responsive(column, nowrap, 0.75rem);
   
   &::before {
     content: '';
@@ -460,18 +460,34 @@
   }
 }
 
-.author-avatar {
-  width: 1.5rem;
-  height: 1.5rem;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
+.user-avatar-container {
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  @include font-responsive(var(--font-size-xs));
-  @include flex-responsive(row, nowrap);
+  
+  .profile-image {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+:deep(.author-avatar) {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  background: var(--primary-color) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  
+  .p-avatar-text {
+    color: white !important;
+    font-weight: 600 !important;
+    @include font-responsive(var(--font-size-xs));
+  }
 }
 
 .author-name {

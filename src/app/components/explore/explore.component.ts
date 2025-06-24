@@ -630,19 +630,55 @@ export class ExploreComponent implements OnInit {
     this.selectedFolder.set(null);
   }
 
-  shareModule(module: Module) {
-    // TODO: Implémenter le partage
-    if (navigator.share) {
-      navigator.share({
-        title: module.title,
-        text: module.description,
-        url: window.location.origin + '/module/' + module.id
-      });
-    } else {
-      // Fallback - copier le lien dans le presse-papiers
-      navigator.clipboard.writeText(
-        window.location.origin + '/module/' + module.id
-      );
+  async shareModule(module: Module) {
+    const moduleUrl = `${window.location.origin}/module/${module.id}`;
+    
+    try {
+      // Utiliser l'API Web Share native si disponible (sur mobile principalement)
+      if (navigator.share) {
+        await navigator.share({
+          title: module.title,
+          text: module.description || `Découvrez ce module RPG : ${module.title}`,
+          url: moduleUrl
+        });
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Partage',
+          detail: 'Module partagé avec succès',
+          life: 3000
+        });
+      } else {
+        // Fallback - copier le lien dans le presse-papiers
+        await navigator.clipboard.writeText(moduleUrl);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Lien copié',
+          detail: 'Le lien du module a été copié dans le presse-papiers',
+          life: 3000
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage:', error);
+      
+      // Fallback ultime si clipboard échoue aussi
+      try {
+        await navigator.clipboard.writeText(moduleUrl);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Lien copié',
+          detail: 'Le lien du module a été copié dans le presse-papiers',
+          life: 3000
+        });
+      } catch (clipboardError) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de partager le module. Copiez manuellement ce lien : ' + moduleUrl,
+          life: 5000
+        });
+      }
     }
   }
 

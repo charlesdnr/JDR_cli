@@ -26,6 +26,8 @@ import { ModuleRatingsComponent } from '../../components/module-ratings/module-r
 import { ModuleCommentsComponent } from '../../components/module-comments/module-comments.component';
 import { ModuleRatingsHttpService } from '../../services/https/module-ratings-http.service';
 import { AggregatedRatings } from '../../classes/AggregatedRatings';
+import { UserAvatarService } from '../../services/user-avatar.service';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-home',
@@ -44,7 +46,8 @@ import { AggregatedRatings } from '../../classes/AggregatedRatings';
     FormsModule,
     ModuleCardComponent,
     DynamicDialogModule,
-    DecimalPipe
+    DecimalPipe,
+    AvatarModule
   ],
   providers: [DialogService],
   templateUrl: './home.component.html',
@@ -105,6 +108,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   dialogService = inject(DialogService);
   authService = inject(AuthenticationService);
   moduleRatingsService = inject(ModuleRatingsHttpService);
+  userAvatarService = inject(UserAvatarService);
   
   private subscriptions = new Subscription();
   private dialogRef: DynamicDialogRef | undefined;
@@ -116,12 +120,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   loadingModules = signal(false);
   featuredModuleRating = signal<AggregatedRatings | null>(null);
   
+  // Map pour stocker les URLs des images de profil chargées
+  private userProfileImages = new Map<number, string>();
+  
   // Configuration des carrousels - 3 cartes par défaut
   carouselResponsiveOptions = [
     {
       breakpoint: '1024px',
       numVisible: 2,
-      numScroll: 1
+      numScroll: 2
     },
     {
       breakpoint: '768px',
@@ -132,7 +139,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   
   // Nombre de cartes visibles par défaut (desktop)
   carouselNumVisible = 3;
-  carouselNumScroll = 1;
+  carouselNumScroll = 3;
   
   // Stats for the hero section - now using real data
   platformStats = signal<PlatformStatistics | null>(null);
@@ -186,6 +193,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (ratedModules.length > 0) {
         this.loadFeaturedModuleRating(ratedModules[0]);
       }
+      
+      // Précharger les images des utilisateurs
+      this.preloadUserImages([...ratedModules, ...recentModules]);
     } catch (error) {
       console.error('Erreur lors du chargement des modules:', error);
     } finally {
@@ -298,6 +308,50 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       });
     }, 100);
+  }
+
+  // User avatar methods
+  getUserInitials(user: any): string {
+    return this.userAvatarService.getUserInitials(user);
+  }
+
+  async getUserProfileImage(user: any): Promise<string> {
+    if (this.userProfileImages.has(user.id)) {
+      return this.userProfileImages.get(user.id)!;
+    }
+    
+    const imageUrl = await this.userAvatarService.getUserProfileImage(user);
+    this.userProfileImages.set(user.id, imageUrl);
+    return imageUrl;
+  }
+
+  getUserProfileImageSync(user: any): string | null {
+    return this.userProfileImages.get(user.id) || null;
+  }
+
+  // Méthode pour précharger les images des créateurs de modules
+  preloadUserImages(modules: Module[]) {
+    modules.forEach(module => {
+      if (module.creator && module.creator.id && !this.userProfileImages.has(module.creator.id)) {
+        this.getUserProfileImage(module.creator).then(() => {
+          // L'image est maintenant en cache
+        });
+      }
+    });
+  }
+
+  // Méthode pour gérer l'erreur de chargement d'image
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    const container = target.parentElement;
+    if (container) {
+      const img = container.querySelector('.profile-image') as HTMLImageElement;
+      const avatar = container.querySelector('p-avatar') as HTMLElement;
+      if (img && avatar) {
+        img.style.display = 'none';
+        avatar.style.display = 'flex';
+      }
+    }
   }
 
   // Charger la note moyenne du module le mieux noté

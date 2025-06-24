@@ -92,8 +92,22 @@
           tabindex="0"
           pTooltip="Voir le profil de {{ module().creator.username }}"
           tooltipStyleClass="tooltip-info">
-          <div class="author-avatar">
-            {{ module().creator.username.charAt(0) || 'A' }}
+          <div class="user-avatar-container">
+            @if(getUserProfileImageSync(module().creator) && getUserProfileImageSync(module().creator) !== 'assets/images/default-avatar.png') {
+              <img 
+                [src]="getUserProfileImageSync(module().creator)!" 
+                [alt]="module().creator.username || 'Photo de profil'"
+                class="profile-image author-avatar"
+                (error)="onImageError($event)"
+              />
+            }
+            <p-avatar 
+              [label]="getUserInitials(module().creator)"
+              size="normal"
+              shape="circle"
+              styleClass="author-avatar"
+              [style.display]="getUserProfileImageSync(module().creator) && getUserProfileImageSync(module().creator) !== 'assets/images/default-avatar.png' ? 'none' : 'flex'">
+            </p-avatar>
           </div>
           <span class="author-name">{{ module().creator.username || 'Anonyme' }}</span>
         </div>

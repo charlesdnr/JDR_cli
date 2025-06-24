@@ -1281,9 +1281,11 @@
   }
 
   .p-dialog-footer {
-    padding: 0;
-    border: none;
-    background: transparent;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
 }
 
@@ -1294,6 +1296,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  border-radius: var(--radius-medium) var(--radius-medium) 0 0;
 
   .dialog-icon {
     display: flex;
@@ -1328,6 +1331,8 @@
 
 .save-dialog-content {
   padding: 1.5rem 2rem 2rem 2rem;
+  background: var(--background-color);
+  border-radius: 0;
 
   .module-preview {
     display: flex;
@@ -1439,6 +1444,9 @@
   padding: 1.5rem 2rem 2rem 2rem;
   border-top: 1px solid var(--neutral-color);
   background: var(--background-color-lighter);
+  width: 100%;
+  margin: 0;
+  border-radius: 0 0 var(--radius-medium) var(--radius-medium);
 
   @media (max-width: 480px) {
     flex-direction: column;
